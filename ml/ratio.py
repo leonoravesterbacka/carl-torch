@@ -25,8 +25,8 @@ class RatioEstimator(ConditionalEstimator):
         Indices of observables (features) that are used as input to the neural networks. If None, all observables
         are used. Default value: None.
     n_hidden : tuple of int, optional
-        Units in each hidden layer in the neural networks. If method is 'nde' or 'scandal', this refers to the
-        setup of each individual MADE layer. Default value: (100,).
+        Units in each hidden layer in the neural networks. 
+        Default value: (100,).
     activation : {'tanh', 'sigmoid', 'relu'}, optional
         Activation function. Default value: 'tanh'.
     """
@@ -120,14 +120,10 @@ class RatioEstimator(ConditionalEstimator):
         x = load_and_check(x, memmap_files_larger_than_gb=memmap_threshold)
         y = load_and_check(y, memmap_files_larger_than_gb=memmap_threshold)
 
-        #self._check_required_data(method, r_xz, t_xz0, t_xz1)
-
         # Infer dimensions of problem
         n_samples = x.shape[0]
         n_observables = x.shape[1]
-        n_parameters = x.shape[1]
-        logger.info("Found %s samples with %s parameters and %s observables", n_samples, n_parameters, n_observables)
-        print("Found %s samples with %s parameters and %s observables", n_samples, n_parameters, n_observables)
+        logger.info("Found %s samples with %s observables", n_samples, n_observables)
 
         # Scale features
         if scale_inputs:
@@ -145,13 +141,7 @@ class RatioEstimator(ConditionalEstimator):
         # Check consistency of input with model
         if self.n_observables is None:
             self.n_observables = n_observables
-        if self.n_parameters is None:
-            self.n_parameters = n_parameters
 
-        if n_parameters != self.n_parameters:
-            raise RuntimeError(
-                "Number of parameters does not match model: {} vs {}".format(n_parameters, self.n_parameters)
-            )
         if n_observables != self.n_observables:
             raise RuntimeError(
                 "Number of observables does not match model: {} vs {}".format(n_observables, self.n_observables)
@@ -191,6 +181,7 @@ class RatioEstimator(ConditionalEstimator):
             clip_gradient=clip_gradient,
             early_stopping_patience=early_stopping_patience,
         )
+        print("results", result)
         return result
 
     def evaluate_log_likelihood_ratio(self, x):
@@ -201,10 +192,6 @@ class RatioEstimator(ConditionalEstimator):
         ----------
         x : str or ndarray
             Observations or filename of a pickled numpy array.
-        theta0 : ndarray or str
-            Numerator parameter points or filename of a pickled numpy array.
-        theta1 : ndarray or str
-            Denominator parameter points or filename of a pickled numpy array.
         test_all_combinations : bool, optional
             If False, the number of samples in the observable and theta
             files has to match, and the likelihood ratio is evaluated only for the combinations
@@ -230,17 +217,16 @@ class RatioEstimator(ConditionalEstimator):
         if self.features is not None:
             x = x[:, self.features]
 
-        all_log_r_hat = []
 
         logger.debug("Starting ratio evaluation")
-        _, all_log_r_hat = evaluate_ratio_model(
+        _, r_hat = evaluate_ratio_model(
             model=self.model,
             method_type="double_parameterized_ratio",
             xs=x,
         )
 
         logger.debug("Evaluation done")
-        return all_log_r_hat
+        return r_hat
 
     def evaluate(self, *args, **kwargs):
         return self.evaluate_log_likelihood_ratio(*args, **kwargs)
@@ -248,12 +234,10 @@ class RatioEstimator(ConditionalEstimator):
     def _create_model(self):
         self.model = RatioModel(
             n_observables=self.n_observables,
-            n_parameters=self.n_parameters,
             n_hidden=self.n_hidden,
             activation=self.activation,
             dropout_prob=self.dropout_prob,
         )
-
 
     @staticmethod
     def _package_training_data(method, x,  y):

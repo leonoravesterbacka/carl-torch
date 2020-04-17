@@ -89,7 +89,7 @@ class Trainer(object):
         loss_labels=None,
         epochs=50,
         batch_size=1,
-        optimizer=optim.Adam,
+        optimizer="lbfgs",
         optimizer_kwargs=None,
         initial_lr=0.001,
         final_lr=0.0001,
@@ -153,8 +153,9 @@ class Trainer(object):
 
         # Loop over epochs
         for i_epoch in range(epochs):
-            logger.debug("Training epoch %s / %s", i_epoch + 1, epochs)
-
+            logger.debug("Training epoch", i_epoch + 1, epochs)
+            print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+            print("Training epoch", i_epoch + 1, "/", epochs)
             self._timer(start="set lr")
             lr = self.calculate_lr(i_epoch, epochs, initial_lr, final_lr)
             self.set_lr(opt, lr)
@@ -535,6 +536,8 @@ class RatioTrainer(Trainer):
         losses = [
             loss_function(r_hat, s_hat, y) for loss_function in loss_functions
         ]
+        print("losses", losses)
+        print("r_hat", r_hat)
         self._timer(stop="fwd: calculate losses", start="fwd: check for nans")
         self._check_for_nans("Loss", *losses)
         self._timer(stop="fwd: check for nans")
