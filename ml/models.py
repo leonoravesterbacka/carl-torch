@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class RatioModel(nn.Module):
 
-    def __init__(self, n_observables, n_parameters, n_hidden, activation="tanh", dropout_prob=0.0):
+    def __init__(self, n_observables, n_hidden, activation="sigmoid", dropout_prob=0.0):
 
         super(RatioModel, self).__init__()
 
@@ -36,7 +36,6 @@ class RatioModel(nn.Module):
         if self.dropout_prob > 1.0e-9:
             self.layers.append(nn.Dropout(self.dropout_prob))
         self.layers.append(nn.Linear(n_last, 1))
-
     def forward(self, x):
         s_hat = x
         for i, layer in enumerate(self.layers):
