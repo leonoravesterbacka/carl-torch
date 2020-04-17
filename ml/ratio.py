@@ -7,7 +7,7 @@ from collections import OrderedDict
 from .evaluate import evaluate_ratio_model
 from .models import RatioModel
 from .functions import get_optimizer, get_loss
-from .tools import load_and_check, shuffle, restrict_samplesize
+from .tools import load_and_check
 from .trainers import RatioTrainer
 from .base import ConditionalEstimator
 
@@ -46,7 +46,6 @@ class RatioEstimator(ConditionalEstimator):
         validation_split=0.25,
         early_stopping=True,
         scale_inputs=False,
-        shuffle_labels=False,
         limit_samplesize=None,
         memmap=False,
         verbose="some",
@@ -90,11 +89,6 @@ class RatioEstimator(ConditionalEstimator):
             True.
         scale_inputs : bool, optional
             Scale the observables to zero mean and unit variance. Default value: True.
-        shuffle_labels : bool, optional
-            If True, the labels (`y`, `r_xz`, `t_xz`) are shuffled, while the observations (`x`) remain in their
-            normal order. 
-        limit_samplesize : int or None, optional
-            If not None, only this number of samples (events) is used to train the estimator. Default value: None.
         memmap : bool, optional.
             If True, training files larger than 1 GB will not be loaded into memory at once. Default value: False.
         verbose : {"all", "many", "some", "few", "none}, optional
@@ -115,7 +109,6 @@ class RatioEstimator(ConditionalEstimator):
         logger.info("  Validation split:       %s", validation_split)
         logger.info("  Early stopping:         %s", early_stopping)
         logger.info("  Scale inputs:           %s", scale_inputs)
-        logger.info("  Shuffle labels          %s", shuffle_labels)
         if limit_samplesize is None:
             logger.info("  Samples:                all")
         else:

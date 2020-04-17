@@ -8,8 +8,7 @@ import pandas as pd
 import multiprocessing
 from functools import partial
 
-from .tools import create_missing_folders, shuffle
-#from .analysis import DataAnalyzer
+from .tools import create_missing_folders
 
 logger = logging.getLogger(__name__)
 
