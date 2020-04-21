@@ -16,6 +16,10 @@ try:
 except NameError:
     FileNotFoundError = IOError
 
+logging.basicConfig(
+    level=logging.INFO
+)
+
 logger = logging.getLogger(__name__)
 class RatioEstimator(ConditionalEstimator):
     """
@@ -181,7 +185,6 @@ class RatioEstimator(ConditionalEstimator):
             clip_gradient=clip_gradient,
             early_stopping_patience=early_stopping_patience,
         )
-        print("results", result)
         return result
 
     def evaluate_log_likelihood_ratio(self, x):
