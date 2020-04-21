@@ -32,7 +32,7 @@ def draw_unweighted_distributions(x0, x1, weights, varis, vlabels, binning):
         plt.legend(frameon=False)
         axes = plt.gca()
         axes.set_ylim([1,10000000])                  
-        create_missing_folders([os.path.dirname("plots")])                                                              
+        create_missing_folders(["plots"])                                                              
         plt.savefig("plots/unweighted_%s.png"%(varis[id-1]))                                                                                                        
         plt.clf()
 
@@ -50,7 +50,7 @@ def draw_weighted_distributions(x0, x1, weights, varis, vlabels, binning, label)
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()
         axes.set_ylim([1,10000000])                  
-        create_missing_folders([os.path.dirname("plots")])                                                              
+        create_missing_folders(["plots"])                                                              
         plt.savefig("plots/weighted_%s_%s.png"%(varis[id-1], label))                                                                                                        
         plt.clf()
 def weight_data(x0,x1,weights, max_weight=10000.):
@@ -100,3 +100,5 @@ def draw_ROC(X0, X1, weights, label):
     plt.legend(loc="lower right", title = label)
     plt.tight_layout()
     plt.savefig('plots/roc_resampled_%s.png'%(label)) 
+    print("CARL weighted %s AUC is %.3f"%(label,roc_auc_tC))
+    print("Unweighted %s AUC is %.3f"%(label,roc_auc_t))

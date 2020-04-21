@@ -36,7 +36,7 @@ class RatioEstimator(ConditionalEstimator):
         method,
         x,
         y,
-        alpha=1.0,
+        alpha=0.0001,
         optimizer="amsgrad",
         n_epochs=50,
         batch_size=128,

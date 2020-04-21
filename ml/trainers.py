@@ -32,7 +32,7 @@ class NumpyDataset(Dataset):
             print("array ", array)
             if self.n is None:
                 self.n = array.shape[0]
-            #assert array.shape[0] == self.n
+            assert array.shape[0] == self.n
 
             if isinstance(array, np.memmap):
                 self.memmap.append(True)
@@ -50,7 +50,6 @@ class NumpyDataset(Dataset):
                 items.append(torch.from_numpy(tensor).to(self.dtype))
             else:
                 items.append(array[index])
-                #items.append(array.numpy())
         return tuple(items)
 
     def __len__(self):
@@ -154,11 +153,11 @@ class Trainer(object):
         # Loop over epochs
         for i_epoch in range(epochs):
             logger.debug("Training epoch", i_epoch + 1, epochs)
-            print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
             print("Training epoch", i_epoch + 1, "/", epochs)
             self._timer(start="set lr")
             lr = self.calculate_lr(i_epoch, epochs, initial_lr, final_lr)
             self.set_lr(opt, lr)
+            print("Learning rate: %s", lr) 
             logger.debug("Learning rate: %s", lr)
             self._timer(stop="set lr")
             loss_val = None
