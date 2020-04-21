@@ -7,7 +7,7 @@ from collections import OrderedDict
 from .evaluate import evaluate_ratio_model
 from .models import RatioModel
 from .functions import get_optimizer, get_loss
-from .tools import load_and_check
+from .utils.tools import load_and_check
 from .trainers import RatioTrainer
 from .base import ConditionalEstimator
 

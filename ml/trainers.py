@@ -536,8 +536,6 @@ class RatioTrainer(Trainer):
         losses = [
             loss_function(r_hat, s_hat, y) for loss_function in loss_functions
         ]
-        print("losses", losses)
-        print("r_hat", r_hat)
         self._timer(stop="fwd: calculate losses", start="fwd: check for nans")
         self._check_for_nans("Loss", *losses)
         self._timer(stop="fwd: check for nans")

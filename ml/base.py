@@ -6,7 +6,7 @@ import json
 import numpy as np
 import torch
 
-from .tools import create_missing_folders, load_and_check
+from .utils.tools import create_missing_folders, load_and_check
 
 try:
     FileNotFoundError
