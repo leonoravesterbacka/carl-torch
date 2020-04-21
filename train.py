@@ -3,11 +3,11 @@ from ml import Loader
 
 loading = Loader()
 
-#x, y = loading.loading(
-#    folder='./data/samples',
-#    filename='train',
-#    plot=True
-#)
+x, y = loading.loading(
+    folder='./data/samples',
+    filename='train',
+    plot=True
+)
 estimator = RatioEstimator(
     n_hidden=(10,10),
     activation="sigmoid"
