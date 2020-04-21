@@ -46,8 +46,6 @@ def get_optimizer(optimizer, nesterov_momentum):
     opt_kwargs = None
     if optimizer == "adam":
         opt = optim.Adam
-    elif optimizer == "lbfgs":
-        opt = optim.LBFGS
     elif optimizer == "amsgrad":
         opt = optim.Adam
         opt_kwargs = {"amsgrad": True}

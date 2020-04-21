@@ -29,7 +29,6 @@ class NumpyDataset(Dataset):
         self.n = None
 
         for array in arrays:
-            print("array ", array)
             if self.n is None:
                 self.n = array.shape[0]
             assert array.shape[0] == self.n
@@ -68,7 +67,6 @@ class Trainer(object):
         self.device = torch.device("cuda" if self.run_on_gpu else "cpu")
         self.dtype = torch.double if double_precision else torch.float
         self.n_workers = n_workers
-        print("self.model", self.model)
         self.model = self.model.to(self.device, self.dtype)
 
         logger.info(
@@ -153,11 +151,9 @@ class Trainer(object):
         # Loop over epochs
         for i_epoch in range(epochs):
             logger.debug("Training epoch", i_epoch + 1, epochs)
-            print("Training epoch", i_epoch + 1, "/", epochs)
             self._timer(start="set lr")
             lr = self.calculate_lr(i_epoch, epochs, initial_lr, final_lr)
             self.set_lr(opt, lr)
-            print("Learning rate: %s", lr) 
             logger.debug("Learning rate: %s", lr)
             self._timer(stop="set lr")
             loss_val = None
