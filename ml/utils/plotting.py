@@ -19,39 +19,39 @@ from .tools import create_missing_folders
 
 logger = logging.getLogger(__name__)
 
-def draw_unweighted_distributions(x0, x1, weights, varis, vlabels, binning):
+def draw_unweighted_distributions(x0, x1, weights, varis, vlabels, binning, legend):
     hist_settings0 = {'alpha': 0.3}
     hist_settings1 = {'histtype':'step', 'color':'black', 'linewidth':1, 'linestyle':'--'}
     columns = range(len(varis))
     for id, column in enumerate(columns, 1):
         plt.figure(figsize=(5, 4))
         plt.yscale('log')
-        plt.hist(x0[:,column], bins = binning[id-1],weights=weights, label = 'Sherpa', **hist_settings0)
-        plt.hist(x1[:,column], bins = binning[id-1],label = 'Madgraph', **hist_settings1)
+        plt.hist(x0[:,column], bins = binning[id-1],weights=weights, label = legend[0], **hist_settings0)
+        plt.hist(x1[:,column], bins = binning[id-1],label = legend[1], **hist_settings1)
         plt.xlabel('%s'%(vlabels[id-1])) 
         plt.legend(frameon=False)
         axes = plt.gca()
         axes.set_ylim([1,10000000])                  
         create_missing_folders(["plots"])                                                              
-        plt.savefig("plots/unweighted_%s.png"%(varis[id-1]))                                                                                                        
+        plt.savefig("plots/unweighted_%s_%sVs%s.png"%(varis[id-1], legend[0],legend[1]))                                                                                                        
         plt.clf()
 
-def draw_weighted_distributions(x0, x1, weights, varis, vlabels, binning, label):
+def draw_weighted_distributions(x0, x1, weights, varis, vlabels, binning, label, legend):
     hist_settings0 = {'alpha': 0.3}
     hist_settings1 = {'histtype':'step', 'color':'black', 'linewidth':1, 'linestyle':'--'}
     columns = range(len(varis))
     for id, column in enumerate(columns, 1):
         plt.figure(figsize=(5, 4))
         plt.yscale('log')
-        plt.hist(x0[:,column], bins = binning[id-1], label = 'Sherpa', **hist_settings0)
-        plt.hist(x0[:,column], bins = binning[id-1],weights=weights, label = 'Sherpa*CARL', **hist_settings0)
-        plt.hist(x1[:,column], bins = binning[id-1],label = 'Madgraph', **hist_settings1)
+        plt.hist(x0[:,column], bins = binning[id-1], label = legend[0], **hist_settings0)
+        plt.hist(x0[:,column], bins = binning[id-1],weights=weights, label = legend[0]+'*CARL', **hist_settings0)
+        plt.hist(x1[:,column], bins = binning[id-1],label = legend[1], **hist_settings1)
         plt.xlabel('%s'%(vlabels[id-1])) 
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()
         axes.set_ylim([1,10000000])                  
         create_missing_folders(["plots"])                                                              
-        plt.savefig("plots/weighted_%s_%s.png"%(varis[id-1], label))                                                                                                        
+        plt.savefig("plots/weighted_%s_%sVs%s_%s.png"%(varis[id-1], legend[0],legend[1],label))                                                                                                        
         plt.clf()
 def weight_data(x0,x1,weights, max_weight=10000.):
     x1_len = x1.shape[0]
@@ -84,12 +84,11 @@ def resampled_discriminator_and_roc(original, target, weights):
     roc_auc = auc(fpr, tpr)
     return fpr,tpr,roc_auc
  
-def draw_ROC(X0, X1, weights, label):
-    weights_scaled = weights / weights.sum() * len(X1)
+def draw_ROC(X0, X1, weights, label, legend):
     no_weights_scaled = np.ones(X0.shape[0])/np.ones(X0.shape[0]).sum() * len(X1)
     fpr_t,tpr_t,roc_auc_t = resampled_discriminator_and_roc(X0, X1, no_weights_scaled)
     plt.plot(fpr_t, tpr_t, label=r"no weight, AUC=%.3f" % roc_auc_t)
-    fpr_tC,tpr_tC,roc_auc_tC = resampled_discriminator_and_roc(X0, X1, weights_scaled)
+    fpr_tC,tpr_tC,roc_auc_tC = resampled_discriminator_and_roc(X0, X1, weights)
     plt.plot(fpr_tC, tpr_tC, label=r"CARL weight, AUC=%.3f" % roc_auc_tC)
     plt.plot([0, 1], [0, 1], 'k--')
     plt.xlim([0.0, 1.0]) 
@@ -99,6 +98,6 @@ def draw_ROC(X0, X1, weights, label):
     plt.ylabel('True Positive Rate')
     plt.legend(loc="lower right", title = label)
     plt.tight_layout()
-    plt.savefig('plots/roc_resampled_%s.png'%(label)) 
+    plt.savefig('plots/roc_resampled_%sVs%s_%s.png'%(legend[0], legend[1],label)) 
     print("CARL weighted %s AUC is %.3f"%(label,roc_auc_tC))
     print("Unweighted %s AUC is %.3f"%(label,roc_auc_t))
