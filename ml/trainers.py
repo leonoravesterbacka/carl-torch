@@ -115,7 +115,7 @@ class Trainer(object):
         logger.debug("Setting up optimizer")
         optimizer_kwargs = {} if optimizer_kwargs is None else optimizer_kwargs
         opt = optimizer(self.model.parameters(), lr=initial_lr, **optimizer_kwargs)
-
+        print("opt ", opt)
         early_stopping = early_stopping and (validation_split is not None) and (epochs > 1)
         best_loss, best_model, best_epoch = None, None, None
         if early_stopping and early_stopping_patience is None:

@@ -27,6 +27,7 @@ class Loader():
         folder=None,
         filename=None,
         plot=False,
+        do = 'sherpaVsMG5',
         randomize = False,
         test_split=0.2,
         validation_split=0.2,
@@ -60,15 +61,33 @@ class Loader():
             (denominator) hypothesis. The same information is saved as a file in the given folder.
         """
 
-        create_missing_folders([folder])
+        create_missing_folders([folder+do])
+        etaV = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
 
-        variables = ['VpT','Njets','j1pT', 'j2pT', 'HT','ptmiss', 'l1pT']
-        vlabels = ['V $\mathrm{p_{T}}$ [GeV]','Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\mathrm{p_{T}}$ [GeV]', '$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading lepton $\mathrm{p_{T}}$ [GeV]']
-        binning = [range(0, 1000, 50), range(0, 10, 1), range(0, 500, 25),range(0, 500, 25),range(0, 1000, 50),range(0, 400, 25),range(0, 500, 25)]
+        variables = ['VpT','Njets','j1pT', 'j2pT', 'HT','ptmiss', 'l1pT','Veta','j1eta','j2eta']
+        vlabels = ['V $\mathrm{p_{T}}$ [GeV]','Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\mathrm{p_{T}}$ [GeV]', '$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]', '    Leading lepton $\mathrm{p_{T}}$ [GeV]','V $\eta$','Leading jet $\eta$','Subleading jet $\eta$']
+        binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),range(0, 2700, 200),range(0, 5000, 250),range(0, 600, 100),range(0, 1500, 100), etaV, etaJ, etaJ]
 
         # load sample X0
-        x0 = load(filename = '/eos/user/m/mvesterb/data/sherpa/one/Nominal.root', variables = variables)
-        
+        if do == "sherpaVsMG5":
+            x0 = load(filename = '/eos/user/m/mvesterb/data/sherpa/one/Nominal.root', variables = variables)
+            x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/one/Nominal.root', variables = variables)
+            legend = ["Sherpa","Madgraph"]
+        else: 
+            x0  = load(filename = '/eos/user/m/mvesterb/data/MUR1_MUF1_PDF261000.root', variables = variables)
+            x1  = load(filename = '/eos/user/m/mvesterb/data/MUR2_MUF1_PDF261000.root', variables = variables)
+            wx0 = load(filename = '/eos/user/m/mvesterb/data/MUR1_MUF1_PDF261000.root', variables = ['truthWeight'])
+            wx1 = load(filename = '/eos/user/m/mvesterb/data/MUR2_MUF1_PDF261000.root', variables = ['truthWeight'])
+            legend = ["MUR1", "MUR2"]
+            pTruth0    = (wx0.truthWeight)/np.sum(wx0.truthWeight.astype(np.float))
+            pTruth1    = (wx1.truthWeight)/np.sum(wx1.truthWeight.astype(np.float))
+            iTruth0    = np.random.choice(np.arange(len(x0)),size=int(np.sum(wx0.truthWeight.astype(np.float))),p=pTruth0)
+            iTruth1    = np.random.choice(np.arange(len(x1)),size=int(np.sum(wx1.truthWeight.astype(np.float))),p=pTruth1)
+            x0     = x0.iloc[iTruth0] #original
+            x1     = x1.iloc[iTruth1] #target
+
+
         # randomize training and test data (or not)
         n_target = x0.values.shape[0]
         if randomize:
@@ -80,7 +99,6 @@ class Loader():
             X0_test = x0.values[-n_target:,:]
 
         # load sample X1
-        x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/one/Nominal.root', variables = variables)
         X1 = x1.to_numpy()
        
         # combine
@@ -93,14 +111,14 @@ class Loader():
 
         # save data
         if filename is not None and folder is not None:
-            np.save(folder + "/x0_test.npy", X0_test)
-            np.save(folder + "/x0_" + filename + ".npy", X0)
-            np.save(folder + "/x1_" + filename + ".npy", X1)
-            np.save(folder + "/x_" + filename + ".npy", x)
-            np.save(folder + "/y_" + filename + ".npy", y)
+            np.save(folder + do + "/x0_test.npy", X0_test)
+            np.save(folder + do + "/x0_" + filename + ".npy", X0)
+            np.save(folder + do + "/x1_" + filename + ".npy", X1)
+            np.save(folder + do + "/x_" + filename + ".npy", x)
+            np.save(folder + do + "/y_" + filename + ".npy", y)
 
         if plot:
-            draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), variables, vlabels, binning) 
+            draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), variables, vlabels, binning, legend) 
             print("saving plots")
             
         return x, y                                                                                                                                                                                                                                      
@@ -111,6 +129,7 @@ class Loader():
         x1,
         weights = None,
         label = None,
+        do = 'sherpaVsMG5',
     ):
         """
         Parameters
@@ -121,16 +140,24 @@ class Loader():
         Returns
         -------
         """
+        etaV = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
 
-        variables = ['VpT','Njets','j1pT', 'j2pT', 'HT','ptmiss', 'l1pT']
-        vlabels = ['V $\mathrm{p_{T}}$ [GeV]','Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\mathrm{p_{T}}$ [GeV]', '$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading lepton $\mathrm{p_{T}}$ [GeV]']
-        binning = [range(0, 1000, 50), range(0, 10, 1), range(0, 500, 25),range(0, 500, 25),range(0, 1000, 50),range(0, 400, 25),range(0, 500, 25)]
+        variables = ['VpT','Njets','j1pT', 'j2pT', 'HT','ptmiss', 'l1pT','Veta','j1eta','j2eta']
+        vlabels = ['V $\mathrm{p_{T}}$ [GeV]','Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\mathrm{p_{T}}$ [GeV]', '$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading lepton $\mathrm{p_{T}}$ [GeV]','V $\eta$','Leading jet $\eta$','Subleading jet $\eta$']
+        binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),range(0, 2700, 200),range(0, 5000, 250),range(0, 600, 100),range(0, 1500, 100), etaV, etaJ, etaJ]
+        if do == "sherpaVsMG5":
+            legend = ["Sherpa","Madgraph"]
+        else:    
+            legend = ["MUR1", "MUR2"]
+        
 
         # load sample X0
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
         # load sample X1
         X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)
-        # plot reweighted distributions       
-        draw_weighted_distributions(X0, X1, weights, variables, vlabels, binning, label) 
+        # plot reweighted distributions      
+        weights = weights / weights.sum() * len(X1)
+        draw_weighted_distributions(X0, X1, weights, variables, vlabels, binning, label, legend) 
         # plot ROC curves     
-        draw_ROC(X0, X1, weights, label)
+        draw_ROC(X0, X1, weights, label, legend)
