@@ -1,5 +1,8 @@
 CARL-TORCH
 ==================================
+**Work in progress by Leonora Vesterbacka, with invaluable input from Johann Brehmer, Kyle Cranmer and Gilles Louppe**
+
+## Introduction
 `carl-torch` is a toolbox for density ratio estimation using PyTorch. 
 `carl-torch` is based on carl (https://github.com/diana-hep/carl/) originally developed for likelihood ratio estimation, but repurposed to be used as a multivariate reweighting technique to be used in the context of particle physics research. 
 ## Background
@@ -12,7 +15,7 @@ A naive approach to reweighting a sample `p0(x)` to look like another `p1(x)` is
 The obvious drawback of this approach is that one or two dimensions is not nearly enough to capture the effects in the full phase space. 
 
 Therefore, a multivariate reweighting technique is proposed, based on density ratio estimation, which can take into account the full space instead of just two dimensions. 
-The technique is based on approximating a density ratio `r=p1(x)/p0(x)` as $s(x) / 1 - s(x)$, where $s$ is a classifier trained to distinguish samples `x ~ p0` from samples `x ~ p1`, and where `s(x)` is the classifier approximate of the probability `p0(x) / (p0(x) + p1(x))` 
+The technique is based on approximating a density ratio `r=p1(x)/p0(x)` as `s(x) / 1 - s(x)`, where $s$ is a classifier trained to distinguish samples `x ~ p0` from samples `x ~ p1`, and where `s(x)` is the classifier approximate of the probability `p0(x) / (p0(x) + p1(x))` 
 The performance of the weights, i.e. how well the reweighted original sample matches the target one, is assessed by training a discriminator to differentiate the original distribution with weights applied from a target distribution. 
 ## Documentation
 * Extensive details regarding likelihood-free inference with calibrated
@@ -23,10 +26,10 @@ The performance of the weights, i.e. how well the reweighted original sample mat
 
 ## Installation
 The following dependencies are required:
-- Numpy >= 1.11
-- Scipy >= 0.17
+- Numpy
+- Scipy
 - PyTorch 
-- Theano >= 0.8
+- Theano 
 
 Once satisfied, `carl-torch` can be installed from source using the following:
 ```
