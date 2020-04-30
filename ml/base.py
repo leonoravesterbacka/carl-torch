@@ -154,15 +154,15 @@ class Estimator(object):
             self.x_scaling_stds = np.ones(n_parameters)
 
     def _transform_inputs(self, x):
-        #if self.x_scaling_means is not None and self.x_scaling_stds is not None:
-        #    if isinstance(x, torch.Tensor):
-        #        x_scaled = x - torch.tensor(self.x_scaling_means, dtype=x.dtype, device=x.device)
-        #        x_scaled = x_scaled / torch.tensor(self.x_scaling_stds, dtype=x.dtype, device=x.device)
-        #    else:
-        #        x_scaled = x - self.x_scaling_means
-        #        x_scaled /= self.x_scaling_stds
-        #else:
-        x_scaled = x
+        if self.x_scaling_means is not None and self.x_scaling_stds is not None:
+            if isinstance(x, torch.Tensor):
+                x_scaled = x - torch.tensor(self.x_scaling_means, dtype=x.dtype, device=x.device)
+                x_scaled = x_scaled / torch.tensor(self.x_scaling_stds, dtype=x.dtype, device=x.device)
+            else:
+                x_scaled = x - self.x_scaling_means
+                x_scaled /= self.x_scaling_stds
+        else:
+            x_scaled = x
         return x_scaled
 
     def _wrap_settings(self):
