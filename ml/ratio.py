@@ -9,7 +9,7 @@ from .models import RatioModel
 from .functions import get_optimizer, get_loss
 from .utils.tools import load_and_check
 from .trainers import RatioTrainer
-from .base import ConditionalEstimator
+from .base import Estimator
 
 try:
     FileNotFoundError
@@ -21,7 +21,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-class RatioEstimator(ConditionalEstimator):
+class RatioEstimator(Estimator):
     """
     Parameters
     ----------
@@ -232,12 +232,12 @@ class RatioEstimator(ConditionalEstimator):
         if self.features is not None:
             x = x[:, self.features]
         logger.debug("Starting ratio evaluation")
-        _, r_hat = evaluate_ratio_model(
+        s_hat, r_hat, logits = evaluate_ratio_model(
             model=self.model,
             xs=x,
         )
         logger.debug("Evaluation done")
-        return r_hat
+        return s_hat, r_hat, logits 
 
     def evaluate(self, *args, **kwargs):
         return self.evaluate_ratio(*args, **kwargs)

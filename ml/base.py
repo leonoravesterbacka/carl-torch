@@ -41,10 +41,10 @@ class Estimator(object):
         raise NotImplementedError
 
 
-    def evaluate_log_likelihood_ratio(self, *args, **kwargs):
+    def evaluate_ratio(self, *args, **kwargs):
         """
-        Log likelihood ratio estimation. Signature depends on the type of estimator. The first returned value is the log
-        likelihood ratio with shape `(n_thetas, n_x)` or `(n_x)`.
+        Ratio estimation. Signature depends on the type of estimator. The first returned value is the ratio with 
+        shape `(n_thetas, n_x)` or `(n_x)`.
         """
         raise NotImplementedError
 
@@ -204,101 +204,4 @@ class Estimator(object):
 
     def _create_model(self):
         raise NotImplementedError
-
-
-class ConditionalEstimator(Estimator):
-
-    """
-    Adds functionality to rescale parameters.
-    """
-
-    def __init__(self, features=None, n_hidden=(100,), activation="tanh", dropout_prob=0.0):
-        super(ConditionalEstimator, self).__init__(features, n_hidden, activation, dropout_prob)
-
-        self.theta_scaling_means = None
-        self.theta_scaling_stds = None
-
-    def save(self, filename, save_model=False):
-
-        """
-        Saves the trained model to four files: a JSON file with the settings, a pickled pyTorch state dict
-        file, and numpy files for the mean and variance of the inputs (used for input scaling).
-        Parameters
-        ----------
-        filename : str
-            Path to the files. '_settings.json' and '_state_dict.pl' will be added.
-        save_model : bool, optional
-            If True, the whole model is saved in addition to the state dict. This is not necessary for loading it
-            again with Estimator.load(), but can be useful for debugging, for instance to plot the computational graph.
-        Returns
-        -------
-            None
-        """
-
-        super(ConditionalEstimator, self).save(filename, save_model)
-
-        # Save param scaling
-        if self.theta_scaling_stds is not None and self.theta_scaling_means is not None:
-            logger.debug(
-                "Saving parameter scaling information to %s_theta_means.npy and %s_theta_stds.npy", filename, filename
-            )
-            np.save(filename + "_theta_means.npy", self.theta_scaling_means)
-            np.save(filename + "_theta_stds.npy", self.theta_scaling_stds)
-
-    def load(self, filename):
-
-        """
-        Loads a trained model from files.
-        Parameters
-        ----------
-        filename : str
-            Path to the files. '_settings.json' and '_state_dict.pl' will be added.
-        Returns
-        -------
-            None
-        """
-
-        super(ConditionalEstimator, self).load(filename)
-
-        # Load param scaling
-        try:
-            self.theta_scaling_means = np.load(filename + "_theta_means.npy")
-            self.theta_scaling_stds = np.load(filename + "_theta_stds.npy")
-            logger.debug(
-                "  Found parameter scaling information: means %s, stds %s",
-                self.theta_scaling_means,
-                self.theta_scaling_stds,
-            )
-        except FileNotFoundError:
-            logger.warning("Parameter scaling information not found in %s", filename)
-            self.theta_scaling_means = None
-            self.theta_scaling_stds = None
-
-    def initialize_parameter_transform(self, theta, transform=True, overwrite=True):
-        if self.x_scaling_stds is not None and self.x_scaling_means is not None and not overwrite:
-            logger.info(
-                "Parameter rescaling already defined. To overwrite, call initialize_parameter_transform(theta, overwrite=True)."
-            )
-        elif transform:
-            logger.info("Setting up parameter rescaling")
-            self.theta_scaling_means = np.mean(theta, axis=0)
-            self.theta_scaling_stds = np.maximum(np.std(theta, axis=0), 1.0e-6)
-        else:
-            logger.info("Disabling parameter rescaling")
-            self.theta_scaling_means = None
-            self.theta_scaling_stds = None
-
-    def _transform_parameters(self, theta):
-        if self.theta_scaling_means is not None and self.theta_scaling_stds is not None:
-            if isinstance(theta, torch.Tensor):
-                theta_scaled = theta - torch.tensor(self.theta_scaling_means, dtype=theta.dtype, device=theta.device)
-                theta_scaled = theta_scaled / torch.tensor(
-                    self.theta_scaling_stds, dtype=theta.dtype, device=theta.device
-                )
-            else:
-                theta_scaled = theta - self.theta_scaling_means[np.newaxis, :]
-                theta_scaled /= self.theta_scaling_stds[np.newaxis, :]
-        else:
-            theta_scaled = theta
-        return theta_scaled
 
