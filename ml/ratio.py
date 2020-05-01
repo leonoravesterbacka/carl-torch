@@ -40,6 +40,8 @@ class RatioEstimator(ConditionalEstimator):
         method,
         x,
         y,
+        x_val=None,
+        y_val=None,
         alpha=1.0,
         optimizer="amsgrad",
         n_epochs=50,
@@ -129,10 +131,21 @@ class RatioEstimator(ConditionalEstimator):
         n_observables = x.shape[1]
         logger.info("Found %s samples with %s observables", n_samples, n_observables)
 
+        external_validation = x_val is not None and y_val is not None
+        if external_validation:
+            x_val = load_and_check(x_val, memmap_files_larger_than_gb=memmap_threshold)
+            y_val = load_and_check(y_val, memmap_files_larger_than_gb=memmap_threshold)
+            logger.info("Found %s separate validation samples", x_val.shape[0])
+
+            assert x_val.shape[1] == n_observables
+
+
         # Scale features
         if scale_inputs:
             self.initialize_input_transform(x, overwrite=False)
             x = self._transform_inputs(x)
+            if external_validation:
+                x_val = self._transform_inputs(x_val)
         else:
             self.initialize_input_transform(x, False, overwrite=False)
 
@@ -141,6 +154,9 @@ class RatioEstimator(ConditionalEstimator):
             x = x[:, self.features]
             logger.info("Only using %s of %s observables", x.shape[1], n_observables)
             n_observables = x.shape[1]
+            if external_validation:
+                x_val = x_val[:, self.features]
+
 
         # Check consistency of input with model
         if self.n_observables is None:
@@ -153,7 +169,10 @@ class RatioEstimator(ConditionalEstimator):
 
         # Data
         data = self._package_training_data(method, x, y)
-        data_val = None
+        if external_validation:
+            data_val = self._package_training_data(method, x_val, y_val)
+        else:
+            data_val = None
         # Create model
         if self.model is None:
             logger.info("Creating model")
@@ -189,22 +208,15 @@ class RatioEstimator(ConditionalEstimator):
 
     def evaluate_log_likelihood_ratio(self, x):
         """
-        Evaluates the log likelihood ratio as a function of the observation x, the numerator hypothesis theta0, and
-        the denominator hypothesis theta1.
+        Evaluates the log likelihood ratio as a function of the observation x.
         Parameters
         ----------
         x : str or ndarray
             Observations or filename of a pickled numpy array.
-        test_all_combinations : bool, optional
-            If False, the number of samples in the observable and theta
-            files has to match, and the likelihood ratio is evaluated only for the combinations
-            `r(x_i | theta0_i, theta1_i)`. If True, `r(x_i | theta0_j, theta1_j)` for all pairwise combinations `i, j`
-            are evaluated. Default value: True.
         Returns
         -------
         log_likelihood_ratio : ndarray
-            The estimated log likelihood ratio. If test_all_combinations is True, the result has shape
-            `(n_thetas, n_x)`. Otherwise, it has shape `(n_samples,)`.
+            The estimated log likelihood ratio. It has shape `(n_samples,)`.
         """
         if self.model is None:
             raise ValueError("No model -- train or load model before evaluating it!")
@@ -219,15 +231,11 @@ class RatioEstimator(ConditionalEstimator):
         # Restrict features
         if self.features is not None:
             x = x[:, self.features]
-
-
         logger.debug("Starting ratio evaluation")
         _, r_hat = evaluate_ratio_model(
             model=self.model,
-            method_type="double_parameterized_ratio",
             xs=x,
         )
-
         logger.debug("Evaluation done")
         return r_hat
 

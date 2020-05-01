@@ -57,7 +57,6 @@ def weight_data(x0,x1,weights, max_weight=10000.):
     x1_len = x1.shape[0]
     x0_len = x0.shape[0]
     weights[weights>max_weight]=max_weight
-
     weights = weights / weights.sum()
     weighted_data = np.random.choice(range(x0_len), x0_len, p = weights)
     w_x0 = x0.copy()[weighted_data]

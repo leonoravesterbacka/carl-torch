@@ -87,7 +87,6 @@ class Loader():
             x0     = x0.iloc[iTruth0] #original
             x1     = x1.iloc[iTruth1] #target
 
-
         # randomize training and test data (or not)
         n_target = x0.values.shape[0]
         if randomize:
