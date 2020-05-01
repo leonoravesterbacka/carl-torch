@@ -206,17 +206,17 @@ class RatioEstimator(ConditionalEstimator):
         )
         return result
 
-    def evaluate_log_likelihood_ratio(self, x):
+    def evaluate_ratio(self, x):
         """
-        Evaluates the log likelihood ratio as a function of the observation x.
+        Evaluates the ratio as a function of the observation x.
         Parameters
         ----------
         x : str or ndarray
             Observations or filename of a pickled numpy array.
         Returns
         -------
-        log_likelihood_ratio : ndarray
-            The estimated log likelihood ratio. It has shape `(n_samples,)`.
+        ratio : ndarray
+            The estimated ratio. It has shape `(n_samples,)`.
         """
         if self.model is None:
             raise ValueError("No model -- train or load model before evaluating it!")
@@ -240,7 +240,7 @@ class RatioEstimator(ConditionalEstimator):
         return r_hat
 
     def evaluate(self, *args, **kwargs):
-        return self.evaluate_log_likelihood_ratio(*args, **kwargs)
+        return self.evaluate_ratio(*args, **kwargs)
 
     def _create_model(self):
         self.model = RatioModel(
