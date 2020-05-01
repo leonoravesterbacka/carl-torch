@@ -31,6 +31,7 @@ The following dependencies are required:
 - Scipy
 - PyTorch 
 - Theano 
+- scikit-learn 
 
 Once satisfied, `carl-torch` can be installed from source using the following:
 ```
