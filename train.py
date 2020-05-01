@@ -18,7 +18,7 @@ estimator = RatioEstimator(
 estimator.train(
     method='carl',
     batch_size = 128,
-    n_epochs = 10,
+    n_epochs = 50,
     x='data/'+do+'/x_train.npy',
     y='data/'+do+'/y_train.npy',
     scale_inputs = True,

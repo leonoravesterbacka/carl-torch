@@ -520,7 +520,7 @@ class RatioTrainer(Trainer):
         self._timer(stop="fwd: move data", start="fwd: check for nans")
         self._timer(start="fwd: model.forward", stop="fwd: check for nans")
 
-        s_hat, r_hat= self.model(x)
+        s_hat, r_hat, _= self.model(x)
 
         self._timer(stop="fwd: model.forward", start="fwd: check for nans")
         self._check_for_nans("Model output", s_hat, r_hat)

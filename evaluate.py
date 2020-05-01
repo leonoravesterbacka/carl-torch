@@ -6,7 +6,7 @@ carl = RatioEstimator()
 #do = "MUR1VsMUR2"
 do = "sherpaVsMG5"
 carl.load('models/'+do+'_carl')
-r_hat = carl.evaluate(x='data/'+do+'/x0_train.npy')
+_, r_hat, _ = carl.evaluate(x='data/'+do+'/x0_train.npy')
 w = 1./r_hat
 print("weights evaluated on training sample, uncalibrated", w)
 
@@ -17,7 +17,7 @@ loading.load_result(x0='data/'+do+'/x0_train.npy',
                     do = do,
 )   
                  
-r_hat = carl.evaluate(x='data/'+do+'/x0_test.npy')
+_, r_hat, _ = carl.evaluate(x='data/'+do+'/x0_test.npy')
 w = 1./r_hat
 print("weights evaluated on test sample, uncalibrated", w)
 
