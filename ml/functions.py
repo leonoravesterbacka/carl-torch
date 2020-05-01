@@ -58,7 +58,8 @@ def get_optimizer(optimizer, nesterov_momentum):
     return opt, opt_kwargs
 
 
-def ratio_xe(r_hat, s_hat, y_true):
+def ratio_xe(s_hat, y_true):
+#def ratio_xe(r_hat, s_hat, y_true):
     loss = BCELoss()(s_hat, y_true)
     return loss
 

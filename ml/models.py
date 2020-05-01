@@ -36,17 +36,18 @@ class RatioModel(nn.Module):
         if self.dropout_prob > 1.0e-9:
             self.layers.append(nn.Dropout(self.dropout_prob))
         self.layers.append(nn.Linear(n_last, 1))
+
     def forward(self, x):
         s_hat = x
         for i, layer in enumerate(self.layers):
             if i > 0:
                 s_hat = self.activation(s_hat)
             s_hat = layer(s_hat)
-            
+
         s_hat = torch.sigmoid(s_hat)
         r_hat = (1 - s_hat) / s_hat
         
-        return r_hat, s_hat
+        return s_hat, r_hat
 
     def to(self, *args, **kwargs):
         self = super(RatioModel, self).to(*args, **kwargs)

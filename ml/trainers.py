@@ -10,7 +10,6 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 from torch.nn.utils import clip_grad_norm_
-
 logger = logging.getLogger(__name__)
 
 class NanException(Exception):
@@ -115,7 +114,6 @@ class Trainer(object):
         logger.debug("Setting up optimizer")
         optimizer_kwargs = {} if optimizer_kwargs is None else optimizer_kwargs
         opt = optimizer(self.model.parameters(), lr=initial_lr, **optimizer_kwargs)
-        print("opt ", opt)
         early_stopping = early_stopping and (validation_split is not None) and (epochs > 1)
         best_loss, best_model, best_epoch = None, None, None
         if early_stopping and early_stopping_patience is None:
@@ -522,14 +520,14 @@ class RatioTrainer(Trainer):
         self._timer(stop="fwd: move data", start="fwd: check for nans")
         self._timer(start="fwd: model.forward", stop="fwd: check for nans")
 
-        r_hat, s_hat= self.model(x)
+        s_hat, r_hat= self.model(x)
 
         self._timer(stop="fwd: model.forward", start="fwd: check for nans")
         self._check_for_nans("Model output", s_hat, r_hat)
 
         self._timer(start="fwd: calculate losses", stop="fwd: check for nans")
         losses = [
-            loss_function(r_hat, s_hat, y) for loss_function in loss_functions
+            loss_function(s_hat, y) for loss_function in loss_functions
         ]
         self._timer(stop="fwd: calculate losses", start="fwd: check for nans")
         self._check_for_nans("Loss", *losses)
