@@ -37,5 +37,9 @@ Once satisfied, `carl-torch` can be installed from source using the following:
 ```
 git clone https://github.com/leonoravesterbacka/carl-torch.git
 ```
+The code is based on three scripts:
+- [train.py](train.py) trains neural networks on loaded data.
+- [evaluate.py](evaluate.py) evaluates the neural network by calculating the weights and making validation and ROC plots.
+- [calibrate.py](calibrate.py) calibrated network predictions based on histograms of the network output.
 
 This toolbox is adapted from  [MadMiner](http://diana-hep.org/madminer) and [CARL](http://diana-hep.org/carl). 
