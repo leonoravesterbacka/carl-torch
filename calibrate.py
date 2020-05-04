@@ -1,13 +1,19 @@
 import numpy as np
+import optparse
 from ml import RatioEstimator
 from ml.utils.loading import Loader
 from ml.calibration import CalibratedClassifier
 from ml.base import Estimator
+
+parser = optparse.OptionParser(usage="usage: %prog [opts]", version="%prog 1.0")
+parser.add_option('-s', '--samples', action='store', type=str, dest='samples', default='sherpaVsMG5', help='chose what samples to perform weight derivation on. default Sherpa     vs. Madgraph5')
+(opts, args) = parser.parse_args()
+do = opts.samples
+
+
 loading = Loader()
 
 carl = RatioEstimator()
-#do = "MUR1VsMUR2"
-do = "sherpaVsMG5"
 carl.load('models/'+do+'_carl')
 #load
 X = 'data/'+do+'/x_train.npy'

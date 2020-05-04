@@ -1,10 +1,14 @@
 import logging
+import optparse
 from ml import RatioEstimator
 from ml import Loader
 
+parser = optparse.OptionParser(usage="usage: %prog [opts]", version="%prog 1.0")
+parser.add_option('-s', '--samples', action='store', type=str, dest='samples', default='sherpaVsMG5', help='chose what samples to perform weight derivation on. default Sherpa vs. Madgraph5')
+(opts, args) = parser.parse_args()
+do = opts.samples
+
 loading = Loader()
-#do = 'MUR1VsMUR2'
-do = 'sherpaVsMG5'
 x, y = loading.loading(
     folder='./data/',
     filename='train',
