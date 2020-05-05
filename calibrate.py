@@ -10,7 +10,6 @@ parser.add_option('-s', '--samples', action='store', type=str, dest='samples', d
 (opts, args) = parser.parse_args()
 do = opts.samples
 
-
 loading = Loader()
 
 carl = RatioEstimator()
@@ -19,15 +18,18 @@ carl.load('models/'+do+'_carl')
 X = 'data/'+do+'/x_train.npy'
 y = 'data/'+do+'/y_train.npy'
 _, r_hat, _ = carl.evaluate(X)
-print("uncalibrated weight is ",1/r_hat)
+w_raw = 1/r_hat
+print("uncalibrated weight is ", w_raw)
 calib = CalibratedClassifier(carl)
 calib.fit(X = X,y = y)
-r = calib.predict(X ='data/'+do+'/x0_train.npy')
-w = 1/r
-print("calibrated weight r is ", w)
-loading.load_result(x0='data/'+do+'/x0_train.npy',     
-                    x1='data/'+do+'/x1_train.npy',
-                    weights=w, 
-                    label = 'calibrated',
-                    do = do,
+r_cal = calib.predict(X = X)
+w_cal = 1/r_cal
+print("calibrated weight is ", w_cal)
+loading.load_calibration(x0='data/'+do+'/x0_train.npy',     
+                         x1='data/'+do+'/x1_train.npy',
+                         y = y,
+                         w_raw = w_raw, 
+                         w_cal = w_cal, 
+                         label = 'calibrated',
+                         do = do,
 )              
