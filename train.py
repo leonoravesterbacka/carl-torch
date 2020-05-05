@@ -4,7 +4,7 @@ from ml import RatioEstimator
 from ml import Loader
 
 parser = optparse.OptionParser(usage="usage: %prog [opts]", version="%prog 1.0")
-parser.add_option('-s', '--samples', action='store', type=str, dest='samples', default='sherpaVsMG5', help='chose what samples to perform weight derivation on. default Sherpa vs. Madgraph5')
+parser.add_option('-s', '--samples', action='store', type=str, dest='samples', default='sherpaVsMG5', help='samples to derive weights for. default Sherpa vs. Madgraph5')
 (opts, args) = parser.parse_args()
 do = opts.samples
 
