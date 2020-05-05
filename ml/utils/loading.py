@@ -129,7 +129,6 @@ class Loader():
         ----------
         weights : ndarray
             r_hat weights:
-            None.
         Returns
         -------
         """

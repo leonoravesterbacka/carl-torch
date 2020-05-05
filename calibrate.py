@@ -16,8 +16,6 @@ carl.load('models/'+do+'_carl')
 #load
 X  = 'data/'+do+'/x_train.npy'
 y  = 'data/'+do+'/y_train.npy'
-X0 = 'data/'+do+'/x0_train.npy'
-X1 = 'data/'+do+'/x1_train.npy'
 s_hat, r_hat, _ = carl.evaluate(X)
 calib = CalibratedClassifier(carl)
 calib.fit(X = X,y = y)
@@ -30,11 +28,13 @@ loading.load_calibration(y_true = y,
                          do = do,
 )
 
-_, _, r_cal = calib.predict(X = X0)
-w_cal = 1/r_cal
-loading.load_result(x0 = X0,
-                    x1 = X1,
-                    weights=w_cal,
-                    label = 'calibration_train',
-                    do = do,
-)              
+evaluate = ['train', 'test']
+for i in evaluate:
+    _, r_hat, _ = carl.evaluate(x='data/'+do+'/x0_'+i+'.npy')
+    w = 1./r_hat
+    loading.load_result(x0='data/'+do+'/x0_'+i+'.npy',
+                        x1='data/'+do+'/x1_train.npy',
+                        weights=w, 
+                        label = i+'_calibrated',
+                        do = do,
+    )
