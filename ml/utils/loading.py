@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from functools import partial
 
 from .tools import create_missing_folders, load, load_and_check
-from .plotting import draw_weighted_distributions, draw_unweighted_distributions, draw_ROC, resampled_discriminator_and_roc
+from .plotting import draw_weighted_distributions, draw_unweighted_distributions, draw_ROC, resampled_discriminator_and_roc, plot_calibration_curve
 
 logger = logging.getLogger(__name__)
 
@@ -160,3 +160,38 @@ class Loader():
         draw_weighted_distributions(X0, X1, weights, variables, vlabels, binning, label, legend) 
         # plot ROC curves     
         draw_ROC(X0, X1, weights, label, legend)
+
+    def load_calibration(
+        self,
+        x0,
+        x1,
+        y,
+        w_raw = None,
+        w_cal = None,
+        label = None,
+        do = 'sherpaVsMG5',
+    ):
+        """
+        Parameters
+        ----------
+        weights : ndarray
+            r_hat weights:
+            None.
+        Returns
+        -------
+        """
+
+        # load sample X0
+        X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
+        # load sample X1
+        X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)
+        y  = load_and_check(y, memmap_files_larger_than_gb=1.0)
+        # plot reweighted distributions      
+        print("weights before scaling",w_cal)
+        w_raw = w_raw / w_raw.sum() * len(X1)
+        w_cal = w_cal / w_cal.sum() * len(X1)
+        print("weights after scaling",w_cal)
+        #draw_weighted_distributions(X0, X1, weights, variables, vlabels, binning, label, legend) 
+        # plot ROC curves     
+        #draw_ROC(X0, X1, weights, label, legend)
+        plot_calibration_curve(y, w_raw, w_cal)                                                                                                                                                                                                                                                                   

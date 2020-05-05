@@ -12,16 +12,17 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import roc_curve, auc
 from sklearn.neural_network import MLPRegressor
+from sklearn.calibration import calibration_curve
 
 
 import torch
 from .tools import create_missing_folders
 
 logger = logging.getLogger(__name__)
+hist_settings0 = {'alpha': 0.3}
+hist_settings1 = {'histtype':'step', 'color':'black', 'linewidth':1, 'linestyle':'--'}
 
 def draw_unweighted_distributions(x0, x1, weights, varis, vlabels, binning, legend):
-    hist_settings0 = {'alpha': 0.3}
-    hist_settings1 = {'histtype':'step', 'color':'black', 'linewidth':1, 'linestyle':'--'}
     columns = range(len(varis))
     for id, column in enumerate(columns, 1):
         plt.figure(figsize=(5, 4))
@@ -33,12 +34,10 @@ def draw_unweighted_distributions(x0, x1, weights, varis, vlabels, binning, lege
         axes = plt.gca()
         axes.set_ylim([1,10000000])                  
         create_missing_folders(["plots"])                                                              
-        plt.savefig("plots/unweighted_%s_%sVs%s.png"%(varis[id-1], legend[0],legend[1]))                                                                                                        
+        plt.savefig("plots/unweighted_%s_%sVs%s.png"%(varis[id-1], legend[0],legend[1]))                                                                
         plt.clf()
 
 def draw_weighted_distributions(x0, x1, weights, varis, vlabels, binning, label, legend):
-    hist_settings0 = {'alpha': 0.3}
-    hist_settings1 = {'histtype':'step', 'color':'black', 'linewidth':1, 'linestyle':'--'}
     columns = range(len(varis))
     for id, column in enumerate(columns, 1):
         plt.figure(figsize=(5, 4))
@@ -51,8 +50,9 @@ def draw_weighted_distributions(x0, x1, weights, varis, vlabels, binning, label,
         axes = plt.gca()
         axes.set_ylim([1,10000000])                  
         create_missing_folders(["plots"])                                                              
-        plt.savefig("plots/weighted_%s_%sVs%s_%s.png"%(varis[id-1], legend[0],legend[1],label))                                                                                                        
+        plt.savefig("plots/weighted_%s_%sVs%s_%s.png"%(varis[id-1], legend[0],legend[1],label)) 
         plt.clf()
+
 def weight_data(x0,x1,weights, max_weight=10000.):
     x1_len = x1.shape[0]
     x0_len = x0.shape[0]
@@ -98,5 +98,32 @@ def draw_ROC(X0, X1, weights, label, legend):
     plt.legend(loc="lower right", title = label)
     plt.tight_layout()
     plt.savefig('plots/roc_resampled_%sVs%s_%s.png'%(legend[0], legend[1],label)) 
-    print("CARL weighted %s AUC is %.3f"%(label,roc_auc_tC))
-    print("Unweighted %s AUC is %.3f"%(label,roc_auc_t))
+    plt.clf()    
+    logger.info("CARL weighted %s AUC is %.3f"%(label,roc_auc_tC))
+    logger.info("Unweighted %s AUC is %.3f"%(label,roc_auc_t))
+    logger.info("Saving ROC plots to /plots")
+
+def plot_calibration_curve(y, probs_raw, probs_cal):
+    #fig = plt.figure(1, figsize=(10, 10))
+    ax1 = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
+    ax2 = plt.subplot2grid((3, 1), (2, 0))
+    
+    ax1.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")
+    
+    frac_of_pos_raw, mean_pred_value_raw = calibration_curve(y, probs_raw, n_bins=50)
+    frac_of_pos_cal, mean_pred_value_cal = calibration_curve(y, probs_cal, n_bins=50)
+
+    ax1.plot(mean_pred_value_raw, frac_of_pos_raw, "s-", label='uncalibrated', **hist_settings0)
+    ax1.plot(mean_pred_value_cal, frac_of_pos_cal, "s-", label='calibrated', **hist_settings0)
+    ax1.set_ylabel("Fraction of positives")
+    ax1.set_ylim([-0.05, 1.05])
+    ax1.legend(loc="lower right")
+    ax1.set_title(f'Calibration plot')
+    
+    ax2.hist(probs_raw, range=(0, 1), bins=50, label='uncalibrated', lw=2, **hist_settings0)
+    ax2.hist(probs_cal, range=(0, 1), bins=50, label='calibrated', lw=2, **hist_settings0)
+    ax2.set_xlabel("Mean predicted value")
+    ax2.set_ylabel("Count") 
+    plt.savefig('plots/calibration.png')
+    plt.clf() 
+    logger.info("Saving calibration curves to /plots")
