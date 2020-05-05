@@ -27,8 +27,8 @@ def draw_unweighted_distributions(x0, x1, weights, varis, vlabels, binning, lege
     for id, column in enumerate(columns, 1):
         plt.figure(figsize=(5, 4))
         plt.yscale('log')
-        plt.hist(x0[:,column], bins = binning[id-1],weights=weights, label = legend[0], **hist_settings0)
-        plt.hist(x1[:,column], bins = binning[id-1],label = legend[1], **hist_settings1)
+        plt.hist(x0[:,column], bins = binning[id-1], weights=weights, label = legend[0], **hist_settings0)
+        plt.hist(x1[:,column], bins = binning[id-1], label = legend[1], **hist_settings1)
         plt.xlabel('%s'%(vlabels[id-1])) 
         plt.legend(frameon=False)
         axes = plt.gca()
@@ -43,8 +43,8 @@ def draw_weighted_distributions(x0, x1, weights, varis, vlabels, binning, label,
         plt.figure(figsize=(5, 4))
         plt.yscale('log')
         plt.hist(x0[:,column], bins = binning[id-1], label = legend[0], **hist_settings0)
-        plt.hist(x0[:,column], bins = binning[id-1],weights=weights, label = legend[0]+'*CARL', **hist_settings0)
-        plt.hist(x1[:,column], bins = binning[id-1],label = legend[1], **hist_settings1)
+        plt.hist(x0[:,column], bins = binning[id-1], weights=weights, label = legend[0]+'*CARL', **hist_settings0)
+        plt.hist(x1[:,column], bins = binning[id-1], label = legend[1], **hist_settings1)
         plt.xlabel('%s'%(vlabels[id-1])) 
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()
@@ -103,11 +103,9 @@ def draw_ROC(X0, X1, weights, label, legend):
     logger.info("Unweighted %s AUC is %.3f"%(label,roc_auc_t))
     logger.info("Saving ROC plots to /plots")
 
-def plot_calibration_curve(y, probs_raw, probs_cal):
-    #fig = plt.figure(1, figsize=(10, 10))
+def plot_calibration_curve(y, probs_raw, probs_cal, do):
     ax1 = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
     ax2 = plt.subplot2grid((3, 1), (2, 0))
-    
     ax1.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")
     
     frac_of_pos_raw, mean_pred_value_raw = calibration_curve(y, probs_raw, n_bins=50)
@@ -124,6 +122,6 @@ def plot_calibration_curve(y, probs_raw, probs_cal):
     ax2.hist(probs_cal, range=(0, 1), bins=50, label='calibrated', lw=2, **hist_settings0)
     ax2.set_xlabel("Mean predicted value")
     ax2.set_ylabel("Count") 
-    plt.savefig('plots/calibration.png')
+    plt.savefig('plots/'+do+'_calibration.png')
     plt.clf() 
     logger.info("Saving calibration curves to /plots")

@@ -29,8 +29,6 @@ class Loader():
         plot=False,
         do = 'sherpaVsMG5',
         randomize = False,
-        test_split=0.2,
-        validation_split=0.2,
         partition="train",
         n_processes=1,
     ):
@@ -44,9 +42,6 @@ class Loader():
             Filenames for the resulting samples. A prefix such as 'x' as well as the extension
             '.npy' will be added automatically. Default value:
             None.
-        test_split : float or None, optional
-            Fraction of events reserved for the evaluation sample (that will not be used for any training samples).
-            Default value: 0.2.
         n_processes : None or int, optional
             If None or larger than 1, multiprocessing will be used to parallelize the sampling. In this case,
             n_workers sets the number of jobs running in parallel, and None will use the number of CPUs. Default value:
@@ -88,7 +83,7 @@ class Loader():
             x1     = x1.iloc[iTruth1] #target
 
         # randomize training and test data (or not)
-        n_target = x0.values.shape[0]
+        n_target = x1.values.shape[0]
         if randomize:
             randomized = x0.values[np.random.choice(range(x0.values.shape[0]),2*n_target,replace=True)]
             X0  = randomized[:n_target,:]
@@ -104,7 +99,6 @@ class Loader():
         x = np.vstack([X0, X1])
         y = np.zeros(x.shape[0])
         y[X0.shape[0] :] = 1.0
-
         # y shape
         y = y.reshape((-1, 1))
 
@@ -151,9 +145,8 @@ class Loader():
             legend = ["MUR1", "MUR2"]
         
 
-        # load sample X0
+        # load samples
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
-        # load sample X1
         X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)
         # plot reweighted distributions      
         weights = weights / weights.sum() * len(X1)
@@ -163,35 +156,25 @@ class Loader():
 
     def load_calibration(
         self,
-        x0,
-        x1,
-        y,
-        w_raw = None,
-        w_cal = None,
+        y_true,
+        p1_raw = None,
+        p1_cal = None,
         label = None,
         do = 'sherpaVsMG5',
     ):
         """
         Parameters
         ----------
-        weights : ndarray
-            r_hat weights:
-            None.
+        y_true : ndarray
+            true targets
+        p1_raw : ndarray
+            uncalibrated probabilities of the positive class
+        p1_cal : ndarray
+            calibrated probabilities of the positive class
         Returns
         -------
         """
 
-        # load sample X0
-        X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
-        # load sample X1
-        X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)
-        y  = load_and_check(y, memmap_files_larger_than_gb=1.0)
-        # plot reweighted distributions      
-        print("weights before scaling",w_cal)
-        w_raw = w_raw / w_raw.sum() * len(X1)
-        w_cal = w_cal / w_cal.sum() * len(X1)
-        print("weights after scaling",w_cal)
-        #draw_weighted_distributions(X0, X1, weights, variables, vlabels, binning, label, legend) 
-        # plot ROC curves     
-        #draw_ROC(X0, X1, weights, label, legend)
-        plot_calibration_curve(y, w_raw, w_cal)                                                                                                                                                                                                                                                                   
+        # load samples
+        y_true  = load_and_check(y_true,  memmap_files_larger_than_gb=1.0)
+        plot_calibration_curve(y_true, p1_raw, p1_cal, do)                                                                                                                                                                                                                                                                   

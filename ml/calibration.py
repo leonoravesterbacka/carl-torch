@@ -80,8 +80,8 @@ class CalibratedClassifier():
         s_hat, _, _ = self.model.evaluate(X)
         p = self.predict_proba(X, s_hat)
         p[p == np.inf] = 1
-        p[p == 0] = 1        
-        return np.divide(p[:, 0], p[:, 1])
+        p[p == 0] = 1       
+        return p[:, 0], p[:, 1], np.divide(p[:, 0], p[:, 1])
 
 
     def predict_proba(self, X, s_hat):
