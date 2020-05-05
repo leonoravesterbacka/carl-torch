@@ -23,7 +23,6 @@ print("uncalibrated weight is ",1/r_hat)
 calib = CalibratedClassifier(carl)
 calib.fit(X = X,y = y)
 r = calib.predict(X ='data/'+do+'/x0_train.npy')
-r[r == np.inf] = 1
 w = 1/r
 print("calibrated weight r is ", w)
 loading.load_result(x0='data/'+do+'/x0_train.npy',     
