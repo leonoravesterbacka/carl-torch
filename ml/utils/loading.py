@@ -25,9 +25,10 @@ class Loader():
     def loading(
         self,
         folder=None,
-        filename=None,
         plot=False,
         do = 'sherpaVsMG5',
+        x0 = None,
+        x1 = None,
         randomize = False,
         partition="train",
         n_processes=1,
@@ -37,10 +38,6 @@ class Loader():
         ----------
         folder : str or None
             Path to the folder where the resulting samples should be saved (ndarrays in .npy format). Default value:
-            None.
-        filename : str or None
-            Filenames for the resulting samples. A prefix such as 'x' as well as the extension
-            '.npy' will be added automatically. Default value:
             None.
         n_processes : None or int, optional
             If None or larger than 1, multiprocessing will be used to parallelize the sampling. In this case,
@@ -64,23 +61,25 @@ class Loader():
         vlabels = ['V $\mathrm{p_{T}}$ [GeV]','Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\mathrm{p_{T}}$ [GeV]', '$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]', '    Leading lepton $\mathrm{p_{T}}$ [GeV]','V $\eta$','Leading jet $\eta$','Subleading jet $\eta$']
         binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),range(0, 2700, 200),range(0, 5000, 250),range(0, 600, 100),range(0, 1500, 100), etaV, etaJ, etaJ]
 
-        # load sample X0
+        # load samples
         if do == "sherpaVsMG5":
-            x0 = load(filename = '/eos/user/m/mvesterb/data/sherpa/one/Nominal.root', variables = variables)
-            x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/one/Nominal.root', variables = variables)
             legend = ["Sherpa","Madgraph"]
+            if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
+                x0 = load(filename = '/eos/user/m/mvesterb/data/sherpa/one/Nominal.root', variables = variables)
+                x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/one/Nominal.root', variables = variables)
         else: 
-            x0  = load(filename = '/eos/user/m/mvesterb/data/MUR1_MUF1_PDF261000.root', variables = variables)
-            x1  = load(filename = '/eos/user/m/mvesterb/data/MUR2_MUF1_PDF261000.root', variables = variables)
-            wx0 = load(filename = '/eos/user/m/mvesterb/data/MUR1_MUF1_PDF261000.root', variables = ['truthWeight'])
-            wx1 = load(filename = '/eos/user/m/mvesterb/data/MUR2_MUF1_PDF261000.root', variables = ['truthWeight'])
             legend = ["MUR1", "MUR2"]
-            pTruth0    = (wx0.truthWeight)/np.sum(wx0.truthWeight.astype(np.float))
-            pTruth1    = (wx1.truthWeight)/np.sum(wx1.truthWeight.astype(np.float))
-            iTruth0    = np.random.choice(np.arange(len(x0)),size=int(np.sum(wx0.truthWeight.astype(np.float))),p=pTruth0)
-            iTruth1    = np.random.choice(np.arange(len(x1)),size=int(np.sum(wx1.truthWeight.astype(np.float))),p=pTruth1)
-            x0     = x0.iloc[iTruth0] #original
-            x1     = x1.iloc[iTruth1] #target
+            if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
+                x0  = load(filename = '/eos/user/m/mvesterb/data/MUR1_MUF1_PDF261000.root', variables = variables)
+                x1  = load(filename = '/eos/user/m/mvesterb/data/MUR2_MUF1_PDF261000.root', variables = variables)
+                wx0 = load(filename = '/eos/user/m/mvesterb/data/MUR1_MUF1_PDF261000.root', variables = ['truthWeight'])
+                wx1 = load(filename = '/eos/user/m/mvesterb/data/MUR2_MUF1_PDF261000.root', variables = ['truthWeight'])
+                p0    = (wx0.truthWeight)/np.sum(wx0.truthWeight.astype(np.float))
+                p1    = (wx1.truthWeight)/np.sum(wx1.truthWeight.astype(np.float))
+                i0    = np.random.choice(np.arange(len(x0)),size=int(np.sum(wx0.truthWeight.astype(np.float))),p=p0)
+                i1    = np.random.choice(np.arange(len(x1)),size=int(np.sum(wx1.truthWeight.astype(np.float))),p=p1)
+                x0     = x0.iloc[i0] #original
+                x1     = x1.iloc[i1] #target
 
         # randomize training and test data (or not)
         n_target = x1.values.shape[0]
@@ -103,12 +102,12 @@ class Loader():
         y = y.reshape((-1, 1))
 
         # save data
-        if filename is not None and folder is not None:
-            np.save(folder + do + "/x0_test.npy", X0_test)
-            np.save(folder + do + "/x0_" + filename + ".npy", X0)
-            np.save(folder + do + "/x1_" + filename + ".npy", X1)
-            np.save(folder + do + "/x_" + filename + ".npy", x)
-            np.save(folder + do + "/y_" + filename + ".npy", y)
+        if folder is not None:
+            np.save(folder + do + "/x0_test.npy",  X0_test)
+            np.save(folder + do + "/x0_train.npy", X0)
+            np.save(folder + do + "/x1_train.npy", X1)
+            np.save(folder + do + "/x_train.npy", x)
+            np.save(folder + do + "/y_train.npy", y)
 
         if plot:
             draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), variables, vlabels, binning, legend) 
@@ -147,11 +146,11 @@ class Loader():
         # load samples
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
         X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)
-        # plot reweighted distributions      
         weights = weights / weights.sum() * len(X1)
-        draw_weighted_distributions(X0, X1, weights, variables, vlabels, binning, label, legend) 
         # plot ROC curves     
         draw_ROC(X0, X1, weights, label, legend)
+        # plot reweighted distributions      
+        draw_weighted_distributions(X0, X1, weights, variables, vlabels, binning, label, legend) 
 
     def load_calibration(
         self,

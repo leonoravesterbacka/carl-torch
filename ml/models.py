@@ -57,3 +57,5 @@ class RatioModel(nn.Module):
             self.layers[i] = layer.to(*args, **kwargs)
 
         return self
+#my_module = RatioModel(10,10)
+#sm = torch.jit.script(my_module)

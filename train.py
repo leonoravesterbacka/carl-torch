@@ -11,7 +11,6 @@ do = opts.samples
 loading = Loader()
 x, y = loading.loading(
     folder='./data/',
-    filename='train',
     plot=True,
     do = do,
 )
