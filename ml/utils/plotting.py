@@ -52,6 +52,7 @@ def draw_weighted_distributions(x0, x1, weights, varis, vlabels, binning, label,
         create_missing_folders(["plots"])                                                              
         plt.savefig("plots/weighted_%s_%sVs%s_%s.png"%(varis[id-1], legend[0],legend[1],label)) 
         plt.clf()
+        plt.close()
 
 def weight_data(x0,x1,weights, max_weight=10000.):
     x1_len = x1.shape[0]
@@ -108,8 +109,8 @@ def plot_calibration_curve(y, probs_raw, probs_cal, do):
     ax2 = plt.subplot2grid((3, 1), (2, 0))
     ax1.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")
     
-    frac_of_pos_raw, mean_pred_value_raw = calibration_curve(y, probs_raw, n_bins=50)
-    frac_of_pos_cal, mean_pred_value_cal = calibration_curve(y, probs_cal, n_bins=50)
+    frac_of_pos_raw, mean_pred_value_raw = calibration_curve(y, probs_raw, n_bins=10)
+    frac_of_pos_cal, mean_pred_value_cal = calibration_curve(y, probs_cal, n_bins=10)
 
     ax1.plot(mean_pred_value_raw, frac_of_pos_raw, "s-", label='uncalibrated', **hist_settings0)
     ax1.plot(mean_pred_value_cal, frac_of_pos_cal, "s-", label='calibrated', **hist_settings0)
@@ -118,8 +119,8 @@ def plot_calibration_curve(y, probs_raw, probs_cal, do):
     ax1.legend(loc="lower right")
     ax1.set_title(f'Calibration plot')
     
-    ax2.hist(probs_raw, range=(0, 1), bins=50, label='uncalibrated', lw=2, **hist_settings0)
-    ax2.hist(probs_cal, range=(0, 1), bins=50, label='calibrated', lw=2, **hist_settings0)
+    ax2.hist(probs_raw, range=(0, 1), bins=10, label='uncalibrated', lw=2, **hist_settings0)
+    ax2.hist(probs_cal, range=(0, 1), bins=10, label='calibrated', lw=2, **hist_settings0)
     ax2.set_xlabel("Mean predicted value")
     ax2.set_ylabel("Count") 
     plt.savefig('plots/calibration_'+do+'.png')
