@@ -41,6 +41,7 @@ The code is based on three scripts:
 - [train.py](train.py) trains neural networks on loaded data.
 - [evaluate.py](evaluate.py) evaluates the neural network by calculating the weights and making validation and ROC plots.
 - [calibrate.py](calibrate.py) calibrated network predictions based on histograms of the network output.
+
 Or run it all in the [Reweighter_SherpaVsMG5.ipynb](Reweighter_SherpaVsMG5.ipynb) notebook. 
 
 This toolbox is adapted from  [MadMiner](http://diana-hep.org/madminer) and [CARL](http://diana-hep.org/carl). 
