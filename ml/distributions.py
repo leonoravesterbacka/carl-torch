@@ -46,7 +46,6 @@ class Histogram():
             # For the last bin, the upper is inclusive
             indices[X[:, j] == self.edges_[j][-2]] -= 1
             all_indices.append(indices)
-        print("all_indices",all_indices)
         return self.histogram_[tuple(all_indices)]
 
     def nll(self, X, **kwargs):
@@ -79,9 +78,6 @@ class Histogram():
 
         else:
             bins = self.bins
-            #h = self._fill_histogram(X)  
-            print("bins", bins)  
-            print("self.range", self.range)  
             h, e = np.histogramdd(X, bins=bins, range=self.range,
                                   weights=sample_weight, normed=True)
 

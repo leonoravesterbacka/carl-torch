@@ -22,10 +22,12 @@ logger = logging.getLogger(__name__)
 hist_settings0 = {'alpha': 0.3}
 hist_settings1 = {'histtype':'step', 'color':'black', 'linewidth':1, 'linestyle':'--'}
 
-def draw_unweighted_distributions(x0, x1, weights, varis, vlabels, binning, legend):
+def draw_unweighted_distributions(x0, x1, weights, varis, vlabels, binning, legend, save = False):
+    plt.figure(figsize=(20, 12))
     columns = range(len(varis))
     for id, column in enumerate(columns, 1):
-        plt.figure(figsize=(5, 4))
+        if save: plt.figure(figsize=(4, 3)) 
+        else: plt.subplot(3,4, id)
         plt.yscale('log')
         plt.hist(x0[:,column], bins = binning[id-1], weights=weights, label = legend[0], **hist_settings0)
         plt.hist(x1[:,column], bins = binning[id-1], label = legend[1], **hist_settings1)
@@ -33,14 +35,18 @@ def draw_unweighted_distributions(x0, x1, weights, varis, vlabels, binning, lege
         plt.legend(frameon=False)
         axes = plt.gca()
         axes.set_ylim([1,10000000])                  
-        create_missing_folders(["plots"])                                                              
-        plt.savefig("plots/unweighted_%s_%sVs%s.png"%(varis[id-1], legend[0],legend[1]))                                                                
-        plt.clf()
+        if save:
+            create_missing_folders(["plots"])                                                              
+            plt.savefig("plots/unweighted_%s_%sVs%s.png"%(varis[id-1], legend[0],legend[1]))                                                                
+            plt.clf()
+            plt.close()
 
-def draw_weighted_distributions(x0, x1, weights, varis, vlabels, binning, label, legend):
+def draw_weighted_distributions(x0, x1, weights, varis, vlabels, binning, label, legend, save = False):
+    plt.figure(figsize=(20, 12))
     columns = range(len(varis))
     for id, column in enumerate(columns, 1):
-        plt.figure(figsize=(5, 4))
+        if save: plt.figure(figsize=(4, 3)) 
+        else: plt.subplot(3,4, id)
         plt.yscale('log')
         plt.hist(x0[:,column], bins = binning[id-1], label = legend[0], **hist_settings0)
         plt.hist(x0[:,column], bins = binning[id-1], weights=weights, label = legend[0]+'*CARL', **hist_settings0)
@@ -49,10 +55,11 @@ def draw_weighted_distributions(x0, x1, weights, varis, vlabels, binning, label,
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()
         axes.set_ylim([1,10000000])                  
-        create_missing_folders(["plots"])                                                              
-        plt.savefig("plots/weighted_%s_%sVs%s_%s.png"%(varis[id-1], legend[0],legend[1],label)) 
-        plt.clf()
-        plt.close()
+        if save:
+            create_missing_folders(["plots"])                                                              
+            plt.savefig("plots/weighted_%s_%sVs%s_%s.png"%(varis[id-1], legend[0],legend[1],label)) 
+            plt.clf()
+            plt.close()
 
 def weight_data(x0,x1,weights, max_weight=10000.):
     x1_len = x1.shape[0]
@@ -84,7 +91,7 @@ def resampled_discriminator_and_roc(original, target, weights):
     roc_auc = auc(fpr, tpr)
     return fpr,tpr,roc_auc
  
-def draw_ROC(X0, X1, weights, label, legend):
+def draw_ROC(X0, X1, weights, label, legend, save = False):
     no_weights_scaled = np.ones(X0.shape[0])/np.ones(X0.shape[0]).sum() * len(X1)
     fpr_t,tpr_t,roc_auc_t = resampled_discriminator_and_roc(X0, X1, no_weights_scaled)
     plt.plot(fpr_t, tpr_t, label=r"no weight, AUC=%.3f" % roc_auc_t)
@@ -98,19 +105,20 @@ def draw_ROC(X0, X1, weights, label, legend):
     plt.ylabel('True Positive Rate')
     plt.legend(loc="lower right", title = label)
     plt.tight_layout()
-    plt.savefig('plots/roc_%sVs%s_%s.png'%(legend[0], legend[1],label)) 
-    plt.clf()    
+    if save:
+        plt.savefig('plots/roc_%sVs%s_%s.png'%(legend[0], legend[1],label)) 
+        plt.clf()    
     logger.info("CARL weighted %s AUC is %.3f"%(label,roc_auc_tC))
     logger.info("Unweighted %s AUC is %.3f"%(label,roc_auc_t))
     logger.info("Saving ROC plots to /plots")
 
-def plot_calibration_curve(y, probs_raw, probs_cal, do):
+def plot_calibration_curve(y, probs_raw, probs_cal, do, save = False):
     ax1 = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
     ax2 = plt.subplot2grid((3, 1), (2, 0))
     ax1.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")
     
-    frac_of_pos_raw, mean_pred_value_raw = calibration_curve(y, probs_raw, n_bins=10)
-    frac_of_pos_cal, mean_pred_value_cal = calibration_curve(y, probs_cal, n_bins=10)
+    frac_of_pos_raw, mean_pred_value_raw = calibration_curve(y, probs_raw, n_bins=50)
+    frac_of_pos_cal, mean_pred_value_cal = calibration_curve(y, probs_cal, n_bins=50)
 
     ax1.plot(mean_pred_value_raw, frac_of_pos_raw, "s-", label='uncalibrated', **hist_settings0)
     ax1.plot(mean_pred_value_cal, frac_of_pos_cal, "s-", label='calibrated', **hist_settings0)
@@ -119,10 +127,11 @@ def plot_calibration_curve(y, probs_raw, probs_cal, do):
     ax1.legend(loc="lower right")
     ax1.set_title(f'Calibration plot')
     
-    ax2.hist(probs_raw, range=(0, 1), bins=10, label='uncalibrated', lw=2, **hist_settings0)
-    ax2.hist(probs_cal, range=(0, 1), bins=10, label='calibrated', lw=2, **hist_settings0)
+    ax2.hist(probs_raw, range=(0, 1), bins=50, label='uncalibrated', lw=2, **hist_settings0)
+    ax2.hist(probs_cal, range=(0, 1), bins=50, label='calibrated', lw=2, **hist_settings0)
     ax2.set_xlabel("Mean predicted value")
     ax2.set_ylabel("Count") 
-    plt.savefig('plots/calibration_'+do+'.png')
-    plt.clf() 
+    if save:
+        plt.savefig('plots/calibration_'+do+'.png')
+        plt.clf() 
     logger.info("Saving calibration curves to /plots")
