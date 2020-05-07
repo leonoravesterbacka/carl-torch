@@ -23,7 +23,7 @@ hist_settings0 = {'alpha': 0.3}
 hist_settings1 = {'histtype':'step', 'color':'black', 'linewidth':1, 'linestyle':'--'}
 
 def draw_unweighted_distributions(x0, x1, weights, varis, vlabels, binning, legend, save = False):
-    plt.figure(figsize=(20, 12))
+    plt.figure(figsize=(14, 10))
     columns = range(len(varis))
     for id, column in enumerate(columns, 1):
         if save: plt.figure(figsize=(4, 3)) 
@@ -42,7 +42,7 @@ def draw_unweighted_distributions(x0, x1, weights, varis, vlabels, binning, lege
             plt.close()
 
 def draw_weighted_distributions(x0, x1, weights, varis, vlabels, binning, label, legend, save = False):
-    plt.figure(figsize=(20, 12))
+    plt.figure(figsize=(14, 10))
     columns = range(len(varis))
     for id, column in enumerate(columns, 1):
         if save: plt.figure(figsize=(4, 3)) 
@@ -92,6 +92,7 @@ def resampled_discriminator_and_roc(original, target, weights):
     return fpr,tpr,roc_auc
  
 def draw_ROC(X0, X1, weights, label, legend, save = False):
+    plt.figure(figsize=(4, 3))
     no_weights_scaled = np.ones(X0.shape[0])/np.ones(X0.shape[0]).sum() * len(X1)
     fpr_t,tpr_t,roc_auc_t = resampled_discriminator_and_roc(X0, X1, no_weights_scaled)
     plt.plot(fpr_t, tpr_t, label=r"no weight, AUC=%.3f" % roc_auc_t)
