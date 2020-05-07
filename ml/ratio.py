@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import logging
 import numpy as np
+import torch
 from collections import OrderedDict
 
 from .evaluate import evaluate_ratio_model
@@ -249,7 +250,6 @@ class RatioEstimator(Estimator):
             activation=self.activation,
             dropout_prob=self.dropout_prob,
         )
-
     @staticmethod
     def _package_training_data(method, x,  y):
         data = OrderedDict()

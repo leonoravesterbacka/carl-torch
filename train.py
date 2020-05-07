@@ -13,10 +13,11 @@ x, y = loading.loading(
     folder='./data/',
     plot=True,
     do = do,
+    save = True,
 )
 estimator = RatioEstimator(
     n_hidden=(10,10),
-    activation="sigmoid"
+    activation="relu"
 )
 estimator.train(
     method='carl',

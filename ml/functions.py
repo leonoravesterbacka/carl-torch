@@ -26,7 +26,7 @@ def get_activation(activation):
     elif activation == "tanh":
         return torch.tanh
     elif activation == "sigmoid":
-        return torch.relu
+        return torch.sigmoid
     elif activation == "log_sigmoid":
         return F.logsigmoid
     else:
