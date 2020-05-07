@@ -26,7 +26,7 @@ def draw_unweighted_distributions(x0, x1, weights, varis, vlabels, binning, lege
     plt.figure(figsize=(14, 10))
     columns = range(len(varis))
     for id, column in enumerate(columns, 1):
-        if save: plt.figure(figsize=(4, 3)) 
+        if save: plt.figure(figsize=(5, 4)) 
         else: plt.subplot(3,4, id)
         plt.yscale('log')
         plt.hist(x0[:,column], bins = binning[id-1], weights=weights, label = legend[0], **hist_settings0)
@@ -45,7 +45,7 @@ def draw_weighted_distributions(x0, x1, weights, varis, vlabels, binning, label,
     plt.figure(figsize=(14, 10))
     columns = range(len(varis))
     for id, column in enumerate(columns, 1):
-        if save: plt.figure(figsize=(4, 3)) 
+        if save: plt.figure(figsize=(5, 4)) 
         else: plt.subplot(3,4, id)
         plt.yscale('log')
         plt.hist(x0[:,column], bins = binning[id-1], label = legend[0], **hist_settings0)

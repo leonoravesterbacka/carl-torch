@@ -26,6 +26,7 @@ loading.load_calibration(y_true = y,
                          p1_cal = p1, 
                          label = 'calibrated',
                          do = do,
+                         save = True,
 )
 
 evaluate = ['train', 'test']
@@ -35,7 +36,8 @@ for i in evaluate:
     loading.load_result(x0='data/'+do+'/x0_'+i+'.npy',
                         x1='data/'+do+'/x1_train.npy',
                         weights=w, 
-                        label = i+'_calibrated',
+                        label = i+'_calib',
                         do = do,
+                        save = True,
     )
 

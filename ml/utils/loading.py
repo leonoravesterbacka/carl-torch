@@ -32,6 +32,7 @@ class Loader():
         randomize = False,
         partition="train",
         n_processes=1,
+        save = False,
     ):
         """
         Parameters
@@ -57,19 +58,19 @@ class Loader():
         etaV = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
 
-        variables = ['VpT','Njets','j1pT', 'j2pT', 'HT','ptmiss', 'l1pT','Veta']
+        variables = ['VpT','Njets','j1pT', 'j2pT', 'HT','ptmiss', 'l1pT','Veta', 'j1eta', 'j2eta']
         vlabels = ['V $\mathrm{p_{T}}$ [GeV]','Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\mathrm{p_{T}}$ [GeV]', '$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]', '    Leading lepton $\mathrm{p_{T}}$ [GeV]','V $\eta$','Leading jet $\eta$','Subleading jet $\eta$']
-        binning = [range(0, 500, 50), range(0, 10, 1), range(0, 1000, 50),range(0, 1000, 50),range(0, 2000, 100),range(0, 400, 50),range(0, 500, 50), etaV, etaJ, etaJ]
-        #binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),range(0, 2700, 200),range(0, 5000, 250),range(0, 600, 100),range(0, 1500, 100), etaV, etaJ, etaJ]
 
         # load samples
         if do == "sherpaVsMG5":
-            legend = ["Sherpa","Madgraph"]
+            legend = ["Sherpa","MG5"]
+            binning = [range(0, 200, 20), range(0, 10, 1), range(0, 200, 20),range(0, 200, 20),range(0, 500, 50),range(0, 100, 10),range(0, 200, 20), etaV, etaJ, etaJ]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0 = load(filename = '/eos/user/m/mvesterb/data/sherpa/one/Nominal.root', variables = variables)
                 x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/one/Nominal.root', variables = variables)
         else: 
             legend = ["MUR1", "MUR2"]
+            binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),range(0, 2700, 200),range(0, 5000, 250),range(0, 600, 100),range(0, 1500, 100), etaV, etaJ, etaJ]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0  = load(filename = '/eos/user/m/mvesterb/data/MUR1_MUF1_PDF261000.root', variables = variables)
                 x1  = load(filename = '/eos/user/m/mvesterb/data/MUR2_MUF1_PDF261000.root', variables = variables)
@@ -111,7 +112,7 @@ class Loader():
             np.save(folder + do + "/y_train.npy", y)
 
         if plot:
-            draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), variables, vlabels, binning, legend) 
+            draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), variables, vlabels, binning, legend, save) 
             print("saving plots")
             
         return x, y                                                                                                                                                                                                                                      
@@ -123,6 +124,7 @@ class Loader():
         weights = None,
         label = None,
         do = 'sherpaVsMG5',
+        save = False,
     ):
         """
         Parameters
@@ -135,14 +137,14 @@ class Loader():
         etaV = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
 
-        variables = ['VpT','Njets','j1pT', 'j2pT', 'HT','ptmiss', 'l1pT','Veta']
+        variables = ['VpT','Njets','j1pT', 'j2pT', 'HT','ptmiss', 'l1pT','Veta', 'j1eta', 'j2eta']
         vlabels = ['V $\mathrm{p_{T}}$ [GeV]','Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\mathrm{p_{T}}$ [GeV]', '$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading lepton $\mathrm{p_{T}}$ [GeV]','V $\eta$','Leading jet $\eta$','Subleading jet $\eta$']
-        #binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),range(0, 2700, 200),range(0, 5000, 250),range(0, 600, 100),range(0, 1500, 100), etaV, etaJ, etaJ]
-        binning = [range(0, 500, 50), range(0, 10, 1), range(0, 1000, 50),range(0, 1000, 50),range(0, 2000, 100),range(0, 400, 50),range(0, 500, 50), etaV, etaJ, etaJ]
         if do == "sherpaVsMG5":
-            legend = ["Sherpa","Madgraph"]
+            legend = ["Sherpa","MG5"]
+            binning = [range(0, 200, 20), range(0, 10, 1), range(0, 200, 20),range(0, 200, 20),range(0, 500, 50),range(0, 100, 10),range(0, 200, 20), etaV, etaJ, etaJ]
         else:    
             legend = ["MUR1", "MUR2"]
+            binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),range(0, 2700, 200),range(0, 5000, 250),range(0, 600, 100),range(0, 1500, 100), etaV, etaJ, etaJ]
         
 
         # load samples
@@ -150,9 +152,9 @@ class Loader():
         X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)
         weights = weights / weights.sum() * len(X1)
         # plot ROC curves     
-        draw_ROC(X0, X1, weights, label, legend)
+        draw_ROC(X0, X1, weights, label, legend, save)
         # plot reweighted distributions      
-        draw_weighted_distributions(X0, X1, weights, variables, vlabels, binning, label, legend) 
+        draw_weighted_distributions(X0, X1, weights, variables, vlabels, binning, label, legend, save) 
 
     def load_calibration(
         self,
@@ -161,6 +163,7 @@ class Loader():
         p1_cal = None,
         label = None,
         do = 'sherpaVsMG5',
+        save = False
     ):
         """
         Parameters
@@ -177,4 +180,4 @@ class Loader():
 
         # load samples
         y_true  = load_and_check(y_true,  memmap_files_larger_than_gb=1.0)
-        plot_calibration_curve(y_true, p1_raw, p1_cal, do)                                                                                                                                                                                                                                                                   
+        plot_calibration_curve(y_true, p1_raw, p1_cal, do, save)                                                                                                                                                                                                                                                                   

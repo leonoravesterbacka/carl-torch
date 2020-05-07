@@ -19,4 +19,5 @@ for i in evaluate:
                         weights=w, 
                         label = i,
                         do = do,
+                        save = True,
     )   
