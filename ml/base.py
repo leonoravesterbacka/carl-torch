@@ -51,7 +51,7 @@ class Estimator(object):
     def evaluate(self, *args, **kwargs):
         raise NotImplementedError
 
-    def save(self, filename, save_model=False):
+    def save(self, filename, x, save_model=False, export_model=False):
 
         """
         Saves the trained model to four files: a JSON file with the settings, a pickled pyTorch state dict
@@ -63,6 +63,8 @@ class Estimator(object):
         save_model : bool, optional
             If True, the whole model is saved in addition to the state dict. This is not necessary for loading it
             again with Estimator.load(), but can be useful for debugging, for instance to plot the computational graph.
+        export_model : bool, optional
+            If True, the whole model is exported to .onnx format to be loaded within a C++ envirnoment. 
         Returns
         -------
             None
@@ -80,10 +82,8 @@ class Estimator(object):
         logger.debug("Saving settings to %s_settings.json", filename)
 
         settings = self._wrap_settings()
-
         with open(filename + "_settings.json", "w") as f:
             json.dump(settings, f)
-
         # Save scaling
         if self.x_scaling_stds is not None and self.x_scaling_means is not None:
             logger.debug("Saving input scaling information to %s_x_means.npy and %s_x_stds.npy", filename, filename)
@@ -93,11 +93,17 @@ class Estimator(object):
         # Save state dict
         logger.debug("Saving state dictionary to %s_state_dict.pt", filename)
         torch.save(self.model.state_dict(), filename + "_state_dict.pt")
-
+        
         # Save model
         if save_model:
             logger.debug("Saving model to %s_model.pt", filename)
             torch.save(self.model, filename + "_model.pt")
+        
+        if export_model:
+            x = load_and_check(x)
+            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+            dummy_input = torch.from_numpy(x[0].reshape(1, -1)).float().to(device)
+            torch.onnx.export(self.model, dummy_input,filename+".onnx")
 
     def load(self, filename):
 

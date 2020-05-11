@@ -22,9 +22,9 @@ estimator = RatioEstimator(
 estimator.train(
     method='carl',
     batch_size = 128,
-    n_epochs = 50,
+    n_epochs = 10,
     x='data/'+do+'/x_train.npy',
     y='data/'+do+'/y_train.npy',
     scale_inputs = True,
 )
-estimator.save('models/'+do+'_carl')
+estimator.save('models/'+do+'_carl', x='data/'+do+'/x_train.npy', export_model = True)
