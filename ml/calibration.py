@@ -3,7 +3,6 @@ import numpy as np
 import json
 import os
 
-from sklearn.utils import check_X_y
 from sklearn.utils import column_or_1d
 from sklearn.preprocessing import LabelEncoder
 
@@ -46,14 +45,13 @@ class CalibratedClassifier():
         X = load_and_check(X)
         y = load_and_check(y)
         y = column_or_1d(y)
-
-        X, y = check_X_y(X, y)
         label_encoder = LabelEncoder()
+        print("y before", y)
         y = label_encoder.fit_transform(y).astype(np.float)
+        print("y after", y)
 
         if len(label_encoder.classes_) != 2:
             raise ValueError
-
         self.classes_ = label_encoder.classes_
 
         # Calibrator
