@@ -178,7 +178,6 @@ class RatioEstimator(Estimator):
         if self.model is None:
             logger.info("Creating model")
             self._create_model()
-
         # Losses
         loss_functions, loss_labels, loss_weights = get_loss(method + "2", alpha)
         # Optimizer
