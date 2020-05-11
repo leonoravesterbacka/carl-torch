@@ -46,9 +46,7 @@ class CalibratedClassifier():
         y = load_and_check(y)
         y = column_or_1d(y)
         label_encoder = LabelEncoder()
-        print("y before", y)
         y = label_encoder.fit_transform(y).astype(np.float)
-        print("y after", y)
 
         if len(label_encoder.classes_) != 2:
             raise ValueError
