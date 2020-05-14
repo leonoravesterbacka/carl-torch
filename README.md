@@ -37,6 +37,11 @@ Once satisfied, `carl-torch` can be installed from source using the following:
 ```
 git clone https://github.com/leonoravesterbacka/carl-torch.git
 ```
+and run
+```
+pip install -e .
+```
+
 The code is based on three scripts:
 - [train.py](train.py) trains neural networks on loaded data.
 - [evaluate.py](evaluate.py) evaluates the neural network by calculating the weights and making validation and ROC plots.
@@ -45,3 +50,5 @@ The code is based on three scripts:
 Or run it all in the [Reweighter_SherpaVsMG5.ipynb](Reweighter_SherpaVsMG5.ipynb) notebook. 
 
 This toolbox is adapted from  [MadMiner](http://diana-hep.org/madminer) and [CARL](http://diana-hep.org/carl). 
+The [setup.py](setup.py) is adapted from
+[https://github.com/kennethreitz/setup.py](https://github.com/kennethreitz/setup.py).
