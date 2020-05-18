@@ -56,6 +56,7 @@ class Estimator(object):
         """
         Saves the trained model to four files: a JSON file with the settings, a pickled pyTorch state dict
         file, and numpy files for the mean and variance of the inputs (used for input scaling).
+        Also exports model to onnx if export_model is set to True. 
         Parameters
         ----------
         filename : str
@@ -99,6 +100,7 @@ class Estimator(object):
             logger.debug("Saving model to %s_model.pt", filename)
             torch.save(self.model, filename + "_model.pt")
         
+        # Export model to onnx
         if export_model:
             x = load_and_check(x)
             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
