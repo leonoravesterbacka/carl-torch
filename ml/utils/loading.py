@@ -30,8 +30,6 @@ class Loader():
         x0 = None,
         x1 = None,
         randomize = False,
-        partition="train",
-        n_processes=1,
         save = False,
     ):
         """
@@ -40,10 +38,21 @@ class Loader():
         folder : str or None
             Path to the folder where the resulting samples should be saved (ndarrays in .npy format). Default value:
             None.
-        n_processes : None or int, optional
-            If None or larger than 1, multiprocessing will be used to parallelize the sampling. In this case,
-            n_workers sets the number of jobs running in parallel, and None will use the number of CPUs. Default value:
-            1.
+        plot : bool, optional
+            make validation plots
+        do : str
+            Decide what samples to use. Can either be Sherpa Vs Madgraph ('sherpaVsMG5'), Renormalization scale up vs down ('mur') or qsf scale up vs down ('qsf') 
+            Default value: 'sherpaVsMG5'
+        x0 : dataframe of none
+            Either pass a dataframe as in notebook, or None to load sample according to do option. 
+        x1 : dataframe of none
+            Either pass a dataframe as in notebook, or None to load sample according to do option. 
+        randomize : bool, optional
+            Randomize training sample. Default value: 
+            False
+        save : bool, optional
+            Save training ans test samples. Default value:
+            False
         Returns
         -------
         x : ndarray
@@ -68,12 +77,13 @@ class Loader():
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0 = load(filename = '/eos/user/m/mvesterb/data/sherpa/one/Nominal.root', variables = variables)
                 x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/one/Nominal.root', variables = variables)
-        else: 
+        elif do == "mur": 
             legend = ["MUR1", "MUR2"]
             binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),range(0, 2700, 200),range(0, 5000, 250),range(0, 600, 100),range(0, 1500, 100), etaV, etaJ, etaJ]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0  = load(filename = '/eos/user/m/mvesterb/data/MUR1_MUF1_PDF261000.root', variables = variables)
                 x1  = load(filename = '/eos/user/m/mvesterb/data/MUR2_MUF1_PDF261000.root', variables = variables)
+                #for mur1 vs MUR2, resampling accoring to the generator (truth) weight is required
                 wx0 = load(filename = '/eos/user/m/mvesterb/data/MUR1_MUF1_PDF261000.root', variables = ['truthWeight'])
                 wx1 = load(filename = '/eos/user/m/mvesterb/data/MUR2_MUF1_PDF261000.root', variables = ['truthWeight'])
                 p0    = (wx0.truthWeight)/np.sum(wx0.truthWeight.astype(np.float))
@@ -82,7 +92,12 @@ class Loader():
                 i1    = np.random.choice(np.arange(len(x1)),size=int(np.sum(wx1.truthWeight.astype(np.float))),p=p1)
                 x0     = x0.iloc[i0] #original
                 x1     = x1.iloc[i1] #target
-
+        elif do == "qsf":
+            legend = ["qsf up", "qsf down"]
+            binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),range(0, 2700, 200),range(0, 5000, 250),range(0, 600, 100),range(0, 1500, 100), etaV, etaJ, etaJ]
+            if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
+                x0 = load(filename = '/eos/user/m/mvesterb/data/qsfup/Nominal.root', variables = variables)
+                x1 = load(filename = '/eos/user/m/mvesterb/data/qsfdown/Nominal.root', variables = variables)
         # randomize training and test data (or not)
         n_target = x1.values.shape[0]
         if randomize:
