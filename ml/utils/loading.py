@@ -93,8 +93,11 @@ class Loader():
                 x0     = x0.iloc[i0] #original
                 x1     = x1.iloc[i1] #target
         elif do == "qsf":
-            legend = ["qsf up", "qsf down"]
-            binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),range(0, 2700, 200),range(0, 5000, 250),range(0, 600, 100),range(0, 1500, 100), etaV, etaJ, etaJ]
+            legend = ["qsfUp", "qsfDown"]
+            variables = ['Njets','Nbjets', 'j1pT', 'j2pT', 'HT','ptmiss', 'l1pT','l1eta', 'j1eta', 'j2eta']
+            vlabels = ['Number of jets','Number of b-jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\mathrm{p_{T}}$ [GeV]', '$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]', '        Leading lepton $\mathrm{p_{T}}$ [GeV]','Leading lepton $\eta$','Leading jet $\eta$','Subleading jet $\eta$']
+
+            binning = [range(0, 15, 1), range(0, 8, 1),range(0, 2750, 250),range(0, 2750, 250),range(0, 4500, 300),range(0, 2000, 200),range(0, 2000, 200), etaJ, etaJ, etaJ]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0 = load(filename = '/eos/user/m/mvesterb/data/qsfup/Nominal.root', variables = variables)
                 x1 = load(filename = '/eos/user/m/mvesterb/data/qsfdown/Nominal.root', variables = variables)
@@ -157,9 +160,14 @@ class Loader():
         if do == "sherpaVsMG5":
             legend = ["Sherpa","MG5"]
             binning = [range(0, 200, 20), range(0, 10, 1), range(0, 200, 20),range(0, 200, 20),range(0, 500, 50),range(0, 100, 10),range(0, 200, 20), etaV, etaJ, etaJ]
-        else:    
+        elif do == "mur": 
             legend = ["MUR1", "MUR2"]
             binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),range(0, 2700, 200),range(0, 5000, 250),range(0, 600, 100),range(0, 1500, 100), etaV, etaJ, etaJ]
+        elif do == "qsf":
+            vlabels = ['Number of jets','Number of b-jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\mathrm{p_{T}}$ [GeV]', '$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]', '        Leading lepton $\mathrm{p_{T}}$ [GeV]','Leading lepton $\eta$','Leading jet $\eta$','Subleading jet $\eta$']
+            variables = ['Njets','Nbjets', 'j1pT', 'j2pT', 'HT','ptmiss', 'l1pT','l1eta', 'j1eta', 'j2eta']
+            legend = ["qsfUp", "qsfDown"]
+            binning = [range(0, 15, 1), range(0, 8, 1),range(0, 2750, 250),range(0, 2750, 250),range(0, 4500, 300),range(0, 2000, 200),range(0, 2000, 200), etaJ, etaJ, etaJ]
         
 
         # load samples
