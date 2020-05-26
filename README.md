@@ -17,6 +17,7 @@ The obvious drawback of this approach is that one or two dimensions is not nearl
 Therefore, a multivariate reweighting technique is proposed, based on density ratio estimation, which can take into account the full space instead of just two dimensions. 
 The technique is based on approximating a density ratio `r=p1(x)/p0(x)` as `s(x) / 1 - s(x)`, where `s` is a classifier trained to distinguish samples `x ~ p0` from samples `x ~ p1`, and where `s(x)` is the classifier approximate of the probability `p0(x) / (p0(x) + p1(x))`. 
 The classification is done using a PyTorch DNN, with Adam optimizer and sigmoid activation function, and the calibration of the classifier is done using histogram or isotonic regression. Other optimizers and activation functions are available.  
+
 The performance of the weights, i.e. how well the reweighted original sample matches the target one, is assessed by training a classifier to discriminate the original distribution with weights applied from a target distribution. 
 If the classifier is able to discriminate between the two samples (area under the curve, AUC > 0.5), the weights are not doing a good job, whereas if the classifier is unable to discriminate the target sample from the weighted original sample, the weights are doing a good job (AUC close to 0.5).  
 The trained model now can be exported to onnx to be able to be loaded within a production environment. 
