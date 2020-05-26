@@ -7,8 +7,8 @@ CARL-TORCH
 `carl-torch` is based on carl (https://github.com/diana-hep/carl/) originally developed for likelihood ratio estimation, but repurposed to be used as a multivariate reweighting technique to be used in the context of particle physics research. 
 ## Background
 The principle is to reweight one simulation to look like another. 
-In the context of particle physics, where a lot of the research is done using simulated data (Monte-Carlos samples), optimizing the use of the generated samples is the name of the game, as computing resources are finite. 
-Searches for new physics and measurements of known Standard Model processes are relying on Monte-Carlo samples generated with multiple theoretical settings, in order to evaluate the effect of these systematic uncertainties. 
+In the context of particle physics, where a lot of the research is done using simulated data (Monte-Carlos samples), optimizing the use of the generated samples is the name of the game since computing resources are finite. 
+Searches for new physics and measurements of known Standard Model processes are relying on Monte-Carlo samples generated with multiple theoretical settings in order to evaluate the effect of these systematic uncertainties. 
 As it is computationally impractical to generate samples for all theoretical settings with full statistical power, smaller samples are generated for each variation, and a weight is derived to reweight a nominal sample of full statistical power to look like a sample generated with a variational setting. 
 
 A naive approach to reweighting a sample `p0(x)` to look like another `p1(x)` is by calculating a weight defined as `r=p1(x)/p0(x)` parameterized in one or two dimensions, i.e. as a function of one or two physical variables, and apply this weight to the nominal sample `p0(x)`. 
@@ -16,8 +16,10 @@ The obvious drawback of this approach is that one or two dimensions is not nearl
 
 Therefore, a multivariate reweighting technique is proposed, based on density ratio estimation, which can take into account the full space instead of just two dimensions. 
 The technique is based on approximating a density ratio `r=p1(x)/p0(x)` as `s(x) / 1 - s(x)`, where `s` is a classifier trained to distinguish samples `x ~ p0` from samples `x ~ p1`, and where `s(x)` is the classifier approximate of the probability `p0(x) / (p0(x) + p1(x))`. 
-The classification is done using a PyTorch DNN, with Adam optimizer and sigmoid activation function, and the calibration of the classifier is done using histogram or isotonic regression. 
-The performance of the weights, i.e. how well the reweighted original sample matches the target one, is assessed by training a discriminator to differentiate the original distribution with weights applied from a target distribution. 
+The classification is done using a PyTorch DNN, with Adam optimizer and sigmoid activation function, and the calibration of the classifier is done using histogram or isotonic regression. Other optimizers and activation functions are available.  
+The performance of the weights, i.e. how well the reweighted original sample matches the target one, is assessed by training a classifier to discriminate the original distribution with weights applied from a target distribution. 
+If the classifier is able to discriminate between the two samples (area under the curve, AUC > 0.5), the weights are not doing a good job, whereas if the classifier is unable to discriminate the target sample from the weighted original sample, the weights are doing a good job (AUC close to 0.5).  
+The trained model now can be exported to onnx to be able to be loaded within a production environment. 
 ## Documentation
 * Extensive details regarding likelihood-free inference with calibrated
   classifiers can be found in the companion paper _"Approximating Likelihood
