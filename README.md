@@ -3,7 +3,7 @@ CARL-TORCH
 *Work in progress by Leonora Vesterbacka, with invaluable input from Johann Brehmer, Kyle Cranmer and Gilles Louppe*
 
 ## Introduction
-`carl-torch` is a toolbox for density ratio estimation using PyTorch. 
+`carl-torch` is a toolbox for multivariate reweighting using PyTorch. 
 `carl-torch` is based on carl (https://github.com/diana-hep/carl/) originally developed for likelihood ratio estimation, but repurposed to be used as a multivariate reweighting technique to be used in the context of particle physics research. 
 ## Background
 The principle is to reweight one simulation to look like another. 
