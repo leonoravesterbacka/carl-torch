@@ -40,10 +40,6 @@ Once satisfied, `carl-torch` can be installed from source using the following:
 ```
 git clone https://github.com/leonoravesterbacka/carl-torch.git
 ```
-and run
-```
-pip install -e .
-```
 
 The code is based on three scripts:
 - [train.py](train.py) trains neural networks on loaded data.
