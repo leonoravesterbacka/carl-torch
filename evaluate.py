@@ -12,7 +12,7 @@ carl = RatioEstimator()
 carl.load('models/'+do+'_carl')
 evaluate = ['train', 'test']
 for i in evaluate:
-    _, r_hat = carl.evaluate(x='data/'+do+'/x0_'+i+'.npy')
+    r_hat, _ = carl.evaluate(x='data/'+do+'/x0_'+i+'.npy')
     w = 1./r_hat
     loading.load_result(x0='data/'+do+'/x0_'+i+'.npy',     
                         x1='data/'+do+'/x1_train.npy',
