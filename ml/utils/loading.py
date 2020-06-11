@@ -67,19 +67,19 @@ class Loader():
         etaV = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
 
-        variables = ['VpT','Njets','j1pT', 'j2pT', 'HT','ptmiss', 'l1pT','Veta', 'j1eta', 'j2eta']
-        vlabels = ['V $\mathrm{p_{T}}$ [GeV]','Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\mathrm{p_{T}}$ [GeV]', '$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]', '    Leading lepton $\mathrm{p_{T}}$ [GeV]','V $\eta$','Leading jet $\eta$','Subleading jet $\eta$']
+        variables = ['VpT','Njets','j1pT', 'j1eta', 'j2pT', 'j2eta','HT','ptmiss','Veta']
+        vlabels = ['V $\mathrm{p_{T}}$ [GeV]','Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]','V $\eta$']
 
         # load samples
         if do == "sherpaVsMG5":
             legend = ["Sherpa","MG5"]
-            binning = [range(0, 200, 20), range(0, 10, 1), range(0, 200, 20),range(0, 200, 20),range(0, 500, 50),range(0, 100, 10),range(0, 200, 20), etaV, etaJ, etaJ]
+            binning = [range(0, 200, 20), range(0, 10, 1), range(0, 200, 20),etaJ,range(0, 200, 20),etaJ,range(0, 500, 50),range(0, 100, 10), etaV]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0 = load(filename = '/eos/user/m/mvesterb/data/sherpa/one/Nominal.root', variables = variables)
                 x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/one/Nominal.root', variables = variables)
         elif do == "mur": 
             legend = ["MUR1", "MUR2"]
-            binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),range(0, 2700, 200),range(0, 5000, 250),range(0, 600, 100),range(0, 1500, 100), etaV, etaJ, etaJ]
+            binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),etaJ,range(0, 2700, 200),etaJ,range(0, 5000, 250),range(0, 600, 10), etaV]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0  = load(filename = '/eos/user/m/mvesterb/data/MUR1_MUF1_PDF261000.root', variables = variables)
                 x1  = load(filename = '/eos/user/m/mvesterb/data/MUR2_MUF1_PDF261000.root', variables = variables)
@@ -155,14 +155,14 @@ class Loader():
         etaV = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
 
-        variables = ['VpT','Njets','j1pT', 'j2pT', 'HT','ptmiss', 'l1pT','Veta', 'j1eta', 'j2eta']
-        vlabels = ['V $\mathrm{p_{T}}$ [GeV]','Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\mathrm{p_{T}}$ [GeV]', '$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading lepton $\mathrm{p_{T}}$ [GeV]','V $\eta$','Leading jet $\eta$','Subleading jet $\eta$']
+        variables = ['VpT','Njets','j1pT', 'j1eta', 'j2pT', 'j2eta','HT','ptmiss','Veta']
+        vlabels = ['V $\mathrm{p_{T}}$ [GeV]','Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]','V $\eta$']
         if do == "sherpaVsMG5":
             legend = ["Sherpa","MG5"]
-            binning = [range(0, 200, 20), range(0, 10, 1), range(0, 200, 20),range(0, 200, 20),range(0, 500, 50),range(0, 100, 10),range(0, 200, 20), etaV, etaJ, etaJ]
+            binning = [range(0, 200, 20), range(0, 10, 1), range(0, 200, 20),etaJ,range(0, 200, 20),etaJ,range(0, 500, 50),range(0, 100, 10), etaV]
         elif do == "mur": 
             legend = ["MUR1", "MUR2"]
-            binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),range(0, 2700, 200),range(0, 5000, 250),range(0, 600, 100),range(0, 1500, 100), etaV, etaJ, etaJ]
+            binning = [range(0, 2400, 200), range(0, 15, 1), range(0, 2700, 200),etaJ,range(0, 2700, 200),etaJ,range(0, 5000, 250),range(0, 600, 10), etaV]
         elif do == "qsf":
             vlabels = ['Number of jets','Number of b-jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\mathrm{p_{T}}$ [GeV]', '$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]', '        Leading lepton $\mathrm{p_{T}}$ [GeV]','Leading lepton $\eta$','Leading jet $\eta$','Subleading jet $\eta$']
             variables = ['Njets','Nbjets', 'j1pT', 'j2pT', 'HT','ptmiss', 'l1pT','l1eta', 'j1eta', 'j2eta']
