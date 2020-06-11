@@ -16,7 +16,7 @@ carl.load('models/'+do+'_carl')
 #load
 X  = 'data/'+do+'/x_train.npy'
 y  = 'data/'+do+'/y_train.npy'
-s_hat, r_hat = carl.evaluate(X)
+r_hat, s_hat = carl.evaluate(X)
 calib = CalibratedClassifier(carl)
 calib.fit(X = X,y = y)
 p0, p1, r_cal = calib.predict(X = X)

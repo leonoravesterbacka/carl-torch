@@ -47,7 +47,7 @@ class RatioModel(nn.Module):
         s_hat = torch.sigmoid(s_hat)
         r_hat = (1 - s_hat) / s_hat
         
-        return s_hat, r_hat
+        return r_hat, s_hat
 
     def to(self, *args, **kwargs):
         self = super(RatioModel, self).to(*args, **kwargs)
