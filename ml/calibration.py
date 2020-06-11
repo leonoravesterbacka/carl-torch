@@ -54,7 +54,7 @@ class CalibratedClassifier():
 
         # Calibrator
         cal = HistogramCalibrator(bins=self.bins, interpolation=self.interpolation,variable_width=self.variable_width)
-        T, _, _ = self.model.evaluate(X)
+        T, _ = self.model.evaluate(X)
 
         cal.fit(T, y)
         self.calibrator = cal
@@ -73,7 +73,7 @@ class CalibratedClassifier():
             The predicted class.
         """
         X = load_and_check(X)
-        s_hat, _, _ = self.model.evaluate(X)
+        s_hat, _ = self.model.evaluate(X)
         p = self.predict_proba(X, s_hat)
         p[p == np.inf] = 1
         p[p == 0] = 1       
