@@ -39,16 +39,15 @@ class RatioModel(nn.Module):
 
     def forward(self, x):
         s_hat = x
-        s_logits = x
         for i, layer in enumerate(self.layers):
             if i > 0:
-                s_hat = self.activation(s_hat)
-            s_hat = layer(s_hat) #also return logits as these will be used for the calibration
-        logits = s_hat
+                s_hat = torch.relu(s_hat)
+                #s_hat = self.activation(s_hat)
+            s_hat = layer(s_hat) 
         s_hat = torch.sigmoid(s_hat)
         r_hat = (1 - s_hat) / s_hat
         
-        return s_hat, r_hat, logits
+        return s_hat, r_hat
 
     def to(self, *args, **kwargs):
         self = super(RatioModel, self).to(*args, **kwargs)

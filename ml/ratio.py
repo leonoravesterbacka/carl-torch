@@ -232,12 +232,12 @@ class RatioEstimator(Estimator):
         if self.features is not None:
             x = x[:, self.features]
         logger.debug("Starting ratio evaluation")
-        s_hat, r_hat, logits = evaluate_ratio_model(
+        s_hat, r_hat = evaluate_ratio_model(
             model=self.model,
             xs=x,
         )
         logger.debug("Evaluation done")
-        return s_hat, r_hat, logits 
+        return s_hat, r_hat 
 
     def evaluate(self, *args, **kwargs):
         return self.evaluate_ratio(*args, **kwargs)

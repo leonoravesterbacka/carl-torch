@@ -30,7 +30,7 @@ def evaluate_ratio_model(
     with torch.no_grad():
         model.eval()
 
-        s_hat, r_hat, _  = model(xs)
+        s_hat, r_hat  = model(xs)
         # Copy back tensors to CPU
         if run_on_gpu:
             s_hat = s_hat.cpu()
@@ -39,4 +39,4 @@ def evaluate_ratio_model(
         # Get data and return
         s_hat = s_hat.detach().numpy().flatten()
         r_hat = r_hat.detach().numpy().flatten()
-    return s_hat, r_hat, _
+    return s_hat, r_hat

@@ -105,7 +105,7 @@ class Estimator(object):
             x = load_and_check(x)
             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
             dummy_input = torch.from_numpy(x[0].reshape(1, -1)).float().to(device)
-            torch.onnx.export(self.model, dummy_input,filename+".onnx")
+            torch.onnx.export(self.model, dummy_input,filename+".onnx", export_params=True, input_names = ['input'],output_names = ['s_hat', 'r_hat'], verbose = True)
 
     def load(self, filename):
 
