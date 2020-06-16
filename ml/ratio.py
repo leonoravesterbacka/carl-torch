@@ -52,7 +52,7 @@ class RatioEstimator(Estimator):
         nesterov_momentum=None,
         validation_split=0.25,
         early_stopping=True,
-        scale_inputs=False,
+        scale_inputs=True,
         limit_samplesize=None,
         memmap=False,
         verbose="some",
