@@ -13,6 +13,7 @@ x, y = loading.loading(
     folder='./data/',
     plot=True,
     do = do,
+    randomize = True,
     save = True,
 )
 estimator = RatioEstimator(

@@ -5,6 +5,7 @@ import logging
 import numpy as np
 import root_numpy
 import pandas as pd
+from pandas.plotting import scatter_matrix
 import multiprocessing
 import matplotlib.pyplot as plt
 from functools import partial
@@ -31,6 +32,7 @@ class Loader():
         x1 = None,
         randomize = False,
         save = False,
+        correlation = True,
     ):
         """
         Parameters
@@ -105,11 +107,23 @@ class Loader():
         n_target = x1.values.shape[0]
         if randomize:
             randomized = x0.values[np.random.choice(range(x0.values.shape[0]),2*n_target,replace=True)]
-            X0  = randomized[:n_target,:]
-            X0_test = randomized[n_target:,:]                                                                 
+            X0 = randomized[:n_target,:]
+            X0_test = randomized[-n_target:,:]
         else:
             X0 = x0.values[:n_target,:]
             X0_test = x0.values[-n_target:,:]
+
+        if correlation:
+            corr_matrix0 = x0.corr()
+            corr_matrix1 = x1.corr()
+            print("correlation of x0 sample ",corr_matrix0["VpT"].sort_values(ascending=False))
+            print("correlation of x1 sample ",corr_matrix1["VpT"].sort_values(ascending=False))
+            scatter_matrix(x0[variables], figsize=(12, 8))
+            plt.savefig('plots/scatterMatrix.png')
+            plt.clf()
+            x0.plot(kind="scatter", x="VpT", y="j1pT", alpha=0.1)
+            plt.savefig('plots/correlation.png')
+            plt.clf()
 
         # load sample X1
         X1 = x1.to_numpy()
