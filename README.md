@@ -14,7 +14,7 @@ As it is computationally impractical to generate samples for all theoretical set
 A naive approach to reweighting a sample `p0(x)` to look like another `p1(x)` is by calculating a weight defined as `r=p1(x)/p0(x)` parameterized in one or two dimensions, i.e. as a function of one or two physical variables, and apply this weight to the nominal sample `p0(x)`. 
 The obvious drawback of this approach is that one or two dimensions is not nearly enough to capture the effects in the full phase space. 
 
-Therefore, a multivariate reweighting technique is proposed, based on density ratio estimation, which can take into account the full space instead of just two dimensions. 
+Therefore, a multivariate reweighting technique is proposed which can take into account the full space instead of just two dimensions. 
 The technique is based on approximating a density ratio `r=p1(x)/p0(x)` as `s(x) / 1 - s(x)`, where `s` is a classifier trained to distinguish samples `x ~ p0` from samples `x ~ p1`, and where `s(x)` is the classifier approximate of the probability `p0(x) / (p0(x) + p1(x))`. 
 The classification is done using a PyTorch DNN, with Adam optimizer and sigmoid activation function, and the calibration of the classifier is done using histogram or isotonic regression. Other optimizers and activation functions are available.  
 
