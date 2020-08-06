@@ -12,7 +12,7 @@ from functools import partial
 
 from .tools import create_missing_folders, load, load_and_check
 from .plotting import draw_weighted_distributions, draw_unweighted_distributions, draw_ROC, resampled_discriminator_and_roc, plot_calibration_curve
-
+from sklearn.model_selection import train_test_split
 logger = logging.getLogger(__name__)
 
 
@@ -135,6 +135,8 @@ class Loader():
         # y shape
         y = y.reshape((-1, 1))
 
+        X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.40, random_state=42)
+        X_train, X_val, y_train, y_val =  train_test_split(X_train, y_train, test_size=0.50, random_state=42)
         # save data
         if folder is not None:
             np.save(folder + do + "/x0_test.npy",  X0_test)
@@ -142,6 +144,12 @@ class Loader():
             np.save(folder + do + "/x1_train.npy", X1)
             np.save(folder + do + "/x_train.npy", x)
             np.save(folder + do + "/y_train.npy", y)
+            np.save(folder + do + "/X_train.npy", X_train)
+            np.save(folder + do + "/X_test.npy", X_test)
+            np.save(folder + do + "/X_val.npy", X_val)
+            np.save(folder + do + "/Y_train.npy", y_train)
+            np.save(folder + do + "/Y_test.npy", y_test)
+            np.save(folder + do + "/Y_val.npy", y_val)
 
         if plot:
             draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), variables, vlabels, binning, legend, save) 

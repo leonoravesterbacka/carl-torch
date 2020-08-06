@@ -20,4 +20,7 @@ for i in evaluate:
                         label = i,
                         do = do,
                         save = True,
-    )   
+    )
+loading = Loader()
+carl.load('models/'+do+'_carlval')
+carl.evaluate_performance(x='data/'+do+'/X_val.npy',y='data/'+do+'/Y_val.npy')

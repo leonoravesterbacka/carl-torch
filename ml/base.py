@@ -7,7 +7,6 @@ import numpy as np
 import torch
 
 from .utils.tools import create_missing_folders, load_and_check
-
 try:
     FileNotFoundError
 except NameError:
@@ -106,6 +105,20 @@ class Estimator(object):
             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
             dummy_input = torch.from_numpy(x[0].reshape(1, -1)).float().to(device)
             torch.onnx.export(self.model, dummy_input,filename+".onnx", export_params=True, input_names = ['input'],output_names = ['r_hat', 's_hat'], verbose = True)
+
+    def makeConfusion(self, filename, x,y):
+        print("x ", x)
+        print("len x ", len(x))
+        X = torch.from_numpy(x).type(torch.FloatTensor)
+        print("X ", X)
+        y_pred = self.model(X)
+        #y_pred = self.model.predict(X)
+        print("y", y)
+        print("len(y)", len(y))
+        print("y pred", y_pred)
+        print("len y pred", len(y_pred))
+        print("acc ",accuracy_score(y_pred,y))
+        print("conf ",confusion_matrix(y, y_pred))
 
     def load(self, filename):
 
