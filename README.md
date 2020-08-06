@@ -48,6 +48,8 @@ The code is based on three scripts:
 
 Or run it all in the [Reweighter_SherpaVsMG5.ipynb](Reweighter_SherpaVsMG5.ipynb) notebook. 
 
+Hyperparameter search for optimization of the classifier is done in branch hyperparameter-search using skorch.
+
 This toolbox is adapted from  [MadMiner](http://diana-hep.org/madminer) and [CARL](http://diana-hep.org/carl). 
 The [setup.py](setup.py) is adapted from
 [https://github.com/kennethreitz/setup.py](https://github.com/kennethreitz/setup.py).
