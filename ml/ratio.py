@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from collections import OrderedDict
 
-from .evaluate import evaluate_ratio_model
+from .evaluate import evaluate_ratio_model, evaluate_performance_model
 from .models import RatioModel
 from .functions import get_optimizer, get_loss
 from .utils.tools import load_and_check
@@ -241,6 +241,42 @@ class RatioEstimator(Estimator):
 
     def evaluate(self, *args, **kwargs):
         return self.evaluate_ratio(*args, **kwargs)
+
+    def evaluate_performance(self, x, y):
+        """
+        Evaluates the performance of the classifier.
+        Parameters
+        ----------
+        x : str or ndarray
+            Observations.
+        y : str or ndarray
+            Target. 
+        """
+        if self.model is None:
+            raise ValueError("No model -- train or load model before evaluating it!")
+
+        # Load training data
+        logger.debug("Loading evaluation data")
+        x = load_and_check(x)
+        y = load_and_check(y)
+
+        # Scale observables
+        x = self._transform_inputs(x)
+
+        # Restrict features
+        if self.features is not None:
+            x = x[:, self.features]
+        r_hat, s_hat = evaluate_performance_model(
+            model=self.model,
+            xs=x,
+            ys=y,
+        )
+        logger.debug("Evaluation done")
+
+
+
+    def performance(self, *args, **kwargs):
+        return self.evaluate_performance(*args, **kwargs)
 
     def _create_model(self):
         self.model = RatioModel(
