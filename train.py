@@ -1,5 +1,7 @@
 import logging
 import optparse
+import skorch
+
 from ml import RatioEstimator
 from ml import Loader
 
