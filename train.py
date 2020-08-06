@@ -10,7 +10,7 @@ parser.add_option('-s', '--samples', action='store', type=str, dest='samples', d
 do = opts.samples
 
 #either train weight derivation model or classifier (the latter is used for hyperparameter search, validation etc.)
-doWeights = True #if False, train model for hyperparameter search
+doWeights = False #if False, train model for hyperparameter search
 loading = Loader()
 loading.loading(
     folder='./data/',
@@ -18,6 +18,7 @@ loading.loading(
     do = do,
     randomize = True,
     save = True,
+    correlation = False,
 )
 if doWeights:
     x='data/'+do+'/x_train.npy'
