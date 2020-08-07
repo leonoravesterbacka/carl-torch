@@ -1,7 +1,5 @@
 import logging
 import optparse
-import skorch
-
 from ml import RatioEstimator
 from ml import Loader
 
@@ -20,6 +18,7 @@ loading.loading(
     do = do,
     randomize = True,
     save = True,
+    correlation = False,
 )
 if doWeights:
     x='data/'+do+'/x_train.npy'
