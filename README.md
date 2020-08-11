@@ -35,6 +35,7 @@ The following dependencies are required:
 - PyTorch 
 - Theano 
 - scikit-learn 
+For hyperparameter search skorch is also required. 
 
 Once satisfied, `carl-torch` can be installed from source using the following:
 ```

@@ -24,7 +24,7 @@ class RatioModel(nn.Module):
         # Build network
         self.layers = nn.ModuleList()
         n_last = n_observables
-
+        
         # Hidden layers
         for n_hidden_units in n_hidden:
             if self.dropout_prob > 1.0e-9:
