@@ -5,6 +5,8 @@ import logging
 import numpy as np
 import root_numpy
 import pandas as pd
+import seaborn as sns
+
 from pandas.plotting import scatter_matrix
 import multiprocessing
 import matplotlib.pyplot as plt
@@ -66,22 +68,21 @@ class Loader():
         """
 
         create_missing_folders([folder+do])
-        etaV = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
 
-        variables = ['Njets','j1pT', 'j1eta', 'j2pT', 'j2eta','HT','ptmiss','VpT','Veta']
-        vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]','V $\mathrm{p_{T}}$ [GeV]','V $\eta$']
+        variables = ['Njets','j1pT', 'j1eta', 'j2pT', 'j2eta','ptmiss','VpT','Veta']
+        vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','V $\mathrm{p_{T}}$ [GeV]','V $\eta$']
 
         # load samples
         if do == "sherpaVsMG5":
             legend = ["Sherpa","MG5"]
-            binning = [range(0, 10, 1), range(0, 200, 20),etaJ,range(0, 200, 20),etaJ,range(0, 500, 50),range(0, 100, 10), range(0, 200, 20),etaV]
+            etaX = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
-                x0 = load(filename = '/eos/user/m/mvesterb/data/sherpa/one/Nominal.root', variables = variables)
-                x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/one/Nominal.root', variables = variables)
+                x0 = load(filename = '/eos/user/m/mvesterb/data/sherpa/Nominal.root', variables = variables)
+                x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/Nominal.root', variables = variables)
         elif do == "mur": 
             legend = ["MUR1", "MUR2"]
-            binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2750, 250),etaJ,range(0, 4500, 300),range(0, 2000, 200), range(0, 2000, 200),etaV]
+            etaX = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0  = load(filename = '/eos/user/m/mvesterb/data/MUR1_MUF1_PDF261000.root', variables = variables)
                 x1  = load(filename = '/eos/user/m/mvesterb/data/MUR2_MUF1_PDF261000.root', variables = variables)
@@ -96,13 +97,13 @@ class Loader():
                 x1     = x1.iloc[i1] #target
         elif do == "qsf":
             legend = ["qsfUp", "qsfDown"]
-            variables = ['Njets','j1pT', 'j1eta', 'j2pT', 'j2eta','HT','ptmiss', 'l1pT','l1eta']
-            vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]','Lepton $\mathrm{p_{T}}$ [GeV]','Lepton $\eta$']
-            binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2750, 250),etaJ,range(0, 4500, 300),range(0, 2000, 200), range(0, 2000, 200),etaJ]
-            correlation = False
+            variables = ['Njets','j1pT', 'j1eta', 'j2pT', 'j2eta','ptmiss', 'l1pT','l1eta']
+            vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','Lepton $\mathrm{p_{T}}$ [GeV]','Lepton $\eta$']
+            etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0 = load(filename = '/eos/user/m/mvesterb/data/qsfup/Nominal.root', variables = variables)
                 x1 = load(filename = '/eos/user/m/mvesterb/data/qsfdown/Nominal.root', variables = variables)
+        binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2750, 250),etaJ,range(0, 2000, 200), range(0, 2000, 200),etaX]
         # randomize training and test data (or not)
         n_target = x1.values.shape[0]
         if randomize:
@@ -114,15 +115,12 @@ class Loader():
             X0_test = x0.values[-n_target:,:]
 
         if correlation:
-            corr_matrix0 = x0.corr()
-            corr_matrix1 = x1.corr()
-            print("correlation of x0 sample ",corr_matrix0["VpT"].sort_values(ascending=False))
-            print("correlation of x1 sample ",corr_matrix1["VpT"].sort_values(ascending=False))
-            scatter_matrix(x0[variables], figsize=(12, 8))
-            plt.savefig('plots/scatterMatrix.png')
-            plt.clf()
-            x0.plot(kind="scatter", x="VpT", y="j1pT", alpha=0.1)
-            plt.savefig('plots/correlation.png')
+            cor0 = x0.corr()
+            sns.heatmap(cor0, annot=True, cmap=plt.cm.Reds)
+            cor_target = abs(cor0[variables[0]])
+            relevant_features = cor_target[cor_target>0.5]
+            print("relevant_features ", relevant_features)
+            plt.savefig('plots/scatterMatrix_'+do+'.png')
             plt.clf()
 
         # load sample X1
@@ -177,8 +175,8 @@ class Loader():
         etaV = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
 
-        variables = ['Njets','j1pT', 'j1eta', 'j2pT', 'j2eta','HT','ptmiss','VpT','Veta']
-        vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]','V $\mathrm{p_{T}}$ [GeV]','V $\eta$']
+        variables = ['Njets','j1pT', 'j1eta', 'j2pT', 'j2eta','ptmiss','VpT','Veta']
+        vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','V $\mathrm{p_{T}}$ [GeV]','V $\eta$']
         if do == "sherpaVsMG5":
             legend = ["Sherpa","MG5"]
             binning = [range(0, 10, 1), range(0, 200, 20),etaJ,range(0, 200, 20),etaJ,range(0, 500, 50),range(0, 100, 10), range(0, 200, 20),etaV]
@@ -186,8 +184,8 @@ class Loader():
             legend = ["MUR1", "MUR2"]
             binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2750, 250),etaJ,range(0, 4500, 300),range(0, 2000, 200), range(0, 2000, 200),etaV]
         elif do == "qsf":
-            vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{H_{T}}$ [GeV]','$\mathrm{p_{T}^{miss}}$ [GeV]','Lepton $\mathrm{p_{T}}$ [GeV]','Lepton $\eta$']
-            variables = ['Njets','j1pT', 'j1eta', 'j2pT', 'j2eta','HT','ptmiss', 'l1pT','l1eta']
+            vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','Lepton $\mathrm{p_{T}}$ [GeV]','Lepton $\eta$']
+            variables = ['Njets','j1pT', 'j1eta', 'j2pT', 'j2eta','ptmiss', 'l1pT','l1eta']
             legend = ["qsfUp", "qsfDown"]
             binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2750, 250),etaJ,range(0, 4500, 300),range(0, 2000, 200), range(0, 2000, 200),etaJ]
         

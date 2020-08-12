@@ -10,7 +10,7 @@ do = opts.samples
 loading = Loader()
 carl = RatioEstimator()
 carl.load('models/'+do+'_carl')
-evaluate = ['train', 'test']
+evaluate = ['train']
 for i in evaluate:
     r_hat, _ = carl.evaluate(x='data/'+do+'/x0_'+i+'.npy')
     w = 1./r_hat
