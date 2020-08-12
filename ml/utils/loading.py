@@ -68,21 +68,20 @@ class Loader():
         """
 
         create_missing_folders([folder+do])
-        etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
 
         variables = ['Njets','j1pT', 'j1eta', 'j2pT', 'j2eta','ptmiss','VpT','Veta']
         vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','V $\mathrm{p_{T}}$ [GeV]','V $\eta$']
+        etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
+        etaX = [-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10,11]
 
         # load samples
         if do == "sherpaVsMG5":
             legend = ["Sherpa","MG5"]
-            etaX = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0 = load(filename = '/eos/user/m/mvesterb/data/sherpa/Nominal.root', variables = variables)
                 x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/Nominal.root', variables = variables)
         elif do == "mur": 
             legend = ["MUR1", "MUR2"]
-            etaX = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0  = load(filename = '/eos/user/m/mvesterb/data/MUR1_MUF1_PDF261000.root', variables = variables)
                 x1  = load(filename = '/eos/user/m/mvesterb/data/MUR2_MUF1_PDF261000.root', variables = variables)
@@ -172,23 +171,22 @@ class Loader():
         Returns
         -------
         """
-        etaV = [-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
 
+        binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2750, 250),etaJ,range(0, 2000, 200), range(0, 2000, 200),etaX]
         variables = ['Njets','j1pT', 'j1eta', 'j2pT', 'j2eta','ptmiss','VpT','Veta']
         vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','V $\mathrm{p_{T}}$ [GeV]','V $\eta$']
+        etaX = [-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10,11]
+        etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
         if do == "sherpaVsMG5":
             legend = ["Sherpa","MG5"]
-            binning = [range(0, 10, 1), range(0, 200, 20),etaJ,range(0, 200, 20),etaJ,range(0, 500, 50),range(0, 100, 10), range(0, 200, 20),etaV]
         elif do == "mur": 
             legend = ["MUR1", "MUR2"]
-            binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2750, 250),etaJ,range(0, 4500, 300),range(0, 2000, 200), range(0, 2000, 200),etaV]
         elif do == "qsf":
+            etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
             vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','Lepton $\mathrm{p_{T}}$ [GeV]','Lepton $\eta$']
             variables = ['Njets','j1pT', 'j1eta', 'j2pT', 'j2eta','ptmiss', 'l1pT','l1eta']
             legend = ["qsfUp", "qsfDown"]
-            binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2750, 250),etaJ,range(0, 4500, 300),range(0, 2000, 200), range(0, 2000, 200),etaJ]
-        
+        binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2750, 250),etaJ,range(0, 2000, 200), range(0, 2000, 200),etaX]
 
         # load samples
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
