@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class RatioModel(nn.Module):
 
-    def __init__(self, n_observables, n_hidden, activation="sigmoid", dropout_prob=0.0):
+    def __init__(self, n_observables, n_hidden, activation="relu", dropout_prob=0.5):
 
         super(RatioModel, self).__init__()
 
@@ -24,7 +24,7 @@ class RatioModel(nn.Module):
         # Build network
         self.layers = nn.ModuleList()
         n_last = n_observables
-        
+
         # Hidden layers
         for n_hidden_units in n_hidden:
             if self.dropout_prob > 1.0e-9:
@@ -37,12 +37,11 @@ class RatioModel(nn.Module):
             self.layers.append(nn.Dropout(self.dropout_prob))
         self.layers.append(nn.Linear(n_last, 1))
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         s_hat = x
         for i, layer in enumerate(self.layers):
             if i > 0:
-                s_hat = torch.relu(s_hat)
-                #s_hat = self.activation(s_hat)
+                s_hat = self.activation(s_hat)
             s_hat = layer(s_hat) 
         s_hat = torch.sigmoid(s_hat)
         r_hat = (1 - s_hat) / s_hat
@@ -56,3 +55,4 @@ class RatioModel(nn.Module):
             self.layers[i] = layer.to(*args, **kwargs)
 
         return self
+

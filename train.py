@@ -22,7 +22,7 @@ x='data/'+do+'/X_train.npy'
 y='data/'+do+'/Y_train.npy'
 
 estimator = RatioEstimator(
-    n_hidden=(10,10),
+    n_hidden=(4,2),
     activation="relu"
 )
 estimator.train(
