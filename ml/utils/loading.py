@@ -172,7 +172,6 @@ class Loader():
         -------
         """
 
-        binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2750, 250),etaJ,range(0, 2000, 200), range(0, 2000, 200),etaX]
         variables = ['Njets','j1pT', 'j1eta', 'j2pT', 'j2eta','ptmiss','VpT','Veta']
         vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','V $\mathrm{p_{T}}$ [GeV]','V $\eta$']
         etaX = [-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10,11]
