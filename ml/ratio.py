@@ -266,17 +266,12 @@ class RatioEstimator(Estimator):
         # Restrict features
         if self.features is not None:
             x = x[:, self.features]
-        r_hat, s_hat = evaluate_performance_model(
+        evaluate_performance_model(
             model=self.model,
             xs=x,
             ys=y,
         )
         logger.debug("Evaluation done")
-
-
-
-    def performance(self, *args, **kwargs):
-        return self.evaluate_performance(*args, **kwargs)
 
     def _create_model(self):
         self.model = RatioModel(

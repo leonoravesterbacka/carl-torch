@@ -139,8 +139,6 @@ class Loader():
             np.save(folder + do + "/x0_test.npy",  X0_test)
             np.save(folder + do + "/x0_train.npy", X0)
             np.save(folder + do + "/x1_train.npy", X1)
-            np.save(folder + do + "/x_train.npy", x)
-            np.save(folder + do + "/y_train.npy", y)
             np.save(folder + do + "/X_train.npy", X_train)
             np.save(folder + do + "/X_test.npy", X_test)
             np.save(folder + do + "/X_val.npy", X_val)

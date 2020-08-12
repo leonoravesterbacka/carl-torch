@@ -9,8 +9,6 @@ parser.add_option('-s', '--samples', action='store', type=str, dest='samples', d
 (opts, args) = parser.parse_args()
 do = opts.samples
 
-#either train weight derivation model or classifier (the latter is used for hyperparameter search, validation etc.)
-doWeights = True #if False, train model for hyperparameter search
 loading = Loader()
 loading.loading(
     folder='./data/',
@@ -20,14 +18,8 @@ loading.loading(
     save = True,
     correlation = True,
 )
-if doWeights:
-    x='data/'+do+'/x_train.npy'
-    y='data/'+do+'/y_train.npy'
-    z=''
-else:
-    x='data/'+do+'/X_train.npy'
-    y='data/'+do+'/Y_train.npy'
-    z='val'
+x='data/'+do+'/X_train.npy'
+y='data/'+do+'/Y_train.npy'
 
 estimator = RatioEstimator(
     n_hidden=(10,10),
@@ -41,4 +33,4 @@ estimator.train(
     y=y,
     scale_inputs = True,
 )
-estimator.save('models/'+do+'_carl'+z, x=x, export_model = True)
+estimator.save('models/'+do+'_carl', x=x, export_model = True)
