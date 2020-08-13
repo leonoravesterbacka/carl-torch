@@ -35,6 +35,7 @@ class Loader():
         randomize = False,
         save = False,
         correlation = True,
+        preprocessing = True,
     ):
         """
         Parameters
@@ -122,9 +123,24 @@ class Loader():
             plt.savefig('plots/scatterMatrix_'+do+'.png')
             plt.clf()
 
+        if preprocessing:
+            print(x1.head)
+            factor = 3
+            print("x0 before preprocessing ",len(x0))
+            print("x1 before preprocessing ",len(x1))
+            for column in variables:
+                upper_lim = x0[column].mean () + x0[column].std () * factor
+                upper_lim = x1[column].mean () + x1[column].std () * factor
+                lower_lim = x0[column].mean () - x0[column].std () * factor
+                lower_lim = x1[column].mean () - x1[column].std () * factor
+                print("column ",column)
+                x0 = x0[(x0[column] < upper_lim) & (x0[column] > lower_lim)]
+                x1 = x1[(x1[column] < upper_lim) & (x1[column] > lower_lim)]
+                print("x0 after",len(x0))
+                print("x1 after",len(x1))
+
         # load sample X1
         X1 = x1.to_numpy()
-       
         # combine
         x = np.vstack([X0, X1])
         y = np.zeros(x.shape[0])
@@ -140,6 +156,8 @@ class Loader():
             np.save(folder + do + "/x0_train.npy", X0)
             np.save(folder + do + "/x1_train.npy", X1)
             np.save(folder + do + "/X_train.npy", X_train)
+            np.save(folder + do + "/x_train.npy", x)
+            np.save(folder + do + "/y_train.npy", y)
             np.save(folder + do + "/X_test.npy", X_test)
             np.save(folder + do + "/X_val.npy", X_val)
             np.save(folder + do + "/Y_train.npy", y_train)
