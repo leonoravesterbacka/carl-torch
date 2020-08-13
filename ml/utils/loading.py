@@ -104,6 +104,31 @@ class Loader():
                 x0 = load(filename = '/eos/user/m/mvesterb/data/qsfup/Nominal.root', variables = variables)
                 x1 = load(filename = '/eos/user/m/mvesterb/data/qsfdown/Nominal.root', variables = variables)
         binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2000, 200), range(0, 2000, 200),etaX]
+
+        if preprocessing:
+            print(x1.head)
+            factor = 3
+            print("x0 before preprocessing ",len(x0))
+            print("x1 before preprocessing ",len(x1))
+            for column in variables:
+                upper_lim = x0[column].mean () + x0[column].std () * factor
+                upper_lim = x1[column].mean () + x1[column].std () * factor
+                lower_lim = x0[column].mean () - x0[column].std () * factor
+                lower_lim = x1[column].mean () - x1[column].std () * factor
+                print("column ",column)
+                x0 = x0[(x0[column] < upper_lim) & (x0[column] > lower_lim)]
+                x1 = x1[(x1[column] < upper_lim) & (x1[column] > lower_lim)]
+                print("x0 after",len(x0))
+                print("x1 after",len(x1))
+            x0 = x0.round(decimals=2)
+            x1 = x1.round(decimals=2)
+            print("after", x1.head)
+
+
+
+        print(x1[variables].describe())
+        #x0 = x0.drop(columns=['ptmiss'])
+
         # randomize training and test data (or not)
         n_target = x1.values.shape[0]
         if randomize:
@@ -122,22 +147,6 @@ class Loader():
             print("relevant_features ", relevant_features)
             plt.savefig('plots/scatterMatrix_'+do+'.png')
             plt.clf()
-
-        if preprocessing:
-            print(x1.head)
-            factor = 3
-            print("x0 before preprocessing ",len(x0))
-            print("x1 before preprocessing ",len(x1))
-            for column in variables:
-                upper_lim = x0[column].mean () + x0[column].std () * factor
-                upper_lim = x1[column].mean () + x1[column].std () * factor
-                lower_lim = x0[column].mean () - x0[column].std () * factor
-                lower_lim = x1[column].mean () - x1[column].std () * factor
-                print("column ",column)
-                x0 = x0[(x0[column] < upper_lim) & (x0[column] > lower_lim)]
-                x1 = x1[(x1[column] < upper_lim) & (x1[column] > lower_lim)]
-                print("x0 after",len(x0))
-                print("x1 after",len(x1))
 
         # load sample X1
         X1 = x1.to_numpy()
