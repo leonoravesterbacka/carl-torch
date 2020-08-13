@@ -17,6 +17,7 @@ loading.loading(
     randomize = False,
     save = True,
     correlation = True,
+    preprocessing = True,
 )
 x='data/'+do+'/X_train.npy'
 y='data/'+do+'/Y_train.npy'
