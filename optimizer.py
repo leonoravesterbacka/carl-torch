@@ -18,10 +18,10 @@ from ml.utils.tools import load_and_check
 
 parser = optparse.OptionParser(usage="usage: %prog [opts]", version="%prog 1.0")
 parser.add_option('-s', '--samples', action='store', type=str, dest='samples', default='sherpaVsMG5', help='samples to derive weights for. default Sherpa vs. Madgraph5')
+parser.add_option('-n', '--nentries', action='store', type=str, dest='nentries', default=None, help='specify the number of events do do the training on, default None means full sample')
+
 (opts, args) = parser.parse_args()
 do = opts.samples
-
-
 
 class RatioModel(nn.Module):
 
@@ -70,6 +70,7 @@ x,y =loading.loading(
     randomize = False,
     save = True,
     correlation = False,
+    nentries = opts.nentries,
 )
 net = NeuralNetBinaryClassifier(
     RatioModel,
@@ -95,13 +96,13 @@ print("scaler x",x)
 net.set_params(train_split=False, verbose=0)
 print(net.get_params().keys())
 params = {
-    'lr': [0.0001],
+    'lr': [0.1],
     #'lr': [0.0001, 0.001,0.01,0.1, 1],
     #'optimizer': [optim.Adam, optim.SGD],
     #'batch_size':[32,64,128],
 }
-#gs = RandomizedSearchCV(net, params, refit = False,random_state=1, n_iter = 20, cv=3, scoring='accuracy', verbose=2)
-gs = GridSearchCV(net, params, refit=True, cv=3, scoring='accuracy', verbose=2)
+gs = RandomizedSearchCV(net, params, refit = False,random_state=1, n_iter = 20, cv=3, scoring='accuracy', verbose=2)
+#gs = GridSearchCV(net, params, refit=True, cv=3, scoring='accuracy', verbose=2)
 gs.fit(x, y)
 print("best score: {:.3f}, best params: {}".format(gs.best_score_, gs.best_params_))
 y_pred = gs.predict(x)

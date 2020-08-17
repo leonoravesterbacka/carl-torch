@@ -5,32 +5,26 @@ from ml import Loader
 
 
 parser = optparse.OptionParser(usage="usage: %prog [opts]", version="%prog 1.0")
-parser.add_option('-s', '--samples', action='store', type=str, dest='samples', default='sherpaVsMG5', help='samples to derive weights for. default Sherpa vs. Madgraph5')
+parser.add_option('-s', '--samples',  action='store', type=str, dest='samples', default='sherpaVsMG5', help='samples to derive weights for. default Sherpa vs. Madgraph5')
+parser.add_option('-n', '--nentries', action='store', type=str, dest='nentries', default=None, help='specify the number of events do do the training on, default None means full sample')
 (opts, args) = parser.parse_args()
-do = opts.samples
 
-#either train weight derivation model or classifier (the latter is used for hyperparameter search, validation etc.)
-doWeights = True #if False, train model for hyperparameter search
 loading = Loader()
 loading.loading(
     folder='./data/',
     plot=True,
-    do = do,
-    randomize = True,
+    do = opts.samples,
+    randomize = False,
     save = True,
-    correlation = False,
+    correlation = True,
+    preprocessing = True,
+    nentries = opts.nentries,
 )
-if doWeights:
-    x='data/'+do+'/x_train.npy'
-    y='data/'+do+'/y_train.npy'
-    z=''
-else:
-    x='data/'+do+'/X_train.npy'
-    y='data/'+do+'/Y_train.npy'
-    z='val'
+x='data/'+opts.samples+'/X_train.npy'
+y='data/'+opts.samples+'/Y_train.npy'
 
 estimator = RatioEstimator(
-    n_hidden=(10,10),
+    n_hidden=(4,2),
     activation="relu"
 )
 estimator.train(
@@ -41,4 +35,4 @@ estimator.train(
     y=y,
     scale_inputs = True,
 )
-estimator.save('models/'+do+'_carl'+z, x=x, export_model = True)
+estimator.save('models/'+opts.samples+'_carl', x=x, export_model = True)
