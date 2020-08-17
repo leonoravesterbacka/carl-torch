@@ -20,11 +20,17 @@ logger = logging.getLogger(__name__)
 
 initialized = False
 
-def load(filename = None, variables = None):
+def load(filename = None, variables = None, n = 0, tree = None):
     if filename is None:
         return None
-    f = uproot.open(filename)["tree_"]
-    df = f.pandas.df(variables)
+    f = uproot.open(filename)[tree]
+    print("n" , n)
+    if n > 0:
+        print("here")
+        df = f.pandas.df(variables, entrystop = n)
+    else:
+        print(" or here")
+        df = f.pandas.df(variables)
     return df
 
 def create_missing_folders(folders):
