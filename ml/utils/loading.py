@@ -36,6 +36,7 @@ class Loader():
         save = False,
         correlation = True,
         preprocessing = True,
+        nentries = 0,
     ):
         """
         Parameters
@@ -69,6 +70,7 @@ class Loader():
         """
 
         create_missing_folders([folder+do])
+        create_missing_folders(['plots'])
 
         variables = ['Njets','j1pT', 'j1eta','ptmiss','VpT','Veta']
         vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','V $\mathrm{p_{T}}$ [GeV]','V $\eta$']
@@ -79,34 +81,22 @@ class Loader():
         if do == "sherpaVsMG5":
             legend = ["Sherpa","MG5"]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
-                x0 = load(filename = '/eos/user/m/mvesterb/data/sherpa/Nominal.root', variables = variables)
-                x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/Nominal.root', variables = variables)
-        elif do == "mur": 
-            legend = ["MUR1", "MUR2"]
-            if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
-                x0  = load(filename = '/eos/user/m/mvesterb/data/MUR1_MUF1_PDF261000.root', variables = variables)
-                x1  = load(filename = '/eos/user/m/mvesterb/data/MUR2_MUF1_PDF261000.root', variables = variables)
-                #for mur1 vs MUR2, resampling accoring to the generator (truth) weight is required
-                wx0 = load(filename = '/eos/user/m/mvesterb/data/MUR1_MUF1_PDF261000.root', variables = ['truthWeight'])
-                wx1 = load(filename = '/eos/user/m/mvesterb/data/MUR2_MUF1_PDF261000.root', variables = ['truthWeight'])
-                p0    = (wx0.truthWeight)/np.sum(wx0.truthWeight.astype(np.float))
-                p1    = (wx1.truthWeight)/np.sum(wx1.truthWeight.astype(np.float))
-                i0    = np.random.choice(np.arange(len(x0)),size=int(np.sum(wx0.truthWeight.astype(np.float))),p=p0)
-                i1    = np.random.choice(np.arange(len(x1)),size=int(np.sum(wx1.truthWeight.astype(np.float))),p=p1)
-                x0     = x0.iloc[i0] #original
-                x1     = x1.iloc[i1] #target
+                x0 = load(filename = '/eos/user/m/mvesterb/data/sherpa/one/Nominal.root',   variables = variables, tree = 'tree_')
+                x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/one/Nominal.root', variables = variables, tree = 'tree_')
         elif do == "qsf":
             legend = ["qsfUp", "qsfDown"]
-            variables = ['Njets','j1pT', 'j1eta', 'ptmiss', 'l1pT','l1eta']
+            variables = ['Njets','Jet_Pt', 'Jet_Eta', 'Jet_Phi', 'Jet_Mass', 'MET']
             vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','Lepton $\mathrm{p_{T}}$ [GeV]','Lepton $\eta$']
             etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
+            print("gonna load")
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
-                x0 = load(filename = '/eos/user/m/mvesterb/data/qsfup/Nominal.root', variables = variables)
-                x1 = load(filename = '/eos/user/m/mvesterb/data/qsfdown/Nominal.root', variables = variables)
+                x0 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfUp/tree.root',   variables = variables, n = int(nentries), tree = 'Tree')
+                x1 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfDown/tree.root', variables = variables, n = int(nentries), tree = 'Tree')
+        print("x1", x1)
         binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2000, 200), range(0, 2000, 200),etaX]
 
         if preprocessing:
-            print(x1.head)
+            #:print(x1.head)
             factor = 3
             print("x0 before preprocessing ",len(x0))
             print("x1 before preprocessing ",len(x1))
