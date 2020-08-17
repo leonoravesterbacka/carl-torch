@@ -23,8 +23,8 @@ initialized = False
 def load(filename = None, variables = None):
     if filename is None:
         return None
-    f    = root_numpy.root2array(filename, branches=variables)
-    df   = pd.DataFrame(f,columns=variables)
+    f = uproot.open(filename)["tree_"]
+    df = f.pandas.df(variables)
     return df
 
 def create_missing_folders(folders):
