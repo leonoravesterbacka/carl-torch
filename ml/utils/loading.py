@@ -138,6 +138,10 @@ class Loader():
                 x1 = x1[(x1[column] < upper_lim) & (x1[column] > lower_lim)]
                 print("x0 after",len(x0))
                 print("x1 after",len(x1))
+            x0 = x0.round(decimals=2)
+            x1 = x1.round(decimals=2)
+            print("after", x1.head)
+
 
         # load sample X1
         X1 = x1.to_numpy()

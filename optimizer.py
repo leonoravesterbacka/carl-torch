@@ -75,6 +75,7 @@ net = NeuralNetBinaryClassifier(
     RatioModel,
     criterion=nn.BCELoss,
     iterator_train__shuffle=True,
+    batch_size = 32,
     optimizer = optim.Adam,
 )
 
@@ -94,7 +95,7 @@ print("scaler x",x)
 net.set_params(train_split=False, verbose=0)
 print(net.get_params().keys())
 params = {
-    'lr': [0.001, 0.01],
+    'lr': [0.0001],
     #'lr': [0.0001, 0.001,0.01,0.1, 1],
     #'optimizer': [optim.Adam, optim.SGD],
     #'batch_size':[32,64,128],
