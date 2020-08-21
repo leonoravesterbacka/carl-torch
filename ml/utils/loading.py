@@ -86,8 +86,8 @@ class Loader():
                 x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/one/Nominal.root', variables = variables, tree = 'tree_')
         elif do == "qsf":
             legend = ["qsfUp", "qsfDown"]
-            variables = ['Jet_Pt', 'Njets']
-            vlabels = ['Jet pT', 'number of jets']
+            variables = ['Jet_Pt', 'Jet_Eta']
+            vlabels = ['Jet pT', 'Jet Eta']
             etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
             binning = [range(0, 2750, 250), range(0, 15, 1)]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here

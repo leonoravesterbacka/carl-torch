@@ -38,10 +38,14 @@ class NumpyDataset(Dataset):
                 self.memmap.append(True)
                 self.data.append(array)
             else:
-                print("a", array)
                 self.memmap.append(False)
-                print("array[:, 0]", array[:, 0])
-                float_arr = np.vstack(array[:, 0]).astype(np.float)
+                if array.shape[1]>1:    
+                    float_arr1 = np.vstack(array[:, 0]).astype(np.float)
+                    float_arr2 = np.vstack(array[:, 1]).astype(np.float)
+                    float_arr = np.append(float_arr1, float_arr2, axis=1)
+                else:
+                    #don't do the above for the target array
+                    float_arr = np.vstack(array[:, 0]).astype(np.float)
                 print("float ", float_arr)
                 tensor = torch.from_numpy(float_arr).to(self.dtype)
                 print("tensor,", tensor)
@@ -236,6 +240,7 @@ class Trainer(object):
             data_labels.append(key) 
             data_arrays.append(value)
         dataset = NumpyDataset(*data_arrays, dtype=self.dtype)
+        
         return data_labels, dataset
 
     def make_dataloaders(self, dataset, dataset_val, validation_split, batch_size):
