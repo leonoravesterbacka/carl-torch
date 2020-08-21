@@ -7,9 +7,11 @@ import numpy as np
 import time
 import torch
 import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset,TensorDataset,  DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 from torch.nn.utils import clip_grad_norm_
+from torch.nn.utils.rnn import pack_padded_sequence
+from torch.nn.utils.rnn import pad_sequence
 logger = logging.getLogger(__name__)
 
 class NanException(Exception):
@@ -36,8 +38,14 @@ class NumpyDataset(Dataset):
                 self.memmap.append(True)
                 self.data.append(array)
             else:
+                print("a", array)
                 self.memmap.append(False)
-                tensor = torch.from_numpy(array).to(self.dtype)
+                #print("array[:, 0]", array[:, 1])
+                float_arr = np.vstack(array[:, 0]).astype(np.float)
+                #float_arr2 = np.vstack(float_arr[:, 1])
+                print("float ", float_arr)
+                tensor = torch.from_numpy(float_arr).to(self.dtype)
+                print("tensor,", tensor)
                 self.data.append(tensor)
 
     def __getitem__(self, index):
@@ -226,7 +234,7 @@ class Trainer(object):
         data_arrays = []
         data_labels = []
         for key, value in six.iteritems(data):
-            data_labels.append(key)
+            data_labels.append(key) 
             data_arrays.append(value)
         dataset = NumpyDataset(*data_arrays, dtype=self.dtype)
         return data_labels, dataset

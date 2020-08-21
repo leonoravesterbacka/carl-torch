@@ -6,7 +6,7 @@ import numpy as np
 import root_numpy
 import pandas as pd
 import seaborn as sns
-
+import awkward as ak
 from pandas.plotting import scatter_matrix
 import multiprocessing
 import matplotlib.pyplot as plt
@@ -80,26 +80,23 @@ class Loader():
         # load samples
         if do == "sherpaVsMG5":
             legend = ["Sherpa","MG5"]
+            binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2000, 200), range(0, 2000, 200),etaX]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0 = load(filename = '/eos/user/m/mvesterb/data/sherpa/one/Nominal.root',   variables = variables, tree = 'tree_')
                 x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/one/Nominal.root', variables = variables, tree = 'tree_')
         elif do == "qsf":
             legend = ["qsfUp", "qsfDown"]
-            variables = ['Njets','Jet_Pt', 'Jet_Eta', 'Jet_Phi', 'Jet_Mass', 'MET']
-            vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','Lepton $\mathrm{p_{T}}$ [GeV]','Lepton $\eta$']
+            variables = ['Jet_Pt', 'Njets']
+            vlabels = ['Jet pT', 'number of jets']
             etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
-            print("gonna load")
+            binning = [range(0, 2750, 250), range(0, 15, 1)]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
-                x0 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfUp/tree.root',   variables = variables, n = int(nentries), tree = 'Tree')
-                x1 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfDown/tree.root', variables = variables, n = int(nentries), tree = 'Tree')
-        print("x1", x1)
-        binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2000, 200), range(0, 2000, 200),etaX]
-
+                x0 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfUp/one/tree.root',   variables = variables, n = int(nentries), tree = 'Tree')
+                x1 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfDown/one/tree.root', variables = variables, n = int(nentries), tree = 'Tree')
+        
         if preprocessing:
-            #:print(x1.head)
             factor = 3
-            print("x0 before preprocessing ",len(x0))
-            print("x1 before preprocessing ",len(x1))
+            # drop outliers
             for column in variables:
                 upper_lim = x0[column].mean () + x0[column].std () * factor
                 upper_lim = x1[column].mean () + x1[column].std () * factor
@@ -110,15 +107,12 @@ class Loader():
                 x1 = x1[(x1[column] < upper_lim) & (x1[column] > lower_lim)]
                 print("x0 after",len(x0))
                 print("x1 after",len(x1))
+            # round off decimals
             x0 = x0.round(decimals=2)
             x1 = x1.round(decimals=2)
             print("after", x1.head)
 
-
-
-        print(x1[variables].describe())
-        #x0 = x0.drop(columns=['ptmiss'])
-
+        print("x",x0)
         # randomize training and test data (or not)
         n_target = x1.values.shape[0]
         if randomize:
@@ -130,6 +124,7 @@ class Loader():
             X0_test = x0.values[-n_target:,:]
 
         if correlation:
+            # investigate correlated variables
             cor0 = x0.corr()
             sns.heatmap(cor0, annot=True, cmap=plt.cm.Reds)
             cor_target = abs(cor0[variables[0]])
@@ -138,20 +133,18 @@ class Loader():
             plt.savefig('plots/scatterMatrix_'+do+'.png')
             plt.clf()
 
-        # load sample X1
+        X0 = x0.to_numpy()
         X1 = x1.to_numpy()
-        # combine
         x = np.vstack([X0, X1])
         y = np.zeros(x.shape[0])
-        y[X0.shape[0] :] = 1.0
-        # y shape
+        y[x0.shape[0]:] = 1.0
         y = y.reshape((-1, 1))
-
+        print("y",y)
+        print("x",x)
         X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.40, random_state=42)
         X_train, X_val, y_train, y_val =  train_test_split(X_train, y_train, test_size=0.50, random_state=42)
         # save data
         if folder is not None:
-            np.save(folder + do + "/x0_test.npy",  X0_test)
             np.save(folder + do + "/x0_train.npy", X0)
             np.save(folder + do + "/x1_train.npy", X1)
             np.save(folder + do + "/X_train.npy", X_train)
@@ -193,14 +186,13 @@ class Loader():
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
         if do == "sherpaVsMG5":
             legend = ["Sherpa","MG5"]
-        elif do == "mur": 
-            legend = ["MUR1", "MUR2"]
+            binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2000, 200), range(0, 2000, 200),etaX]
         elif do == "qsf":
             etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
-            vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','Lepton $\mathrm{p_{T}}$ [GeV]','Lepton $\eta$']
-            variables = ['Njets','j1pT', 'j1eta', 'ptmiss', 'l1pT','l1eta']
+            variables = ['Jet_Pt', 'Njets']
+            vlabels = ['Jet pT', 'number of jets']
+            binning = [range(0, 2750, 250), range(0, 15, 1)]
             legend = ["qsfUp", "qsfDown"]
-        binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2000, 200), range(0, 2000, 200),etaX]
 
         # load samples
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
