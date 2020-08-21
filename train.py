@@ -7,7 +7,7 @@ from ml import Loader
 
 parser = optparse.OptionParser(usage="usage: %prog [opts]", version="%prog 1.0")
 parser.add_option('-s', '--samples',  action='store', type=str, dest='samples', default='qsf', help='samples to derive weights for. default QSF down to QSF up')
-parser.add_option('-n', '--nentries', action='store', type=str, dest='nentries', default=None, help='specify the number of events do do the training on, default None means full sample')
+parser.add_option('-n', '--nentries', action='store', type=str, dest='nentries', default=10, help='specify the number of events do do the training on, default None means full sample')
 (opts, args) = parser.parse_args()
 
 loading = Loader()
