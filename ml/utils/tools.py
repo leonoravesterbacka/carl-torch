@@ -27,7 +27,7 @@ def load(filename = None, variables = None, n = 0, tree = None):
     t = uproot.open(filename)[tree]
     a = t.arrays(variables, namedecode='utf-8',entrystop = n)
     p = a.copy()
-    p['Jet_Pt'] = a['Jet_Pt'].pad(8,clip=True).fillna(0)
+    p['Jet_Pt'] = a['Jet_Pt'].pad(2,clip=True).fillna(0)
     print("padded array ",p)
     df = pd.DataFrame.from_dict(p)
     print("df", df)

@@ -40,9 +40,8 @@ class NumpyDataset(Dataset):
             else:
                 print("a", array)
                 self.memmap.append(False)
-                #print("array[:, 0]", array[:, 1])
+                print("array[:, 0]", array[:, 0])
                 float_arr = np.vstack(array[:, 0]).astype(np.float)
-                #float_arr2 = np.vstack(float_arr[:, 1])
                 print("float ", float_arr)
                 tensor = torch.from_numpy(float_arr).to(self.dtype)
                 print("tensor,", tensor)
