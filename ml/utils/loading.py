@@ -86,13 +86,13 @@ class Loader():
                 x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/one/Nominal.root', variables = variables, tree = 'tree_')
         elif do == "qsf":
             legend = ["qsfUp", "qsfDown"]
-            variables = ['Jet_Pt', 'Jet_Eta']
+            variables = ['Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi']
             vlabels = ['Jet pT', 'Jet Eta']
             etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
-            binning = [range(0, 2750, 250), range(0, 15, 1)]
+            binning = [range(0, 2750, 250), etaX, range(0,200,200), etaX]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
-                x0 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfUp/one/tree.root',   variables = variables, n = int(nentries), tree = 'Tree')
-                x1 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfDown/one/tree.root', variables = variables, n = int(nentries), tree = 'Tree')
+                x0 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfUp/one/tree.root',  variables = variables, n = int(nentries), tree = 'Tree')
+                x1 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfDown/one/tree.root',variables = variables, n = int(nentries), tree = 'Tree')
         
         if preprocessing:
             factor = 3
@@ -112,7 +112,6 @@ class Loader():
             x1 = x1.round(decimals=2)
             print("after", x1.head)
 
-        print("x",x0)
         # randomize training and test data (or not)
         n_target = x1.values.shape[0]
         if randomize:

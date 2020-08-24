@@ -8,8 +8,8 @@ from subprocess import Popen, PIPE
 import io
 import numpy as np
 import shutil
-import uproot
-import awkward as ak
+import uproot4
+import awkward1 as ak
 import root_numpy
 import pandas as pd
 import torch
@@ -24,13 +24,11 @@ initialized = False
 def load(filename = None, variables = None, n = 0, tree = None):
     if filename is None:
         return None
-    t = uproot.open(filename)[tree]
-    a = t.arrays(variables, namedecode='utf-8',entrystop = n)
-    p = a.copy()
-    p['Jet_Pt'] = a['Jet_Pt'].pad(3,clip=True).fillna(0)
-    p['Jet_Eta'] = a['Jet_Eta'].pad(3,clip=True).fillna(0)
-    print("padded array ",p)
-    df = pd.DataFrame.from_dict(p)
+    t = uproot4.open(filename)[tree]
+    a = t.arrays(variables, entry_stop = n)
+    f = ak.fill_none(ak.pad_none(a, 3, axis = 1, clip=True), 0)
+    df = ak.to_pandas(f)
+    print("df ",df)
     return df
 
 def create_missing_folders(folders):
@@ -67,18 +65,18 @@ def load_and_check(filename, warning_threshold=1.0e9, memmap_files_larger_than_g
             memmap = True
 
     if not memmap:
-        #n_nans = np.sum(np.isnan(data))
-        #n_infs = np.sum(np.isinf(data))
-        #n_finite = np.sum(np.isfinite(data))
-        #if n_nans + n_infs > 0:
-        #    logger.warning(
-        #        "%s contains %s NaNs and %s Infs, compared to %s finite numbers!", filename, n_nans, n_infs, n_finite
-        #    )
+        n_nans = np.sum(np.isnan(data))
+        n_infs = np.sum(np.isinf(data))
+        n_finite = np.sum(np.isfinite(data))
+        if n_nans + n_infs > 0:
+            logger.warning(
+                "%s contains %s NaNs and %s Infs, compared to %s finite numbers!", filename, n_nans, n_infs, n_finite
+            )
         print("data", data)
-        #smallest = np.nanmin(data)
-        #largest = np.nanmax(data)
-        #if np.abs(smallest) > warning_threshold or np.abs(largest) > warning_threshold:
-        #    logger.warning("Warning: file %s has some large numbers, rangin from %s to %s", filename, smallest, largest)
+        smallest = np.nanmin(data)
+        largest = np.nanmax(data)
+        if np.abs(smallest) > warning_threshold or np.abs(largest) > warning_threshold:
+            logger.warning("Warning: file %s has some large numbers, rangin from %s to %s", filename, smallest, largest)
 
     if len(data.shape) == 1:
         data = data.reshape(-1, 1)

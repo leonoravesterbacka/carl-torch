@@ -39,16 +39,7 @@ class NumpyDataset(Dataset):
                 self.data.append(array)
             else:
                 self.memmap.append(False)
-                if array.shape[1]>1:    
-                    float_arr1 = np.vstack(array[:, 0]).astype(np.float)
-                    float_arr2 = np.vstack(array[:, 1]).astype(np.float)
-                    float_arr = np.append(float_arr1, float_arr2, axis=1)
-                else:
-                    #don't do the above for the target array
-                    float_arr = np.vstack(array[:, 0]).astype(np.float)
-                print("float ", float_arr)
-                tensor = torch.from_numpy(float_arr).to(self.dtype)
-                print("tensor,", tensor)
+                tensor = torch.from_numpy(array).to(self.dtype)
                 self.data.append(tensor)
 
     def __getitem__(self, index):

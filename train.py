@@ -11,18 +11,18 @@ parser.add_option('-n', '--nentries', action='store', type=str, dest='nentries',
 (opts, args) = parser.parse_args()
 
 loading = Loader()
-x, y =loading.loading(
+loading.loading(
     folder='./data/',
     plot=False,
     do = opts.samples,
     randomize = False,
-    save = False,
+    save = True,
     correlation = False,
     preprocessing = False,
     nentries = opts.nentries,
 )
-#x='data/'+opts.samples+'/X_train.npy'
-#y='data/'+opts.samples+'/Y_train.npy'
+x='data/'+opts.samples+'/X_train.npy'
+y='data/'+opts.samples+'/Y_train.npy'
 
 estimator = RatioEstimator(
     n_hidden=(4,2),
@@ -34,6 +34,6 @@ estimator.train(
     n_epochs = 50,
     x=x,
     y=y,
-    scale_inputs = False,
+    scale_inputs = True,
 )
 estimator.save('models/'+opts.samples+'_carl', x=x, export_model = True)
