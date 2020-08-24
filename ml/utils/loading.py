@@ -132,9 +132,12 @@ class Loader():
             plt.savefig('plots/scatterMatrix_'+do+'.png')
             plt.clf()
 
-        X0 = x0.to_numpy()
-        X1 = x1.to_numpy()
-        x = np.vstack([X0, X1])
+        #X0 = x0.to_numpy()
+        #X1 = x1.to_numpy()
+        X0 = x0
+        X1 = x1
+        x = pd.concat([x0,x1],ignore_index=True)
+        #x = np.vstack([x0, x1])
         y = np.zeros(x.shape[0])
         y[x0.shape[0]:] = 1.0
         y = y.reshape((-1, 1))

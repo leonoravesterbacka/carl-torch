@@ -33,13 +33,14 @@ class NumpyDataset(Dataset):
             if self.n is None:
                 self.n = array.shape[0]
             assert array.shape[0] == self.n
-
+            print("array ", array)
             if isinstance(array, np.memmap):
                 self.memmap.append(True)
                 self.data.append(array)
             else:
                 self.memmap.append(False)
                 tensor = torch.from_numpy(array).to(self.dtype)
+                print("tensor", tensor)
                 self.data.append(tensor)
 
     def __getitem__(self, index):
