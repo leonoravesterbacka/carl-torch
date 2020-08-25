@@ -5,14 +5,14 @@ from ml import Loader
 
 
 parser = optparse.OptionParser(usage="usage: %prog [opts]", version="%prog 1.0")
-parser.add_option('-s', '--samples',  action='store', type=str, dest='samples', default='sherpaVsMG5', help='samples to derive weights for. default Sherpa vs. Madgraph5')
-parser.add_option('-n', '--nentries', action='store', type=str, dest='nentries', default=None, help='specify the number of events do do the training on, default None means full sample')
+parser.add_option('-s', '--samples',  action='store', type=str, dest='samples',  default='qsf', help='samples to derive weights for. default QSF down to QSF up')
+parser.add_option('-n', '--nentries', action='store', type=str, dest='nentries', default=0, help='specify the number of events do do the training on, default None means full sample')
 (opts, args) = parser.parse_args()
 
 loading = Loader()
 loading.loading(
     folder='./data/',
-    plot=True,
+    plot=False,
     do = opts.samples,
     randomize = False,
     save = True,

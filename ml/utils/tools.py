@@ -23,15 +23,21 @@ initialized = False
 def load(filename = None, variables = None, n = 0, tree = None):
     if filename is None:
         return None
+
     f = uproot.open(filename)[tree]
-    print("n" , n)
-    if n > 0:
-        print("here")
+    if n > 0: # if n > 0 n is the number of entries to do training on 
         df = f.pandas.df(variables, entrystop = n)
-    else:
-        print(" or here")
+    else: # else do training on the full sample
         df = f.pandas.df(variables)
-    return df
+    dfj1 =  df.xs(0, level='subentry')
+    dfj2 =  df.xs(1, level='subentry')
+    
+    dfnew = dfj1.assign(Jet1_Pt=  dfj1['Jet_Pt'], Jet1_Eta= dfj1['Jet_Eta'], Jet1_Mass=dfj1['Jet_Mass'], Jet1_Phi= dfj1['Jet_Phi'], 
+                        Jet2_Pt=  dfj2['Jet_Pt'], Jet2_Eta= dfj2['Jet_Eta'], Jet2_Mass=dfj2['Jet_Mass'], Jet2_Phi= dfj2['Jet_Phi'],
+    )
+    final = dfnew.drop(['Jet_Pt', 'Jet_Eta', 'Jet_Phi', 'Jet_Mass'], axis=1)
+    print("final  ", final)
+    return final
 
 def create_missing_folders(folders):
     if folders is None:

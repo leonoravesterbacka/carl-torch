@@ -88,46 +88,27 @@ class Loader():
             variables = ['Njets','Jet_Pt', 'Jet_Eta', 'Jet_Phi', 'Jet_Mass', 'MET']
             vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','Lepton $\mathrm{p_{T}}$ [GeV]','Lepton $\eta$']
             etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
-            print("gonna load")
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfUp/tree.root',   variables = variables, n = int(nentries), tree = 'Tree')
                 x1 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfDown/tree.root', variables = variables, n = int(nentries), tree = 'Tree')
-        print("x1", x1)
         binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2000, 200), range(0, 2000, 200),etaX]
 
         if preprocessing:
-            #:print(x1.head)
             factor = 3
             print("x0 before preprocessing ",len(x0))
             print("x1 before preprocessing ",len(x1))
-            for column in variables:
+            for column in x0.columns:
                 upper_lim = x0[column].mean () + x0[column].std () * factor
                 upper_lim = x1[column].mean () + x1[column].std () * factor
                 lower_lim = x0[column].mean () - x0[column].std () * factor
                 lower_lim = x1[column].mean () - x1[column].std () * factor
-                print("column ",column)
                 x0 = x0[(x0[column] < upper_lim) & (x0[column] > lower_lim)]
                 x1 = x1[(x1[column] < upper_lim) & (x1[column] > lower_lim)]
                 print("x0 after",len(x0))
                 print("x1 after",len(x1))
             x0 = x0.round(decimals=2)
             x1 = x1.round(decimals=2)
-            print("after", x1.head)
 
-
-
-        print(x1[variables].describe())
-        #x0 = x0.drop(columns=['ptmiss'])
-
-        # randomize training and test data (or not)
-        n_target = x1.values.shape[0]
-        if randomize:
-            randomized = x0.values[np.random.choice(range(x0.values.shape[0]),2*n_target,replace=True)]
-            X0 = randomized[:n_target,:]
-            X0_test = randomized[-n_target:,:]
-        else:
-            X0 = x0.values[:n_target,:]
-            X0_test = x0.values[-n_target:,:]
 
         if correlation:
             cor0 = x0.corr()
@@ -138,20 +119,21 @@ class Loader():
             plt.savefig('plots/scatterMatrix_'+do+'.png')
             plt.clf()
 
-        # load sample X1
+        X0 = x0.to_numpy()
         X1 = x1.to_numpy()
         # combine
         x = np.vstack([X0, X1])
         y = np.zeros(x.shape[0])
+
         y[X0.shape[0] :] = 1.0
         # y shape
         y = y.reshape((-1, 1))
-
+        print("x", x)
+        print("y", y)
         X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.40, random_state=42)
         X_train, X_val, y_train, y_val =  train_test_split(X_train, y_train, test_size=0.50, random_state=42)
         # save data
         if folder is not None:
-            np.save(folder + do + "/x0_test.npy",  X0_test)
             np.save(folder + do + "/x0_train.npy", X0)
             np.save(folder + do + "/x1_train.npy", X1)
             np.save(folder + do + "/X_train.npy", X_train)
