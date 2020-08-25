@@ -3,7 +3,6 @@ import os
 import time
 import logging
 import numpy as np
-import root_numpy
 import pandas as pd
 import seaborn as sns
 
@@ -85,18 +84,17 @@ class Loader():
                 x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/one/Nominal.root', variables = variables, tree = 'tree_')
         elif do == "qsf":
             legend = ["qsfUp", "qsfDown"]
-            variables = ['Njets','Jet_Pt', 'Jet_Eta', 'Jet_Phi', 'Jet_Mass', 'MET']
-            vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','Lepton $\mathrm{p_{T}}$ [GeV]','Lepton $\eta$']
+            variables = ['Njets', 'MET', 'Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi']
+            vlabels = ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$', 'Leading jet mass [GeV]','Leading jet $\Phi$', 'Subleading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\eta$', 'Subleading jet mass [GeV]','Subleading jet $\Phi$']
             etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
+            jetBinning = [range(0, 2750, 250), etaJ, range(0, 2000, 200), etaJ]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfUp/tree.root',   variables = variables, n = int(nentries), tree = 'Tree')
                 x1 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfDown/tree.root', variables = variables, n = int(nentries), tree = 'Tree')
-        binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2000, 200), range(0, 2000, 200),etaX]
+        binning = [range(0, 15, 1), range(0, 1000, 100)]+jetBinning+jetBinning
 
         if preprocessing:
             factor = 3
-            print("x0 before preprocessing ",len(x0))
-            print("x1 before preprocessing ",len(x1))
             for column in x0.columns:
                 upper_lim = x0[column].mean () + x0[column].std () * factor
                 upper_lim = x1[column].mean () + x1[column].std () * factor
@@ -104,8 +102,6 @@ class Loader():
                 lower_lim = x1[column].mean () - x1[column].std () * factor
                 x0 = x0[(x0[column] < upper_lim) & (x0[column] > lower_lim)]
                 x1 = x1[(x1[column] < upper_lim) & (x1[column] > lower_lim)]
-                print("x0 after",len(x0))
-                print("x1 after",len(x1))
             x0 = x0.round(decimals=2)
             x1 = x1.round(decimals=2)
 
@@ -128,25 +124,21 @@ class Loader():
         y[X0.shape[0] :] = 1.0
         # y shape
         y = y.reshape((-1, 1))
-        print("x", x)
-        print("y", y)
         X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.40, random_state=42)
-        X_train, X_val, y_train, y_val =  train_test_split(X_train, y_train, test_size=0.50, random_state=42)
+        X_train, X_val,  y_train, y_val =  train_test_split(X_train, y_train, test_size=0.50, random_state=42)
         # save data
         if folder is not None:
             np.save(folder + do + "/x0_train.npy", X0)
             np.save(folder + do + "/x1_train.npy", X1)
-            np.save(folder + do + "/X_train.npy", X_train)
             np.save(folder + do + "/x_train.npy", x)
             np.save(folder + do + "/y_train.npy", y)
-            np.save(folder + do + "/X_test.npy", X_test)
+            np.save(folder + do + "/X_train.npy", X_train)
             np.save(folder + do + "/X_val.npy", X_val)
             np.save(folder + do + "/Y_train.npy", y_train)
-            np.save(folder + do + "/Y_test.npy", y_test)
             np.save(folder + do + "/Y_val.npy", y_val)
 
         if plot:
-            draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), variables, vlabels, binning, legend, save) 
+            draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, legend, save) 
             print("saving plots")
             
         return x, y                                                                                                                                                                                                                                      
@@ -157,7 +149,7 @@ class Loader():
         x1,
         weights = None,
         label = None,
-        do = 'sherpaVsMG5',
+        do = 'qsf',
         save = False,
     ):
         """
@@ -169,21 +161,20 @@ class Loader():
         -------
         """
 
-        variables = ['Njets','j1pT', 'j1eta', 'ptmiss','VpT','Veta']
-        vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','V $\mathrm{p_{T}}$ [GeV]','V $\eta$']
         etaX = [-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10,11]
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
         if do == "sherpaVsMG5":
             legend = ["Sherpa","MG5"]
-        elif do == "mur": 
-            legend = ["MUR1", "MUR2"]
         elif do == "qsf":
             etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
-            vlabels = ['Number of jets','Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$','Subleading jet $\mathrm{p_{T}}$ [GeV]', 'Subleading jet $\eta$','$\mathrm{p_{T}^{miss}}$ [GeV]','Lepton $\mathrm{p_{T}}$ [GeV]','Lepton $\eta$']
-            variables = ['Njets','j1pT', 'j1eta', 'ptmiss', 'l1pT','l1eta']
             legend = ["qsfUp", "qsfDown"]
-        binning = [range(0, 15, 1), range(0, 2750, 250),etaJ,range(0, 2000, 200), range(0, 2000, 200),etaX]
+            variables = ['Njets', 'MET', 'Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi']
+            vlabels = ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$', 'Leading jet mass [GeV]','Leading jet $\Phi$', 'Subleading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\eta$', 'Subleading jet mass [GeV]','Subleading jet $\Phi$']
+            etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
+            jetBinning = [range(0, 2750, 250), etaJ, range(0, 2000, 200), etaJ]
 
+        binning = [range(0, 15, 1), range(0, 1000, 100)]+jetBinning+jetBinning
+        x0df = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfUp/tree.root',   variables = variables, n = 1, tree = 'Tree')
         # load samples
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
         X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)
@@ -191,7 +182,7 @@ class Loader():
         # plot ROC curves     
         draw_ROC(X0, X1, weights, label, legend, save)
         # plot reweighted distributions      
-        draw_weighted_distributions(X0, X1, weights, variables, vlabels, binning, label, legend, save) 
+        draw_weighted_distributions(X0, X1, weights, x0df.columns, vlabels, binning, label, legend, save) 
 
     def load_calibration(
         self,

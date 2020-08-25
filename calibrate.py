@@ -5,7 +5,7 @@ from ml.calibration import CalibratedClassifier
 from ml.base import Estimator
 
 parser = optparse.OptionParser(usage="usage: %prog [opts]", version="%prog 1.0")
-parser.add_option('-s', '--samples', action='store', type=str, dest='samples', default='sherpaVsMG5', help='samples to derive weights for. default Sherpa vs. Madgraph5')
+parser.add_option('-s', '--samples',  action='store', type=str, dest='samples', default='qsf', help='samples to derive weights for. default QSF down to QSF up')
 (opts, args) = parser.parse_args()
 do = opts.samples
 
@@ -29,7 +29,7 @@ loading.load_calibration(y_true = y,
                          save = True,
 )
 
-evaluate = ['train', 'test']
+evaluate = ['train']
 for i in evaluate:
     p0, p1, r_cal = calib.predict(X = 'data/'+do+'/x0_'+i+'.npy')
     w = 1./r_cal

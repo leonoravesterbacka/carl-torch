@@ -2,7 +2,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import time
 import logging
-import root_numpy
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -22,9 +21,9 @@ logger = logging.getLogger(__name__)
 hist_settings0 = {'alpha': 0.3}
 hist_settings1 = {'histtype':'step', 'color':'black', 'linewidth':1, 'linestyle':'--'}
 
-def draw_unweighted_distributions(x0, x1, weights, varis, vlabels, binning, legend, save = False):
+def draw_unweighted_distributions(x0, x1, weights, variables, vlabels, binning, legend, save = False):
     plt.figure(figsize=(14, 10))
-    columns = range(len(varis))
+    columns = range(len(variables))
     for id, column in enumerate(columns, 1):
         if save: plt.figure(figsize=(5, 4)) 
         else: plt.subplot(3,4, id)
@@ -34,16 +33,16 @@ def draw_unweighted_distributions(x0, x1, weights, varis, vlabels, binning, lege
         plt.xlabel('%s'%(vlabels[id-1])) 
         plt.legend(frameon=False)
         axes = plt.gca()
-        axes.set_ylim([1,100000])                  
+        axes.set_ylim([len(x0)*0.01,len(x0)*10])                  
         if save:
             create_missing_folders(["plots"])                                                              
-            plt.savefig("plots/unweighted_%s_%sVs%s.png"%(varis[id-1], legend[0],legend[1]))                                                                
+            plt.savefig("plots/unweighted_%s_%sVs%s.png"%(variables[id-1], legend[0],legend[1]))                                                                
             plt.clf()
             plt.close()
 
-def draw_weighted_distributions(x0, x1, weights, varis, vlabels, binning, label, legend, save = False):
+def draw_weighted_distributions(x0, x1, weights, variables, vlabels, binning, label, legend, save = False):
     plt.figure(figsize=(14, 10))
-    columns = range(len(varis))
+    columns = range(len(variables))
     for id, column in enumerate(columns, 1):
         if save: plt.figure(figsize=(5, 4)) 
         else: plt.subplot(3,4, id)
@@ -54,10 +53,10 @@ def draw_weighted_distributions(x0, x1, weights, varis, vlabels, binning, label,
         plt.xlabel('%s'%(vlabels[id-1])) 
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()
-        axes.set_ylim([1,100000])                  
+        axes.set_ylim([len(x0)*0.01,len(x0)*10])                 
         if save:
             create_missing_folders(["plots"])                                                              
-            plt.savefig("plots/weighted_%s_%sVs%s_%s.png"%(varis[id-1], legend[0],legend[1],label)) 
+            plt.savefig("plots/weighted_%s_%sVs%s_%s.png"%(variables[id-1], legend[0],legend[1],label)) 
             plt.clf()
             plt.close()
 
