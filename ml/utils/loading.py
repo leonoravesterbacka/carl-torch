@@ -87,7 +87,7 @@ class Loader():
             variables = ['Njets', 'MET', 'Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi']
             vlabels = ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$', 'Leading jet mass [GeV]','Leading jet $\Phi$', 'Subleading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\eta$', 'Subleading jet mass [GeV]','Subleading jet $\Phi$']
             etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
-            jetBinning = [range(0, 2750, 250), etaJ, range(0, 2000, 200), etaJ]
+            jetBinning = [range(0, 2000, 200), etaJ, range(0, 1000, 100), etaJ]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
                 x0 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfUp/tree.root',   variables = variables, n = int(nentries), tree = 'Tree')
                 x1 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfDown/tree.root', variables = variables, n = int(nentries), tree = 'Tree')
@@ -171,7 +171,7 @@ class Loader():
             variables = ['Njets', 'MET', 'Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi']
             vlabels = ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$', 'Leading jet mass [GeV]','Leading jet $\Phi$', 'Subleading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\eta$', 'Subleading jet mass [GeV]','Subleading jet $\Phi$']
             etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
-            jetBinning = [range(0, 2750, 250), etaJ, range(0, 2000, 200), etaJ]
+            jetBinning = [range(0, 2000, 200), etaJ, range(0, 1000, 100), etaJ]
 
         binning = [range(0, 15, 1), range(0, 1000, 100)]+jetBinning+jetBinning
         x0df = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfUp/tree.root',   variables = variables, n = 1, tree = 'Tree')
