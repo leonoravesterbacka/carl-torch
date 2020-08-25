@@ -24,7 +24,7 @@ x='data/'+opts.samples+'/X_train.npy'
 y='data/'+opts.samples+'/Y_train.npy'
 
 estimator = RatioEstimator(
-    n_hidden=(9,6,3),
+    n_hidden=(8,4,2),
     activation="relu"
 )
 estimator.train(
