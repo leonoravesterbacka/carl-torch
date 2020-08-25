@@ -84,14 +84,15 @@ class Loader():
                 x1 = load(filename = '/eos/user/m/mvesterb/data/madgraph/one/Nominal.root', variables = variables, tree = 'tree_')
         elif do == "qsf":
             legend = ["qsfUp", "qsfDown"]
-            variables = ['Njets', 'MET', 'Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi']
-            vlabels = ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$', 'Leading jet mass [GeV]','Leading jet $\Phi$', 'Subleading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\eta$', 'Subleading jet mass [GeV]','Subleading jet $\Phi$']
+            jetVariables = ['Njets', 'MET', 'Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi']
+            lepVariables = ['Lepton_Pt', 'Lepton_Eta', 'Lepton_Mass', 'Lepton_Phi']
+            vlabels = ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$', 'Leading jet mass [GeV]','Leading jet $\Phi$', 'Subleading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\eta$', 'Subleading jet mass [GeV]','Subleading jet $\Phi$', 'Leading lepton $\mathrm{p_{T}}$ [GeV]','Leading lepton $\eta$', 'Leading lepton mass [GeV]','Leading lepton $\Phi$', 'Subleading lepton $\mathrm{p_{T}}$ [GeV]','Subleading lepton $\eta$', 'Subleading lepton mass [GeV]','Subleading lepton $\Phi$']
             etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
             jetBinning = [range(0, 2000, 200), etaJ, range(0, 1000, 100), etaJ]
             if x0 is None and x1 is None: # if x0 and x1 are not provided, load them here
-                x0 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfUp/tree.root',   variables = variables, n = int(nentries), tree = 'Tree')
-                x1 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfDown/tree.root', variables = variables, n = int(nentries), tree = 'Tree')
-        binning = [range(0, 15, 1), range(0, 1000, 100)]+jetBinning+jetBinning
+                x0 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfUp/tree.root',   jets = jetVariables, leps = lepVariables, n = int(nentries), tree = 'Tree')
+                x1 = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfDown/tree.root', jets = jetVariables, leps = lepVariables, n = int(nentries), tree = 'Tree')
+        binning = [range(0, 15, 1), range(0, 1000, 100)]+jetBinning+jetBinning+jetBinning+jetBinning
 
         if preprocessing:
             factor = 3
@@ -168,13 +169,14 @@ class Loader():
         elif do == "qsf":
             etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
             legend = ["qsfUp", "qsfDown"]
-            variables = ['Njets', 'MET', 'Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi']
-            vlabels = ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$', 'Leading jet mass [GeV]','Leading jet $\Phi$', 'Subleading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\eta$', 'Subleading jet mass [GeV]','Subleading jet $\Phi$']
+            jetVariables = ['Njets', 'MET', 'Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi']
+            lepVariables = ['Lepton_Pt', 'Lepton_Eta', 'Lepton_Mass', 'Lepton_Phi']
+            vlabels = ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$', 'Leading jet mass [GeV]','Leading jet $\Phi$', 'Subleading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\eta$', 'Subleading jet mass [GeV]','Subleading jet $\Phi$', 'Leading lepton $\mathrm{p_{T}}$ [GeV]','Leading lepton $\eta$', 'Leading lepton mass [GeV]','Leading lepton $\Phi$', 'Subleading lepton $\mathrm{p_{T}}$ [GeV]','Subleading lepton $\eta$', 'Subleading lepton mass [GeV]','Subleading lepton $\Phi$']
             etaX = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
             jetBinning = [range(0, 2000, 200), etaJ, range(0, 1000, 100), etaJ]
 
-        binning = [range(0, 15, 1), range(0, 1000, 100)]+jetBinning+jetBinning
-        x0df = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfUp/tree.root',   variables = variables, n = 1, tree = 'Tree')
+        binning = [range(0, 15, 1), range(0, 1000, 100)]+jetBinning+jetBinning+jetBinning+jetBinning
+        x0df = load(filename = '/afs/cern.ch/work/m/mvesterb/public/pmg/aug11/qsfUp/tree.root',   jets = jetVariables, leps = lepVariables, n = 1, tree = 'Tree')
         # load samples
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
         X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)
