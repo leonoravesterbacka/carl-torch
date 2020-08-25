@@ -12,7 +12,7 @@ parser.add_option('-n', '--nentries', action='store', type=str, dest='nentries',
 loading = Loader()
 loading.loading(
     folder='./data/',
-    plot=False,
+    plot=True,
     do = opts.samples,
     randomize = False,
     save = True,
