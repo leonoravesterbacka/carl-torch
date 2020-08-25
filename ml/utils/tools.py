@@ -20,17 +20,17 @@ logger = logging.getLogger(__name__)
 
 initialized = False
 
-def load(filename = None, jets = None, leps = None, n = 0, tree = None):
+def load(filename = None, events = None, jets = None, leps = None, n = 0, tree = None):
     if filename is None:
         return None
 
     f = uproot.open(filename)[tree]
     if n > 0: # if n > 0 n is the number of entries to do training on 
+        df = f.pandas.df(events, entrystop = n)
         jetdf = f.pandas.df(jets, entrystop = n)
         lepdf = f.pandas.df(leps, entrystop = n)
-        print("df", jetdf)
-        print("lep df", lepdf)
     else: # else do training on the full sample
+        df = f.pandas.df(events)
         jetdf = f.pandas.df(jets)
         lepdf = f.pandas.df(leps)
     dfj1 =  jetdf.xs(0, level='subentry')
@@ -38,13 +38,10 @@ def load(filename = None, jets = None, leps = None, n = 0, tree = None):
     dfl1 =  lepdf.xs(0, level='subentry')
     dfl2 =  lepdf.xs(1, level='subentry')
     
-    dfnew = dfj1.assign(Jet1_Pt=  dfj1['Jet_Pt'], Jet1_Eta= dfj1['Jet_Eta'], Jet1_Mass=dfj1['Jet_Mass'], Jet1_Phi= dfj1['Jet_Phi'], 
-                        Jet2_Pt=  dfj2['Jet_Pt'], Jet2_Eta= dfj2['Jet_Eta'], Jet2_Mass=dfj2['Jet_Mass'], Jet2_Phi= dfj2['Jet_Phi'],
-                        Lep1_Pt=  dfl1['Lepton_Pt'], Lep1_Eta= dfl1['Lepton_Eta'], Lep1_Mass=dfl1['Lepton_Mass'], Lep1_Phi= dfl1['Lepton_Phi'],
-                        Lep2_Pt=  dfl2['Lepton_Pt'], Lep2_Eta= dfl2['Lepton_Eta'], Lep2_Mass=dfl2['Lepton_Mass'], Lep2_Phi= dfl2['Lepton_Phi'],
-    )
-    final = dfnew.drop(['Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi'], axis=1).fillna(0.0)
-    print("final", final)
+    final = df.assign(Jet1_Pt=  dfj1['Jet_Pt'], Jet1_Eta= dfj1['Jet_Eta'], Jet1_Mass=dfj1['Jet_Mass'], Jet1_Phi= dfj1['Jet_Phi'], 
+                      Jet2_Pt=  dfj2['Jet_Pt'], Jet2_Eta= dfj2['Jet_Eta'], Jet2_Mass=dfj2['Jet_Mass'], Jet2_Phi= dfj2['Jet_Phi'],
+                      Lep1_Pt=  dfl1['Lepton_Pt'], Lep1_Eta= dfl1['Lepton_Eta'], Lep1_Phi= dfl1['Lepton_Phi'],
+                      Lep2_Pt=  dfl2['Lepton_Pt'], Lep2_Eta= dfl2['Lepton_Eta'], Lep2_Phi= dfl2['Lepton_Phi']).fillna(0.0)
     return final
 
 def create_missing_folders(folders):
