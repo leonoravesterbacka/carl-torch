@@ -77,8 +77,8 @@ class Loader():
         jetVars   = ['Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi']
         lepVars   = ['Lepton_Pt', 'Lepton_Eta', 'Lepton_Phi']
         vlabels = ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$', 'Leading jet mass [GeV]','Leading jet $\Phi$', 'Subleading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\eta$', 'Subleading jet mass [GeV]','Subleading jet $\Phi$', 'Leading lepton $\mathrm{p_{T}}$ [GeV]','Leading lepton $\eta$','Leading lepton $\Phi$', 'Subleading lepton $\mathrm{p_{T}}$ [GeV]','Subleading lepton $\eta$', 'Subleading lepton $\Phi$']
-        jetBinning = [range(0, 1500, 100), etaJ, range(0, 500, 50), etaJ]
-        lepBinning = [range(0, 500, 50), etaJ, etaJ]
+        jetBinning = [range(0, 1500, 100), etaJ, range(0, 300, 30), etaJ]
+        lepBinning = [range(0, 700, 50), etaJ, etaJ]
         if do == "ckkw":
             legend = ["CKKW20","CKKW50"]
             x0 = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_dilepton_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree')
@@ -87,10 +87,10 @@ class Loader():
             legend = ["qsfUp", "qsfDown"]
             x0 = load(f = '/eos/user/m/mvesterb/pmg/qsfSamples/Sh_228_ttbar_dilepton_EnhMaxHTavrgTopPT_QSFDOWN.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree')
             x1 = load(f = '/eos/user/m/mvesterb/pmg/qsfSamples/Sh_228_ttbar_dilepton_EnhMaxHTavrgTopPT_QSFUP.root',   events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree')
-        binning = [range(0, 15, 1), range(0, 700, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
+        binning = [range(0, 12, 1), range(0, 800, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
 
         if preprocessing:
-            factor = 3
+            factor = 5
             x00 = len(x0)
             x10 = len(x1)
             for column in x0.columns:
@@ -102,8 +102,8 @@ class Loader():
                 x1 = x1[(x1[column] < upper_lim) & (x1[column] > lower_lim)]
             x0 = x0.round(decimals=2)
             x1 = x1.round(decimals=2)
-            print("filtered x0 ", (x00-len(x0))/len(x0)*100, "% ")
-            print("filtered x1 ", (x10-len(x1))/len(x1)*100, "% ")
+            print("filtered x0 outliers: ", (x00-len(x0))/len(x0)*100, "% ")
+            print("filtered x1 outliers: ", (x10-len(x1))/len(x1)*100, "% ")
 
 
         if correlation:
@@ -126,11 +126,9 @@ class Loader():
         X0_train, X0_val,  y0_train, y0_val =  train_test_split(X0_train, y0_train, test_size=0.50, random_state=42)
         X1_train, X1_val,  y1_train, y1_val =  train_test_split(X1_train, y1_train, test_size=0.50, random_state=42)
         X_train = np.vstack([X0_train, X1_train])
-        y_train = np.vstack([y0_train, y1_train])
+        y_train = np.concatenate((y0_train, y1_train), axis=None)
         X_val   = np.vstack([X0_val, X1_val])
-        y_val   = np.vstack([y0_val, y1_val])
-        y_val   = y_val.reshape((-1, 1))
-        y_train = y_train.reshape((-1, 1))
+        y_val = np.concatenate((y0_val, y1_val), axis=None)
         # save data
         if folder is not None:
             np.save(folder + do + "/X_train.npy", X_train)
@@ -169,14 +167,14 @@ class Loader():
         lepVars   = ['Lepton_Pt', 'Lepton_Eta', 'Lepton_Phi']
         vlabels = ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$', 'Leading jet mass [GeV]','Leading jet $\Phi$', 'Subleading jet $\mathrm    {p_{T}}$ [GeV]','Subleading jet $\eta$', 'Subleading jet mass [GeV]','Subleading jet $\Phi$', 'Leading lepton $\mathrm{p_{T}}$ [GeV]','Leading lepton $\eta$','Leading lepton $\Phi$', 'Subleading lepto    n $\mathrm{p_{T}}$ [GeV]','Subleading lepton $\eta$', 'Subleading lepton $\Phi$']
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
-        jetBinning = [range(0, 1500, 100), etaJ, range(0, 500, 50), etaJ]
-        lepBinning = [range(0, 500, 50), etaJ, etaJ]
+        jetBinning = [range(0, 1500, 100), etaJ, range(0, 300, 30), etaJ]
+        lepBinning = [range(0, 700, 50), etaJ, etaJ]
         if do == "ckkw":
             legend = ["CKKW20","CKKW50"]
         elif do == "qsf":
             legend = ["qsfUp", "qsfDown"]
 
-        binning = [range(0, 15, 1), range(0, 700, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
+        binning = [range(0, 12, 1), range(0, 800, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
         x0df = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_dilepton_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = 1, t = 'Tree')
         # load samples
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
