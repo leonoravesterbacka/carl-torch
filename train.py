@@ -17,11 +17,11 @@ loading.loading(
     randomize = False,
     save = True,
     correlation = True,
-    preprocessing = True,
+    preprocessing = False,
     nentries = opts.nentries,
 )
 x='data/'+opts.samples+'/X_train.npy'
-y='data/'+opts.samples+'/Y_train.npy'
+y='data/'+opts.samples+'/y_train.npy'
 
 estimator = RatioEstimator(
     n_hidden=(8,4,2),
