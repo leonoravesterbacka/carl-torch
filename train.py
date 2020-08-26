@@ -17,7 +17,7 @@ loading.loading(
     randomize = False,
     save = True,
     correlation = True,
-    preprocessing = False,
+    preprocessing = True,
     nentries = opts.nentries,
 )
 x='data/'+opts.samples+'/X_train.npy'

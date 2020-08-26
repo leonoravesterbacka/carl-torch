@@ -33,7 +33,7 @@ def draw_unweighted_distributions(x0, x1, weights, variables, vlabels, binning, 
         plt.xlabel('%s'%(vlabels[id-1])) 
         plt.legend(frameon=False)
         axes = plt.gca()
-        axes.set_ylim([len(x0)*0.01,len(x0)*10])                  
+        axes.set_ylim([len(x0)*0.005,len(x0)*2])                  
         if save:
             create_missing_folders(["plots"])                                                              
             plt.savefig("plots/unweighted_%s_%sVs%s.png"%(variables[id-1], legend[0],legend[1]))                                                                
@@ -53,7 +53,7 @@ def draw_weighted_distributions(x0, x1, weights, variables, vlabels, binning, la
         plt.xlabel('%s'%(vlabels[id-1])) 
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()
-        axes.set_ylim([len(x0)*0.01,len(x0)*10])                 
+        axes.set_ylim([len(x0)*0.005,len(x0)*2])                 
         if save:
             create_missing_folders(["plots"])                                                              
             plt.savefig("plots/weighted_%s_%sVs%s_%s.png"%(variables[id-1], legend[0],legend[1],label)) 
