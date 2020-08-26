@@ -14,7 +14,8 @@ loading = Loader()
 carl = RatioEstimator()
 carl.load('models/'+do+'_carl')
 #load
-X  = 'data/'+do+'/x_train.npy'
+evaluate = ['train']
+X  = 'data/'+do+'/X_train.npy'
 y  = 'data/'+do+'/y_train.npy'
 r_hat, s_hat = carl.evaluate(X)
 calib = CalibratedClassifier(carl)
@@ -31,10 +32,10 @@ loading.load_calibration(y_true = y,
 
 evaluate = ['train']
 for i in evaluate:
-    p0, p1, r_cal = calib.predict(X = 'data/'+do+'/x0_'+i+'.npy')
+    p0, p1, r_cal = calib.predict(X = 'data/'+do+'/X0_'+i+'.npy')
     w = 1./r_cal
-    loading.load_result(x0='data/'+do+'/x0_'+i+'.npy',
-                        x1='data/'+do+'/x1_train.npy',
+    loading.load_result(x0='data/'+do+'/X0_'+i+'.npy',
+                        x1='data/'+do+'/X1_'+i+'.npy',
                         weights=w, 
                         label = i+'_calib',
                         do = do,
