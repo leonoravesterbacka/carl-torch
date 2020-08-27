@@ -28,7 +28,8 @@ class Loader():
         self,
         folder=None,
         plot=False,
-        do = 'qsf',
+        var = 'qsf',
+        do  = 'dilepton',
         x0 = None,
         x1 = None,
         randomize = False,
@@ -68,7 +69,7 @@ class Loader():
             (denominator) hypothesis. The same information is saved as a file in the given folder.
         """
 
-        create_missing_folders([folder+do])
+        create_missing_folders([folder+'/'+do+'/'+var])
         create_missing_folders(['plots'])
 
         # load samples
@@ -76,17 +77,16 @@ class Loader():
         eventVars = ['Njets', 'MET']
         jetVars   = ['Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi']
         lepVars   = ['Lepton_Pt', 'Lepton_Eta', 'Lepton_Phi']
-        vlabels = ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$', 'Leading jet mass [GeV]','Leading jet $\Phi$', 'Subleading jet $\mathrm{p_{T}}$ [GeV]','Subleading jet $\eta$', 'Subleading jet mass [GeV]','Subleading jet $\Phi$', 'Leading lepton $\mathrm{p_{T}}$ [GeV]','Leading lepton $\eta$','Leading lepton $\Phi$', 'Subleading lepton $\mathrm{p_{T}}$ [GeV]','Subleading lepton $\eta$', 'Subleading lepton $\Phi$']
         jetBinning = [range(0, 1500, 100), etaJ, range(0, 300, 30), etaJ]
         lepBinning = [range(0, 700, 50), etaJ, etaJ]
-        if do == "ckkw":
+        if var == "ckkw":
             legend = ["CKKW20","CKKW50"]
-            x0 = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_dilepton_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree')
-            x1 = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_dilepton_EnhMaxHTavrgTopPT_CKKW50.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree')
-        elif do == "qsf":
+            x0, vlabels = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
+            x1, vlabels = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW50.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
+        elif var == "qsf":
             legend = ["qsfUp", "qsfDown"]
-            x0 = load(f = '/eos/user/m/mvesterb/pmg/qsfSamples/Sh_228_ttbar_dilepton_EnhMaxHTavrgTopPT_QSFDOWN.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree')
-            x1 = load(f = '/eos/user/m/mvesterb/pmg/qsfSamples/Sh_228_ttbar_dilepton_EnhMaxHTavrgTopPT_QSFUP.root',   events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree')
+            x0, vlabels = load(f = '/eos/user/m/mvesterb/pmg/qsfSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_QSFDOWN.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
+            x1, vlabels = load(f = '/eos/user/m/mvesterb/pmg/qsfSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_QSFUP.root',   events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
         binning = [range(0, 12, 1), range(0, 800, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
 
         if preprocessing:
@@ -112,7 +112,7 @@ class Loader():
             cor_target = abs(cor0[x0.columns[0]])
             relevant_features = cor_target[cor_target>0.5]
             print("relevant_features ", relevant_features)
-            plt.savefig('plots/scatterMatrix_'+do+'.png')
+            plt.savefig('plots/scatterMatrix_'+do+'_'+var+'.png')
             plt.clf()
 
         X0 = x0.to_numpy()
@@ -131,17 +131,17 @@ class Loader():
         y_val = np.concatenate((y0_val, y1_val), axis=None)
         # save data
         if folder is not None:
-            np.save(folder + do + "/X_train.npy", X_train)
-            np.save(folder + do + "/y_train.npy", y_train)
-            np.save(folder + do + "/X_val.npy", X_val)
-            np.save(folder + do + "/y_val.npy", y_val)
-            np.save(folder + do + "/X0_val.npy", X0_val)
-            np.save(folder + do + "/X1_val.npy", X1_val)
-            np.save(folder + do + "/X0_train.npy", X0_train)
-            np.save(folder + do + "/X1_train.npy", X1_train)
+            np.save(folder + do + '/' + var + "/X_train.npy", X_train)
+            np.save(folder + do + '/' + var + "/y_train.npy", y_train)
+            np.save(folder + do + '/' + var + "/X_val.npy", X_val)
+            np.save(folder + do + '/' + var + "/y_val.npy", y_val)
+            np.save(folder + do + '/' + var + "/X0_val.npy", X0_val)
+            np.save(folder + do + '/' + var + "/X1_val.npy", X1_val)
+            np.save(folder + do + '/' + var + "/X0_train.npy", X0_train)
+            np.save(folder + do + '/' + var + "/X1_train.npy", X1_train)
 
         if plot:
-            draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, legend, save) 
+            draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, legend, do, save) 
             print("saving plots")
             
 
@@ -165,7 +165,6 @@ class Loader():
         eventVars = ['Njets', 'MET']
         jetVars   = ['Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi']
         lepVars   = ['Lepton_Pt', 'Lepton_Eta', 'Lepton_Phi']
-        vlabels = ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]', 'Leading jet $\mathrm{p_{T}}$ [GeV]','Leading jet $\eta$', 'Leading jet mass [GeV]','Leading jet $\Phi$', 'Subleading jet $\mathrm    {p_{T}}$ [GeV]','Subleading jet $\eta$', 'Subleading jet mass [GeV]','Subleading jet $\Phi$', 'Leading lepton $\mathrm{p_{T}}$ [GeV]','Leading lepton $\eta$','Leading lepton $\Phi$', 'Subleading lepto    n $\mathrm{p_{T}}$ [GeV]','Subleading lepton $\eta$', 'Subleading lepton $\Phi$']
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
         jetBinning = [range(0, 1500, 100), etaJ, range(0, 300, 30), etaJ]
         lepBinning = [range(0, 700, 50), etaJ, etaJ]
@@ -175,7 +174,7 @@ class Loader():
             legend = ["qsfUp", "qsfDown"]
 
         binning = [range(0, 12, 1), range(0, 800, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
-        x0df = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_dilepton_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = 1, t = 'Tree')
+        x0df, vlabels = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_dilepton_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = 1, t = 'Tree')
         # load samples
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
         X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)

@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 initialized = False
 
-def load(f = None, events = None, jets = None, leps = None, n = 0, t = None):
+def load(f = None, events = None, jets = None, leps = None, n = 0, t = None, do = "dilepton"):
     if f is None:
         return None
 
@@ -33,16 +33,48 @@ def load(f = None, events = None, jets = None, leps = None, n = 0, t = None):
         df    = tree.pandas.df(events)
         jetdf = tree.pandas.df(jets)
         lepdf = tree.pandas.df(leps)
-    dfj1 = jetdf.xs(0, level='subentry')
-    dfj2 = jetdf.xs(1, level='subentry')
-    dfl1 = lepdf.xs(0, level='subentry')
-    dfl2 = lepdf.xs(1, level='subentry')
-    
-    final = df.assign( Jet1_Pt = dfj1['Jet_Pt'], Jet1_Eta= dfj1['Jet_Eta'], Jet1_Mass=dfj1['Jet_Mass'], Jet1_Phi= dfj1['Jet_Phi'], 
-                       Jet2_Pt = dfj2['Jet_Pt'], Jet2_Eta= dfj2['Jet_Eta'], Jet2_Mass=dfj2['Jet_Mass'], Jet2_Phi= dfj2['Jet_Phi'],
-                       Lep1_Pt = dfl1['Lepton_Pt'], Lep1_Eta= dfl1['Lepton_Eta'], Lep1_Phi= dfl1['Lepton_Phi'],
-                       Lep2_Pt = dfl2['Lepton_Pt'], Lep2_Eta= dfl2['Lepton_Eta'], Lep2_Phi= dfl2['Lepton_Phi']).fillna(0.0)
-    return final
+    if do == "dilepton":
+        nJet = 2; nLep = 2
+        dfj1 = jetdf.xs(0, level='subentry')
+        dfj2 = jetdf.xs(1, level='subentry')
+        dfl1 = lepdf.xs(0, level='subentry')
+        dfl2 = lepdf.xs(1, level='subentry')
+        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Eta= dfj1['Jet_Eta'], Jet1_Mass=dfj1['Jet_Mass'], Jet1_Phi= dfj1['Jet_Phi'], 
+                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Eta= dfj2['Jet_Eta'], Jet2_Mass=dfj2['Jet_Mass'], Jet2_Phi= dfj2['Jet_Phi'],                       
+                          Lep1_Pt = dfl1['Lepton_Pt'], Lep1_Eta= dfl1['Lepton_Eta'], Lep1_Phi= dfl1['Lepton_Phi'],
+                          Lep2_Pt = dfl2['Lepton_Pt'], Lep2_Eta= dfl2['Lepton_Eta'], Lep2_Phi= dfl2['Lepton_Phi']).fillna(0.0)   
+    if do == "SingleLepP" or do == "SingleLepM":
+        nJet = 3; nLep = 1
+        dfj1 = jetdf.xs(0, level='subentry')
+        dfj2 = jetdf.xs(1, level='subentry')
+        dfj3 = jetdf.xs(2, level='subentry')
+        dfl1 = lepdf.xs(0, level='subentry')
+        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Eta= dfj1['Jet_Eta'], Jet1_Mass=dfj1['Jet_Mass'], Jet1_Phi= dfj1['Jet_Phi'], 
+                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Eta= dfj2['Jet_Eta'], Jet2_Mass=dfj2['Jet_Mass'], Jet2_Phi= dfj2['Jet_Phi'],     
+                          Jet3_Pt = dfj3['Jet_Pt'], Jet3_Eta= dfj3['Jet_Eta'], Jet3_Mass=dfj3['Jet_Mass'], Jet3_Phi= dfj3['Jet_Phi'],     
+                          Lep1_Pt = dfl1['Lepton_Pt'], Lep1_Eta= dfl1['Lepton_Eta'], Lep1_Phi= dfl1['Lepton_Phi']).fillna(0.0)            
+    if do == "AllHadronic":
+        nJet = 4; nLep = 0
+        dfj1 = jetdf.xs(0, level='subentry')
+        dfj2 = jetdf.xs(1, level='subentry')
+        dfj3 = jetdf.xs(2, level='subentry')
+        dfj4 = jetdf.xs(3, level='subentry')
+        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Eta= dfj1['Jet_Eta'], Jet1_Mass=dfj1['Jet_Mass'], Jet1_Phi= dfj1['Jet_Phi'], 
+                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Eta= dfj2['Jet_Eta'], Jet2_Mass=dfj2['Jet_Mass'], Jet2_Phi= dfj2['Jet_Phi'],   
+                          Jet3_Pt = dfj3['Jet_Pt'], Jet3_Eta= dfj3['Jet_Eta'], Jet3_Mass=dfj3['Jet_Mass'], Jet3_Phi= dfj3['Jet_Phi'],   
+                          Jet4_Pt = dfj4['Jet_Pt'], Jet4_Eta= dfj4['Jet_Eta'], Jet4_Mass=dfj4['Jet_Mass'], Jet4_Phi= dfj4['Jet_Phi']).fillna(0.0)          
+    labels =  ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]']
+    for j in range(1, nJet+1):
+        labels.append('Jet '+str(j)+' $\mathrm{p_{T}}$ [GeV]')
+        labels.append('Jet '+str(j)+' $\eta$')
+        labels.append('Jet '+str(j)+' mass [GeV]')
+        labels.append('Jet '+str(j)+' $\Phi$')
+    for l in range(nLep):
+        labels.append('Lepton '+str(j)+' $\mathrm{p_{T}}$ [GeV]')
+        labels.append('Lepton '+str(j)+' $\eta$')
+        labels.append('Lepton '+str(j)+' $\Phi$')
+
+    return final, labels
 
 def create_missing_folders(folders):
     if folders is None:

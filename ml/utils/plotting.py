@@ -21,22 +21,22 @@ logger = logging.getLogger(__name__)
 hist_settings0 = {'alpha': 0.3}
 hist_settings1 = {'histtype':'step', 'color':'black', 'linewidth':1, 'linestyle':'--'}
 
-def draw_unweighted_distributions(x0, x1, weights, variables, vlabels, binning, legend, save = False):
+def draw_unweighted_distributions(x0, x1, weights, variables, vlabels, binning, legend, do, save = False):
     plt.figure(figsize=(14, 10))
     columns = range(len(variables))
     for id, column in enumerate(columns, 1):
-        if save: plt.figure(figsize=(5, 4)) 
+        if save: plt.figure(figsize=(5, 4.2)) 
         else: plt.subplot(3,4, id)
         plt.yscale('log')
         plt.hist(x0[:,column], bins = binning[id-1], weights=weights, label = legend[0], **hist_settings0)
         plt.hist(x1[:,column], bins = binning[id-1], label = legend[1], **hist_settings1)
-        plt.xlabel('%s'%(vlabels[id-1])) 
+        plt.xlabel('ttbar %s, %s'%(do, vlabels[id-1]), horizontalalignment='right',x=1) 
         plt.legend(frameon=False)
         axes = plt.gca()
         axes.set_ylim([len(x0)*0.005,len(x0)*2])                  
         if save:
             create_missing_folders(["plots"])                                                              
-            plt.savefig("plots/unweighted_%s_%sVs%s.png"%(variables[id-1], legend[0],legend[1]))                                                                
+            plt.savefig("plots/%s_%s_%sVs%s.png"%(variables[id-1], do, legend[0],legend[1]))                                                                
             plt.clf()
             plt.close()
 
@@ -50,13 +50,13 @@ def draw_weighted_distributions(x0, x1, weights, variables, vlabels, binning, la
         plt.hist(x0[:,column], bins = binning[id-1], label = legend[0], **hist_settings0)
         plt.hist(x0[:,column], bins = binning[id-1], weights=weights, label = legend[0]+'*CARL', **hist_settings0)
         plt.hist(x1[:,column], bins = binning[id-1], label = legend[1], **hist_settings1)
-        plt.xlabel('%s'%(vlabels[id-1])) 
+        plt.xlabel('ttbar %s, %s'%(do, vlabels[id-1]), horizontalalignment='right',x=1) 
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()
         axes.set_ylim([len(x0)*0.005,len(x0)*2])                 
         if save:
             create_missing_folders(["plots"])                                                              
-            plt.savefig("plots/weighted_%s_%sVs%s_%s.png"%(variables[id-1], legend[0],legend[1],label)) 
+            plt.savefig("plots/weighted_%s_%s_%sVs%s_%s.png"%(variables[id-1], do, legend[0],legend[1],label)) 
             plt.clf()
             plt.close()
 
