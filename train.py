@@ -9,21 +9,22 @@ parser.add_option('-s', '--samples',   action='store', type=str, dest='samples',
 parser.add_option('-v', '--variation', action='store', type=str, dest='variation', default='qsf', help='variation to derive weights for. default QSF down to QSF up')
 parser.add_option('-n', '--nentries',  action='store', type=str, dest='nentries',  default=0, help='specify the number of events do do the training on, default None means full sample')
 (opts, args) = parser.parse_args()
-
+do  = opts.samples
+var = opts.variation
 loading = Loader()
 loading.loading(
     folder='./data/',
     plot=True,
-    var = opts.variation,
-    do = opts.samples,
+    var = var,
+    do = do,
     randomize = False,
     save = True,
     correlation = True,
     preprocessing = True,
     nentries = opts.nentries,
 )
-x='data/'+opts.samples+'/'+opts.variation+'/X_train.npy'
-y='data/'+opts.samples+'/'+opts.variation+'/y_train.npy'
+x='data/'+ do +'/'+ var +'/X_train.npy'
+y='data/'+ do +'/'+ var +'/y_train.npy'
 
 estimator = RatioEstimator(
     n_hidden=(8,4,2),
@@ -37,4 +38,4 @@ estimator.train(
     y=y,
     scale_inputs = True,
 )
-estimator.save('models/'+opts.samples+'/'+opts.variation+'_carl', x=x, export_model = True)
+estimator.save('models/'+ do +'/'+ var +'_carl', x=x, export_model = True)
