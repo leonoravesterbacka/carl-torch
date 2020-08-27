@@ -4,12 +4,8 @@ import six
 import logging
 import os
 import stat
-from subprocess import Popen, PIPE
-import io
 import numpy as np
-import shutil
 import uproot
-import root_numpy
 import pandas as pd
 import torch
 from torch.nn import functional as F

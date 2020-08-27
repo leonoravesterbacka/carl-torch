@@ -3,14 +3,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import six
 import logging
 import os
-import stat
-from subprocess import Popen, PIPE
-import io
-import numpy as np
-import shutil
-import uproot
-import root_numpy
-import pandas as pd
 import torch
 from torch.nn import functional as F
 from torch import optim
@@ -59,7 +51,6 @@ def get_optimizer(optimizer, nesterov_momentum):
 
 
 def ratio_xe(s_hat, y_true):
-#def ratio_xe(r_hat, s_hat, y_true):
     loss = BCELoss()(s_hat, y_true)
     return loss
 
