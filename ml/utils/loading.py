@@ -151,7 +151,8 @@ class Loader():
         x1,
         weights = None,
         label = None,
-        do = 'qsf',
+        do = 'dilepton',
+        var = 'qsf',
         save = False,
     ):
         """
@@ -168,21 +169,21 @@ class Loader():
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
         jetBinning = [range(0, 1500, 100), etaJ, range(0, 300, 30), etaJ]
         lepBinning = [range(0, 700, 50), etaJ, etaJ]
-        if do == "ckkw":
+        if var == "ckkw":
             legend = ["CKKW20","CKKW50"]
-        elif do == "qsf":
+        elif var == "qsf":
             legend = ["qsfUp", "qsfDown"]
 
         binning = [range(0, 12, 1), range(0, 800, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
-        x0df, vlabels = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_dilepton_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = 1, t = 'Tree')
+        x0df, labels = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = 1, t = 'Tree')
         # load samples
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
         X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)
         weights = weights / weights.sum() * len(X1)
         # plot ROC curves     
-        draw_ROC(X0, X1, weights, label, legend, save)
+        draw_ROC(X0, X1, weights, label, legend, do, save)
         # plot reweighted distributions      
-        draw_weighted_distributions(X0, X1, weights, x0df.columns, vlabels, binning, label, legend, save) 
+        draw_weighted_distributions(X0, X1, weights, x0df.columns, labels, binning, label, legend, do, save) 
 
     def load_calibration(
         self,
@@ -190,7 +191,8 @@ class Loader():
         p1_raw = None,
         p1_cal = None,
         label = None,
-        do = 'sherpaVsMG5',
+        do = 'dilepton',
+        var = 'qsf',
         save = False
     ):
         """
@@ -208,4 +210,4 @@ class Loader():
 
         # load samples
         y_true  = load_and_check(y_true,  memmap_files_larger_than_gb=1.0)
-        plot_calibration_curve(y_true, p1_raw, p1_cal, do, save)                                                                                                                                                                                                                                                                   
+        plot_calibration_curve(y_true, p1_raw, p1_cal, do, var, save)                                                                                                                                                                                                                                                                   
