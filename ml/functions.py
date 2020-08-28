@@ -6,7 +6,7 @@ import os
 import torch
 from torch.nn import functional as F
 from torch import optim
-from torch.nn import BCELoss, MSELoss
+from torch.nn import BCELoss, BCEWithLogitsLoss, MSELoss
 
 from contextlib import contextmanager
 
@@ -51,7 +51,7 @@ def get_optimizer(optimizer, nesterov_momentum):
 
 
 def ratio_xe(s_hat, y_true):
-    loss = BCELoss()(s_hat, y_true)
+    loss = BCEWithLogitsLoss()(s_hat, y_true)
     return loss
 
 @contextmanager

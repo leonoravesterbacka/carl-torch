@@ -43,8 +43,7 @@ class RatioModel(nn.Module):
             if i > 0:
                 s_hat = self.activation(s_hat)
             s_hat = layer(s_hat) 
-        s_hat = torch.sigmoid(s_hat)
-        r_hat = (1 - s_hat) / s_hat
+        r_hat = (1 - torch.sigmoid(s_hat)) / torch.sigmoid(s_hat)
         
         return r_hat, s_hat
 
