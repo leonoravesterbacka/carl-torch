@@ -81,7 +81,8 @@ class Loader():
         lepBinning = [range(0, 700, 50), etaJ, etaJ]
         if var == "ckkw":
             legend = ["CKKW20","CKKW50"]
-            x0, vlabels = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
+            x0, vlabels = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/miniCKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
+            #x0, vlabels = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
             x1, vlabels = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW50.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
         elif var == "qsf":
             legend = ["qsfUp", "qsfDown"]
@@ -130,20 +131,19 @@ class Loader():
         X_val   = np.vstack([X0_val, X1_val])
         y_val = np.concatenate((y0_val, y1_val), axis=None)
         # save data
-        if folder is not None:
-            np.save(folder + do + '/' + var + "/X_train.npy", X_train)
-            np.save(folder + do + '/' + var + "/y_train.npy", y_train)
-            np.save(folder + do + '/' + var + "/X_val.npy", X_val)
-            np.save(folder + do + '/' + var + "/y_val.npy", y_val)
-            np.save(folder + do + '/' + var + "/X0_val.npy", X0_val)
-            np.save(folder + do + '/' + var + "/X1_val.npy", X1_val)
-            np.save(folder + do + '/' + var + "/X0_train.npy", X0_train)
-            np.save(folder + do + '/' + var + "/X1_train.npy", X1_train)
+        if folder is not None and save:
+            np.save(folder + do + '/' + var + "/X_train_"+str(nentries)+".npy", X_train)
+            np.save(folder + do + '/' + var + "/y_train_"+str(nentries)+".npy", y_train)
+            np.save(folder + do + '/' + var + "/X_val_"+str(nentries)+".npy", X_val)
+            np.save(folder + do + '/' + var + "/y_val_"+str(nentries)+".npy", y_val)
+            np.save(folder + do + '/' + var + "/X0_val_"+str(nentries)+".npy", X0_val)
+            np.save(folder + do + '/' + var + "/X1_val_"+str(nentries)+".npy", X1_val)
+            np.save(folder + do + '/' + var + "/X0_train_"+str(nentries)+".npy", X0_train)
+            np.save(folder + do + '/' + var + "/X1_train_"+str(nentries)+".npy", X1_train)
 
         if plot:
             draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, legend, do, save) 
             print("saving plots")
-            
 
     def load_result(
         self,
