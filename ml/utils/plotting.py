@@ -21,10 +21,11 @@ logger = logging.getLogger(__name__)
 hist_settings0 = {'alpha': 0.3}
 hist_settings1 = {'histtype':'step', 'color':'black', 'linewidth':1, 'linestyle':'--'}
 
-def draw_unweighted_distributions(x0, x1, weights, variables, vlabels, binning, legend, do, save = False):
+def draw_unweighted_distributions(x0, x1, weights, variables, vlabels, binning, legend, do, n, save = False):
     plt.figure(figsize=(14, 10))
     columns = range(len(variables))
     for id, column in enumerate(columns, 1):
+        print("variables[id-1]", variables[id-1])
         if save: plt.figure(figsize=(5, 4.2)) 
         else: plt.subplot(3,4, id)
         plt.yscale('log')
@@ -36,11 +37,11 @@ def draw_unweighted_distributions(x0, x1, weights, variables, vlabels, binning, 
         axes.set_ylim([len(x0)*0.001,len(x0)*2])                  
         if save:
             create_missing_folders(["plots"])                                                              
-            plt.savefig("plots/%s_%s_%sVs%s.png"%(variables[id-1], do, legend[0],legend[1]))                                                                
+            plt.savefig("plots/%s_%s_%sVs%s_%s.png"%(variables[id-1], do, legend[0],legend[1], n))                                                                
             plt.clf()
             plt.close()
 
-def draw_weighted_distributions(x0, x1, weights, variables, vlabels, binning, label, legend, do, save = False):
+def draw_weighted_distributions(x0, x1, weights, variables, vlabels, binning, label, legend, do, n, save = False):
     plt.figure(figsize=(14, 10))
     columns = range(len(variables))
     for id, column in enumerate(columns, 1):
@@ -56,7 +57,7 @@ def draw_weighted_distributions(x0, x1, weights, variables, vlabels, binning, la
         axes.set_ylim([len(x0)*0.001,len(x0)*2])                 
         if save:
             create_missing_folders(["plots"])                                                              
-            plt.savefig("plots/w_%s_%s_%sVs%s_%s.png"%(variables[id-1], do, legend[0],legend[1],label)) 
+            plt.savefig("plots/w_%s_%s_%sVs%s_%s_%s.png"%(variables[id-1], do, legend[0],legend[1],label, n)) 
             plt.clf()
             plt.close()
 
@@ -90,7 +91,7 @@ def resampled_discriminator_and_roc(original, target, weights):
     roc_auc = auc(fpr, tpr)
     return fpr,tpr,roc_auc
  
-def draw_ROC(X0, X1, weights, label, legend, do, save = False):
+def draw_ROC(X0, X1, weights, label, legend, do, n, save = False):
     plt.figure(figsize=(4, 3))
     no_weights_scaled = np.ones(X0.shape[0])/np.ones(X0.shape[0]).sum() * len(X1)
     fpr_t,tpr_t,roc_auc_t = resampled_discriminator_and_roc(X0, X1, no_weights_scaled)
@@ -106,7 +107,7 @@ def draw_ROC(X0, X1, weights, label, legend, do, save = False):
     plt.legend(loc="lower right", title = label)
     plt.tight_layout()
     if save:
-        plt.savefig('plots/roc_%sVs%s_%s_%s.png'%(legend[0], legend[1],do,label)) 
+        plt.savefig('plots/roc_%sVs%s_%s_%s_%s.png'%(legend[0], legend[1],do,label, n)) 
         plt.clf()    
     logger.info("CARL weighted %s AUC is %.3f"%(label,roc_auc_tC))
     logger.info("Unweighted %s AUC is %.3f"%(label,roc_auc_t))
