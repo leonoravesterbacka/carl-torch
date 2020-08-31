@@ -67,6 +67,7 @@ def evaluate_performance_model(
         model.eval()
 
         _, y_test_pred  = model(xs)
+        y_test_pred = torch.sigmoid(y_test_pred)
         y_pred_tag = torch.round(y_test_pred)
         print("accuracy ",accuracy_score(y_pred_tag,ys))
         print("confusion matrix ",confusion_matrix(ys, y_pred_tag))
