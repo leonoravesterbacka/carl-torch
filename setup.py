@@ -17,9 +17,9 @@ from setuptools import find_packages, setup, Command
 NAME = 'carl-torch'
 DESCRIPTION = 'A multivariate reweighting technique for Monte-Carlo simulation using calibrated classifiers.' 
 URL = 'https://github.com/leonoravesterbacka/carl-torch'
-EMAIL = 'leonora.vesterbacka@nyu.edu'
+EMAIL = 'leonoravesterbacka@gmail.com'
 AUTHOR = 'Leonora Vesterbacka' 
-REQUIRES_PYTHON = '>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4'
+REQUIRES_PYTHON = '>=3.6'
 VERSION = '0.1'
 
 # What packages are required for this module to be executed?
