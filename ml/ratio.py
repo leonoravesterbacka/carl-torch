@@ -41,6 +41,8 @@ class RatioEstimator(Estimator):
         method,
         x,
         y,
+        x0=None,
+        x1=None,
         x_val=None,
         y_val=None,
         alpha=1.0,
@@ -124,8 +126,10 @@ class RatioEstimator(Estimator):
         # Load training data
         logger.info("Loading training data")
         memmap_threshold = 1.0 if memmap else None
-        x = load_and_check(x, memmap_files_larger_than_gb=memmap_threshold)
-        y = load_and_check(y, memmap_files_larger_than_gb=memmap_threshold)
+        x  = load_and_check(x, memmap_files_larger_than_gb=memmap_threshold)
+        y  = load_and_check(y, memmap_files_larger_than_gb=memmap_threshold)
+        x0 = load_and_check(x0, memmap_files_larger_than_gb=memmap_threshold)
+        x1 = load_and_check(x1, memmap_files_larger_than_gb=memmap_threshold)
 
         # Infer dimensions of problem
         n_samples = x.shape[0]
@@ -179,7 +183,9 @@ class RatioEstimator(Estimator):
             logger.info("Creating model")
             self._create_model()
         # Losses
-        loss_functions, loss_labels, loss_weights = get_loss(method + "2", alpha)
+        w = len(x0)/len(x1)
+        logger.info("Passing weight %s to the loss function to account for imbalanced dataset: ", w)
+        loss_functions, loss_labels, loss_weights = get_loss(method + "2", alpha, w)
         # Optimizer
         opt, opt_kwargs = get_optimizer(optimizer, nesterov_momentum)
 

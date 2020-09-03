@@ -19,10 +19,12 @@ if os.path.exists('data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'):
     print("Doing training of model with datasets: ",sample, ", generator variation: ", var, " with ", n, " events." )
     x='data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'
     y='data/'+ sample +'/'+ var +'/y_train_'+str(n)+'.npy'
+    x0='data/'+ sample +'/'+ var +'/X0_train_'+str(n)+'.npy'
+    x1='data/'+ sample +'/'+ var +'/X1_train_'+str(n)+'.npy'
     print("Loaded existing datasets ", x, y)
 else:
     print("Doing training of model with datasets: ",sample, ", generator variation: ", var, " with ", n, " events." )
-    x, y = loading.loading(
+    x, y, x0, x1 = loading.loading(
         folder='./data/',
         plot=True,
         var = var,
@@ -45,6 +47,8 @@ estimator.train(
     n_epochs = 50,
     x=x,
     y=y,
+    x0=x0, 
+    x1=x1,
     scale_inputs = True,
 )
 estimator.save('models/'+ sample +'/'+ var +'_carl_'+str(n), x=x, export_model = True)

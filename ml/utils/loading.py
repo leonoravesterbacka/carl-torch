@@ -139,7 +139,7 @@ class Loader():
         if plot and int(nentries) > 10000: # no point in plotting distributions with too few events
             draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, legend, do, nentries, save) 
             print("saving plots")
-        return X_train, y_train
+        return X_train, y_train, X0_train, X1_train
 
     def load_result(
         self,
@@ -161,11 +161,11 @@ class Loader():
         -------
         """
         eventVars = ['Njets', 'MET']
-        jetVars   = ['Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi']
-        lepVars   = ['Lepton_Pt', 'Lepton_Eta', 'Lepton_Phi']
+        jetVars   = ['Jet_Pt', 'Jet_Mass']
+        lepVars   = ['Lepton_Pt']
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
-        jetBinning = [range(0, 1500, 100), etaJ, range(0, 300, 30), etaJ]
-        lepBinning = [range(0, 700, 50), etaJ, etaJ]
+        jetBinning = [range(0, 1500, 100), range(0, 300, 30)]
+        lepBinning = [range(0, 700, 50)]
         if var == "ckkw":
             legend = ["CKKW20","CKKW50"]
         elif var == "qsf":

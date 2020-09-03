@@ -25,7 +25,7 @@ def get_activation(activation):
         raise ValueError("Activation function %s unknown", activation)
 
 
-def get_loss(method, alpha):
+def get_loss(method, alpha, w = 1):
     if method in ["carl", "carl2"]:
         loss_functions = [ratio_xe]
         loss_weights = [1.0]
@@ -50,8 +50,8 @@ def get_optimizer(optimizer, nesterov_momentum):
     return opt, opt_kwargs
 
 
-def ratio_xe(s_hat, y_true):
-    loss = BCEWithLogitsLoss()(s_hat, y_true)
+def ratio_xe(s_hat, y_true, w = 1):
+    loss = BCEWithLogitsLoss(pos_weight = torch.tensor(w))(s_hat, y_true)
     return loss
 
 @contextmanager
