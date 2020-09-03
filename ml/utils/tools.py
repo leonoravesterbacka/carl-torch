@@ -19,7 +19,6 @@ initialized = False
 def load(f = None, events = None, jets = None, leps = None, n = 0, t = None, do = "dilepton"):
     if f is None:
         return None
-
     tree = uproot.open(f)[t]
     if n > 0: # if n > 0 n is the number of entries to do training on 
         df    = tree.pandas.df(events, entrystop = n)
@@ -35,40 +34,36 @@ def load(f = None, events = None, jets = None, leps = None, n = 0, t = None, do 
         dfj2 = jetdf.xs(1, level='subentry')
         dfl1 = lepdf.xs(0, level='subentry')
         dfl2 = lepdf.xs(1, level='subentry')
-        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Eta= dfj1['Jet_Eta'], Jet1_Mass=dfj1['Jet_Mass'], Jet1_Phi= dfj1['Jet_Phi'], 
-                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Eta= dfj2['Jet_Eta'], Jet2_Mass=dfj2['Jet_Mass'], Jet2_Phi= dfj2['Jet_Phi'],                       
-                          Lep1_Pt = dfl1['Lepton_Pt'], Lep1_Eta= dfl1['Lepton_Eta'], Lep1_Phi= dfl1['Lepton_Phi'],
-                          Lep2_Pt = dfl2['Lepton_Pt'], Lep2_Eta= dfl2['Lepton_Eta'], Lep2_Phi= dfl2['Lepton_Phi']).fillna(0.0)   
+        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Mass=dfj1['Jet_Mass'], 
+                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Mass=dfj2['Jet_Mass'],                       
+                          Lep1_Pt = dfl1['Lepton_Pt'],
+                          Lep2_Pt = dfl2['Lepton_Pt']).fillna(0.0)   
     if do == "SingleLepP" or do == "SingleLepM":
         nJet = 3; nLep = 1
         dfj1 = jetdf.xs(0, level='subentry')
         dfj2 = jetdf.xs(1, level='subentry')
         dfj3 = jetdf.xs(2, level='subentry')
         dfl1 = lepdf.xs(0, level='subentry')
-        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Eta= dfj1['Jet_Eta'], Jet1_Mass=dfj1['Jet_Mass'], Jet1_Phi= dfj1['Jet_Phi'], 
-                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Eta= dfj2['Jet_Eta'], Jet2_Mass=dfj2['Jet_Mass'], Jet2_Phi= dfj2['Jet_Phi'],     
-                          Jet3_Pt = dfj3['Jet_Pt'], Jet3_Eta= dfj3['Jet_Eta'], Jet3_Mass=dfj3['Jet_Mass'], Jet3_Phi= dfj3['Jet_Phi'],     
-                          Lep1_Pt = dfl1['Lepton_Pt'], Lep1_Eta= dfl1['Lepton_Eta'], Lep1_Phi= dfl1['Lepton_Phi']).fillna(0.0)            
+        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Mass=dfj1['Jet_Mass'], 
+                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Mass=dfj2['Jet_Mass'],     
+                          Jet3_Pt = dfj3['Jet_Pt'], Jet3_Mass=dfj3['Jet_Mass'],     
+                          Lep1_Pt = dfl1['Lepton_Pt']).fillna(0.0)            
     if do == "AllHadronic":
         nJet = 4; nLep = 0
         dfj1 = jetdf.xs(0, level='subentry')
         dfj2 = jetdf.xs(1, level='subentry')
         dfj3 = jetdf.xs(2, level='subentry')
         dfj4 = jetdf.xs(3, level='subentry')
-        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Eta= dfj1['Jet_Eta'], Jet1_Mass=dfj1['Jet_Mass'], Jet1_Phi= dfj1['Jet_Phi'], 
-                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Eta= dfj2['Jet_Eta'], Jet2_Mass=dfj2['Jet_Mass'], Jet2_Phi= dfj2['Jet_Phi'],   
-                          Jet3_Pt = dfj3['Jet_Pt'], Jet3_Eta= dfj3['Jet_Eta'], Jet3_Mass=dfj3['Jet_Mass'], Jet3_Phi= dfj3['Jet_Phi'],   
-                          Jet4_Pt = dfj4['Jet_Pt'], Jet4_Eta= dfj4['Jet_Eta'], Jet4_Mass=dfj4['Jet_Mass'], Jet4_Phi= dfj4['Jet_Phi']).fillna(0.0)          
+        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Mass=dfj1['Jet_Mass'], 
+                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Mass=dfj2['Jet_Mass'],   
+                          Jet3_Pt = dfj3['Jet_Pt'], Jet3_Mass=dfj3['Jet_Mass'],   
+                          Jet4_Pt = dfj4['Jet_Pt'], Jet4_Mass=dfj4['Jet_Mass']).fillna(0.0)          
     labels =  ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]']
     for j in range(1, nJet+1):
         labels.append('Jet '+str(j)+' $\mathrm{p_{T}}$ [GeV]')
-        labels.append('Jet '+str(j)+' $\eta$')
         labels.append('Jet '+str(j)+' mass [GeV]')
-        labels.append('Jet '+str(j)+' $\Phi$')
     for l in range(nLep):
         labels.append('Lepton '+str(j)+' $\mathrm{p_{T}}$ [GeV]')
-        labels.append('Lepton '+str(j)+' $\eta$')
-        labels.append('Lepton '+str(j)+' $\Phi$')
 
     return final, labels
 

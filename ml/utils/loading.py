@@ -5,7 +5,6 @@ import logging
 import numpy as np
 import pandas as pd
 import seaborn as sns
-
 from pandas.plotting import scatter_matrix
 import multiprocessing
 import matplotlib.pyplot as plt
@@ -71,14 +70,13 @@ class Loader():
 
         create_missing_folders([folder+'/'+do+'/'+var])
         create_missing_folders(['plots'])
-
         # load samples
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
         eventVars = ['Njets', 'MET']
-        jetVars   = ['Jet_Pt', 'Jet_Eta', 'Jet_Mass', 'Jet_Phi']
-        lepVars   = ['Lepton_Pt', 'Lepton_Eta', 'Lepton_Phi']
-        jetBinning = [range(0, 1500, 100), etaJ, range(0, 300, 30), etaJ]
-        lepBinning = [range(0, 700, 50), etaJ, etaJ]
+        jetVars   = ['Jet_Pt', 'Jet_Mass']
+        lepVars   = ['Lepton_Pt']
+        jetBinning = [range(0, 1500, 100), range(0, 300, 30)]
+        lepBinning = [range(0, 700, 50)]
         if var == "ckkw":
             legend = ["CKKW20","CKKW50"]
             x0, vlabels = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
@@ -151,7 +149,7 @@ class Loader():
         label = None,
         do = 'dilepton',
         var = 'qsf',
-        save = False,
+        save = True,
         n = 0,
     ):
         """

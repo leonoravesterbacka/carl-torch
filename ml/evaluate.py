@@ -33,6 +33,7 @@ def evaluate_ratio_model(
         model.eval()
 
         r_hat, s_hat  = model(xs)
+        s_hat = torch.sigmoid(s_hat)
         # Copy back tensors to CPU
         if run_on_gpu:
             r_hat = r_hat.cpu()
@@ -66,23 +67,21 @@ def evaluate_performance_model(
     with torch.no_grad():
         model.eval()
 
-        _, y_test_pred  = model(xs)
-        y_test_pred = torch.sigmoid(y_test_pred)
-        y_pred_tag = torch.round(y_test_pred)
-        print("accuracy ",accuracy_score(y_pred_tag,ys))
-        print("confusion matrix ",confusion_matrix(ys, y_pred_tag))
-        print(classification_report(ys, y_pred_tag))
-        fpr, tpr, auc_thresholds = roc_curve(ys, y_pred_tag)
-        print("auc ", auc(fpr, tpr)) 
+        _, logit  = model(xs)
+        print("logit from model ", logit)
+        probs = torch.sigmoid(logit)
+        print("probs after sigmoid ", probs)
+        y_pred = torch.round(probs)
+        print("y_pred is ", y_pred)
+        print("y_true is ", ys)
+        print("confusion matrix ",confusion_matrix(ys, y_pred))
+        print(classification_report(ys, y_pred))
+        fpr, tpr, auc_thresholds = roc_curve(ys, y_pred)
         plot_roc_curve(fpr, tpr, 'test')
         plt.savefig('plots/rocClassifier.png')
         plt.clf()
 
 def plot_roc_curve(fpr, tpr, label=None):
-    """
-    The ROC curve, modified from 
-    Hands-On Machine learning with Scikit-Learn and TensorFlow; p.91
-    """
     plt.figure(figsize=(8,8))
     plt.title('ROC Curve')
     plt.plot(fpr, tpr, linewidth=2, label=label)
