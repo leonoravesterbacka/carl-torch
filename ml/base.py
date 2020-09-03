@@ -174,7 +174,7 @@ class Estimator(object):
             self.x_scaling_means = np.zeros(n_parameters)
             self.x_scaling_stds = np.ones(n_parameters)
 
-    def _transform_inputs(self, x, scaling = "standard"):
+    def _transform_inputs(self, x, scaling = "minmax"):
         if scaling == "standard":    
             if self.x_scaling_means is not None and self.x_scaling_stds is not None:
                 if isinstance(x, torch.Tensor):
