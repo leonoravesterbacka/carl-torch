@@ -36,15 +36,17 @@ else:
     print("Loaded new datasets ", x, y)
 
 estimator = RatioEstimator(
-    n_hidden=(8,4,2),
+    n_hidden=(10,10,10),
     activation="relu"
 )
 estimator.train(
     method='carl',
-    batch_size = 128,
-    n_epochs = 50,
+    batch_size = 5000,
+    n_epochs = 500,
     x=x,
     y=y,
     scale_inputs = True,
+#    early_stopping = True,
+#    early_stopping_patience = 10
 )
 estimator.save('models/'+ sample +'/'+ var +'_carl_'+str(n), x=x, export_model = True)
