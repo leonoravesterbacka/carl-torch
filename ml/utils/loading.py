@@ -78,8 +78,8 @@ class Loader():
         jetBinning = [range(0, 1500, 100), range(0, 300, 30)]
         lepBinning = [range(0, 700, 50)]
         if var == "ckkw":
-            legend = ["CKKW20","CKKW50"]
-            x0, vlabels = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
+            legend = ["Nominal","CKKW50"]
+            x0, vlabels = load(f = '/eos/user/m/mvesterb/pmg/nominal/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
             x1, vlabels = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW50.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
         if var == "qsf":
             legend = ["qsfUp", "qsfDown"]
@@ -109,8 +109,9 @@ class Loader():
             cor_target = abs(cor0[x0.columns[0]])
             relevant_features = cor_target[cor_target>0.5]
             print("relevant_features ", relevant_features)
-            plt.savefig('plots/scatterMatrix_'+do+'_'+var+'.png')
-            plt.clf()
+            if plot:
+                plt.savefig('plots/scatterMatrix_'+do+'_'+var+'.png')
+                plt.clf()
 
         X0 = x0.to_numpy()
         X1 = x1.to_numpy()
@@ -137,7 +138,7 @@ class Loader():
             np.save(folder + do + '/' + var + "/X0_train_"+str(nentries)+".npy", X0_train)
             np.save(folder + do + '/' + var + "/X1_train_"+str(nentries)+".npy", X1_train)
         if plot and int(nentries) > 10000: # no point in plotting distributions with too few events
-            draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, legend, do, nentries, save) 
+            draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, legend, do, nentries, plot) 
             print("saving plots")
         return X_train, y_train, X0_train, X1_train
 
@@ -149,7 +150,7 @@ class Loader():
         label = None,
         do = 'dilepton',
         var = 'qsf',
-        save = True,
+        plot = False,
         n = 0,
     ):
         """
@@ -167,7 +168,7 @@ class Loader():
         jetBinning = [range(0, 1500, 100), range(0, 300, 30)]
         lepBinning = [range(0, 700, 50)]
         if var == "ckkw":
-            legend = ["CKKW20","CKKW50"]
+            legend = ["Nominal","CKKW50"]
         elif var == "qsf":
             legend = ["qsfUp", "qsfDown"]
 
@@ -179,9 +180,9 @@ class Loader():
         weights = weights / weights.sum() * len(X1)
         if int(n) > 10000: # no point in plotting distributions with too few events, they only look bad 
             # plot ROC curves     
-            draw_ROC(X0, X1, weights, label, legend, do, save)
+            draw_ROC(X0, X1, weights, label, legend, do, plot)
             # plot reweighted distributions     
-            draw_weighted_distributions(X0, X1, weights, x0df.columns, labels, binning, label, legend, do, n, save) 
+            draw_weighted_distributions(X0, X1, weights, x0df.columns, labels, binning, label, legend, do, n, plot) 
 
     def load_calibration(
         self,

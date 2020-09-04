@@ -25,8 +25,8 @@ if os.path.exists('data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'):
 else:
     print("Doing training of model with datasets: ",sample, ", generator variation: ", var, " with ", n, " events." )
     x, y, x0, x1 = loading.loading(
-        folder='./data/',
-        plot=True,
+        folder = './data/',
+        plot = False,
         var = var,
         do = sample,
         randomize = False,
@@ -43,7 +43,7 @@ estimator = RatioEstimator(
 )
 estimator.train(
     method='carl',
-    batch_size = 128,
+    batch_size = 256,
     n_epochs = 50,
     x=x,
     y=y,

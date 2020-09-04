@@ -25,7 +25,6 @@ def draw_unweighted_distributions(x0, x1, weights, variables, vlabels, binning, 
     plt.figure(figsize=(14, 10))
     columns = range(len(variables))
     for id, column in enumerate(columns, 1):
-        print("variables[id-1]", variables[id-1])
         if save: plt.figure(figsize=(5, 4.2)) 
         else: plt.subplot(3,4, id)
         plt.yscale('log')

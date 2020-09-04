@@ -34,7 +34,7 @@ for i in evaluate:
                         label = i,
                         do = sample,
                         var = var,
-                        save = True,
+                        plot = True,
                         n = n,
     )
 carl.evaluate_performance(x='data/'+ sample + '/' + var + '/X_val_'+str(n)+'.npy',y='data/' + sample + '/' + var +'/y_val_'+str(n)+'.npy')
