@@ -73,6 +73,7 @@ class Trainer(object):
             "GPU" if self.run_on_gpu else "CPU",
             "double" if double_precision else "single",
         )
+        logger.info(" run_on_gpu %r,   torch.cuda.is_available() %r ", run_on_gpu, torch.cuda.is_available()) 
 
         self._timer(stop="initialize model")
         self._timer(stop="ALL")
