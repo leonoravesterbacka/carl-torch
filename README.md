@@ -1,6 +1,6 @@
 CARL-TORCH
 ==================================
-*Work in progress by Leonora Vesterbacka, with invaluable input from Johann Brehmer, Kyle Cranmer and Gilles Louppe*
+*Work in progress by Leonora Vesterbacka, with input from Stephen Jiggins, Johann Brehmer, Kyle Cranmer and Gilles Louppe*
 
 ## Introduction
 `carl-torch` is a toolbox for multivariate reweighting using PyTorch. 
@@ -48,8 +48,4 @@ The code is based on three scripts:
 - [evaluate.py](evaluate.py) evaluates the neural network by calculating the weights and making validation and ROC plots.
 - [calibrate.py](calibrate.py) calibrated network predictions based on histograms of the network output.
 
-Or run it all in the [Reweighter_SherpaVsMG5.ipynb](Reweighter_SherpaVsMG5.ipynb) notebook. 
-
 Hyperparameter search for optimization of the classifier is done in branch hyperparameter-search using skorch.
-
-This toolbox is adapted from  [MadMiner](http://diana-hep.org/madminer) and [CARL](http://diana-hep.org/carl). 
