@@ -23,6 +23,8 @@ class NumpyDataset(Dataset):
     def __init__(self, *arrays, **kwargs):
 
         self.dtype = kwargs.get("dtype", torch.float)
+        self.run_on_gpu = kwargs.get("run_on_gpu") and torch.cuda.is_available()
+        self.device = torch.device("cuda" if self.run_on_gpu else "cpu")
         self.memmap = []
         self.data = []
         self.n = None
@@ -37,7 +39,7 @@ class NumpyDataset(Dataset):
                 self.data.append(array)
             else:
                 self.memmap.append(False)
-                tensor = torch.from_numpy(array).to(self.dtype)
+                tensor = torch.from_numpy(array).to(self.device, self.dtype)
                 self.data.append(tensor)
 
     def __getitem__(self, index):
@@ -229,7 +231,7 @@ class Trainer(object):
         for key, value in six.iteritems(data):
             data_labels.append(key)
             data_arrays.append(value)
-        dataset = NumpyDataset(*data_arrays, dtype=self.dtype)
+        dataset = NumpyDataset(*data_arrays, dtype=self.dtype, run_on_gpu=self.run_on_gpu)
         return data_labels, dataset
 
     def make_dataloaders(self, dataset, dataset_val, validation_split, batch_size):

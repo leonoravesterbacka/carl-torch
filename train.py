@@ -21,7 +21,7 @@ if os.path.exists('data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'):
     y='data/'+ sample +'/'+ var +'/y_train_'+str(n)+'.npy'
     x0='data/'+ sample +'/'+ var +'/X0_train_'+str(n)+'.npy'
     x1='data/'+ sample +'/'+ var +'/X1_train_'+str(n)+'.npy'
-    print("Loaded existing datasets ", x, y)
+    print("Loaded existing datasets ")
 else:
     print("Doing training of model with datasets: ",sample, ", generator variation: ", var, " with ", n, " events." )
     x, y, x0, x1 = loading.loading(
@@ -35,7 +35,7 @@ else:
         preprocessing = True,
         nentries = n
     )
-    print("Loaded new datasets ", x, y)
+    print("Loaded new datasets ")
 
 estimator = RatioEstimator(
     n_hidden=(10,10,10),
