@@ -41,7 +41,8 @@ else:
         save = True,
         correlation = True,
         preprocessing = True,
-        nentries = n
+        nentries = n,
+        path = p,
     )
     print("Loaded new datasets ")
 

@@ -38,6 +38,7 @@ class Loader():
         correlation = True,
         preprocessing = True,
         nentries = 0,
+        path = '',
     ):
         """
         Parameters
@@ -79,10 +80,9 @@ class Loader():
         lepVars   = ['Lepton_Pt']
         jetBinning = [range(0, 1500, 100), range(0, 300, 30)]
         lepBinning = [range(0, 700, 50)]
-        legend = var
-        x0, vlabels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_nominal.root', 
+        x0, vlabels = load(f = path+'/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_nominal.root', 
                            events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
-        x1, vlabels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_'+var+'.root', 
+        x1, vlabels = load(f = path+'/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_'+var+'.root', 
                            events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
         binning = [range(0, 12, 1), range(0, 800, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
         if preprocessing:
@@ -137,7 +137,7 @@ class Loader():
             np.save(folder + do + '/' + var + "/X0_train_"+str(nentries)+".npy", X0_train)
             np.save(folder + do + '/' + var + "/X1_train_"+str(nentries)+".npy", X1_train)
         if plot and int(nentries) > 10000: # no point in plotting distributions with too few events
-            draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, legend, do, nentries, plot) 
+            draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, var, do, nentries, plot) 
             print("saving plots")
         return X_train, y_train, X0_train, X1_train
 
@@ -151,6 +151,7 @@ class Loader():
         var = 'qsf',
         plot = False,
         n = 0,
+        path = '',
     ):
         """
         Parameters
@@ -168,7 +169,7 @@ class Loader():
         lepBinning = [range(0, 700, 50)]
 
         binning = [range(0, 12, 1), range(0, 800, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
-        x0df, labels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_nominal.root', 
+        x0df, labels = load(f = path+'/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_nominal.root', 
                             events = eventVars, jets = jetVars, leps = lepVars, n = 1, t = 'Tree')
         # load samples
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
