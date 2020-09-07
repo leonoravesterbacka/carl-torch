@@ -7,6 +7,8 @@ import pandas as pd
 import seaborn as sns
 from pandas.plotting import scatter_matrix
 import multiprocessing
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from functools import partial
 
@@ -78,13 +80,16 @@ class Loader():
         jetBinning = [range(0, 1500, 100), range(0, 300, 30)]
         lepBinning = [range(0, 700, 50)]
         if var == "ckkw":
-            legend = ["Nominal","CKKW50"]
-            x0, vlabels = load(f = '/eos/user/m/mvesterb/pmg/nominal/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
-            x1, vlabels = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW50.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
+            legend = ["nominal","CKKW20"]
+            #x0, vlabels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
+            x0, vlabels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_nominal.root', 
+                               events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
+            x1, vlabels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW20.root', 
+                               events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
         if var == "qsf":
             legend = ["qsfUp", "qsfDown"]
-            x0, vlabels = load(f = '/eos/user/m/mvesterb/pmg/qsfSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_QSFDOWN.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
-            x1, vlabels = load(f = '/eos/user/m/mvesterb/pmg/qsfSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_QSFUP.root',   events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
+            x0, vlabels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_QSFDOWN.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
+            x1, vlabels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_QSFUP.root',   events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
         binning = [range(0, 12, 1), range(0, 800, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
         if preprocessing:
             factor = 5
@@ -168,12 +173,13 @@ class Loader():
         jetBinning = [range(0, 1500, 100), range(0, 300, 30)]
         lepBinning = [range(0, 700, 50)]
         if var == "ckkw":
-            legend = ["Nominal","CKKW50"]
+            legend = ["nominal","CKKW20"]
         elif var == "qsf":
             legend = ["qsfUp", "qsfDown"]
 
         binning = [range(0, 12, 1), range(0, 800, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
-        x0df, labels = load(f = '/eos/user/m/mvesterb/pmg/ckkwSamples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = 1, t = 'Tree')
+        x0df, labels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW20.root', 
+                            events = eventVars, jets = jetVars, leps = lepVars, n = 1, t = 'Tree')
         # load samples
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
         X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)
