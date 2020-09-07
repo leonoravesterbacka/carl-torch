@@ -29,7 +29,7 @@ class Loader():
         self,
         folder=None,
         plot=False,
-        var = 'qsf',
+        var = 'QSFUP',
         do  = 'dilepton',
         x0 = None,
         x1 = None,
@@ -79,17 +79,11 @@ class Loader():
         lepVars   = ['Lepton_Pt']
         jetBinning = [range(0, 1500, 100), range(0, 300, 30)]
         lepBinning = [range(0, 700, 50)]
-        if var == "ckkw":
-            legend = ["nominal","CKKW20"]
-            #x0, vlabels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW20.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
-            x0, vlabels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_nominal.root', 
-                               events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
-            x1, vlabels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW20.root', 
-                               events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
-        if var == "qsf":
-            legend = ["qsfUp", "qsfDown"]
-            x0, vlabels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_QSFDOWN.root', events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
-            x1, vlabels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_QSFUP.root',   events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
+        legend = var
+        x0, vlabels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_nominal.root', 
+                           events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
+        x1, vlabels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_'+var+'.root', 
+                           events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
         binning = [range(0, 12, 1), range(0, 800, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
         if preprocessing:
             factor = 5
@@ -172,13 +166,9 @@ class Loader():
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
         jetBinning = [range(0, 1500, 100), range(0, 300, 30)]
         lepBinning = [range(0, 700, 50)]
-        if var == "ckkw":
-            legend = ["nominal","CKKW20"]
-        elif var == "qsf":
-            legend = ["qsfUp", "qsfDown"]
 
         binning = [range(0, 12, 1), range(0, 800, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
-        x0df, labels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_CKKW20.root', 
+        x0df, labels = load(f = '/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_nominal.root', 
                             events = eventVars, jets = jetVars, leps = lepVars, n = 1, t = 'Tree')
         # load samples
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
@@ -186,9 +176,9 @@ class Loader():
         weights = weights / weights.sum() * len(X1)
         if int(n) > 10000: # no point in plotting distributions with too few events, they only look bad 
             # plot ROC curves     
-            draw_ROC(X0, X1, weights, label, legend, do, plot)
+            draw_ROC(X0, X1, weights, label, var, do, plot)
             # plot reweighted distributions     
-            draw_weighted_distributions(X0, X1, weights, x0df.columns, labels, binning, label, legend, do, n, plot) 
+            draw_weighted_distributions(X0, X1, weights, x0df.columns, labels, binning, label, var, do, n, plot) 
 
     def load_calibration(
         self,
