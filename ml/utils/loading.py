@@ -2,6 +2,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import time
 import logging
+import tarfile
+import torch
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -78,13 +80,13 @@ class Loader():
         eventVars = ['Njets', 'MET']
         jetVars   = ['Jet_Pt', 'Jet_Mass']
         lepVars   = ['Lepton_Pt']
-        jetBinning = [range(0, 1500, 100), range(0, 300, 30)]
-        lepBinning = [range(0, 700, 50)]
+        jetBinning = [range(0, 1500, 50), range(0, 200, 10)]
+        lepBinning = [range(0, 700, 20)]
         x0, vlabels = load(f = path+'/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_nominal.root', 
                            events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
         x1, vlabels = load(f = path+'/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_'+var+'.root', 
                            events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
-        binning = [range(0, 12, 1), range(0, 800, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
+        binning = [range(0, 12, 1), range(0, 900, 25)]+jetBinning+jetBinning+lepBinning+lepBinning
         if preprocessing:
             factor = 5
             x00 = len(x0)
@@ -128,14 +130,29 @@ class Loader():
         y_val = np.concatenate((y0_val, y1_val), axis=None)
         # save data
         if folder is not None and save:
-            np.save(folder + do + '/' + var + "/X_train_"+str(nentries)+".npy", X_train)
-            np.save(folder + do + '/' + var + "/y_train_"+str(nentries)+".npy", y_train)
-            np.save(folder + do + '/' + var + "/X_val_"+str(nentries)+".npy", X_val)
-            np.save(folder + do + '/' + var + "/y_val_"+str(nentries)+".npy", y_val)
-            np.save(folder + do + '/' + var + "/X0_val_"+str(nentries)+".npy", X0_val)
-            np.save(folder + do + '/' + var + "/X1_val_"+str(nentries)+".npy", X1_val)
+            np.save(folder + do + '/' + var + "/X_train_" +str(nentries)+".npy", X_train)
+            np.save(folder + do + '/' + var + "/y_train_" +str(nentries)+".npy", y_train)
+            np.save(folder + do + '/' + var + "/X_val_"   +str(nentries)+".npy", X_val)
+            np.save(folder + do + '/' + var + "/y_val_"   +str(nentries)+".npy", y_val)
+            np.save(folder + do + '/' + var + "/X0_val_"  +str(nentries)+".npy", X0_val)
+            np.save(folder + do + '/' + var + "/X1_val_"  +str(nentries)+".npy", X1_val)
             np.save(folder + do + '/' + var + "/X0_train_"+str(nentries)+".npy", X0_train)
             np.save(folder + do + '/' + var + "/X1_train_"+str(nentries)+".npy", X1_train)
+            #Tar data files if training is done on GPU
+            if torch.cuda.is_available():
+                plot = False #don't plot on GPU...
+                tar = tarfile.open("data_out.tar.gz", "w:gz")
+                for name in [folder + do + '/' + var + "/X_train_" +str(nentries)+".npy", 
+                             folder + do + '/' + var + "/y_train_" +str(nentries)+".npy",
+                             folder + do + '/' + var + "/X_val_"   +str(nentries)+".npy",
+                             folder + do + '/' + var + "/y_val_"   +str(nentries)+".npy",
+                             folder + do + '/' + var + "/X0_val_"  +str(nentries)+".npy",
+                             folder + do + '/' + var + "/X1_val_"  +str(nentries)+".npy",
+                             folder + do + '/' + var + "/X0_train_"+str(nentries)+".npy",
+                             folder + do + '/' + var + "/X1_train_"+str(nentries)+".npy"]:
+                    tar.add(name)
+                tar.close()
+
         if plot and int(nentries) > 10000: # no point in plotting distributions with too few events
             draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, var, do, nentries, plot) 
             print("saving plots")
@@ -165,10 +182,10 @@ class Loader():
         jetVars   = ['Jet_Pt', 'Jet_Mass']
         lepVars   = ['Lepton_Pt']
         etaJ = [-2.8,-2.4,-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2,2.4,2.8]
-        jetBinning = [range(0, 1500, 100), range(0, 300, 30)]
-        lepBinning = [range(0, 700, 50)]
+        jetBinning = [range(0, 1500, 50), range(0, 200, 10)]
+        lepBinning = [range(0, 700, 20)]
 
-        binning = [range(0, 12, 1), range(0, 800, 50)]+jetBinning+jetBinning+lepBinning+lepBinning
+        binning = [range(0, 12, 1), range(0, 900, 25)]+jetBinning+jetBinning+lepBinning+lepBinning
         x0df, labels = load(f = path+'/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_nominal.root', 
                             events = eventVars, jets = jetVars, leps = lepVars, n = 1, t = 'Tree')
         # load samples

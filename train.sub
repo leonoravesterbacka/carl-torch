@@ -5,8 +5,9 @@ error                   = CARLRun.$(ClusterId).$(ProcId).err
 log                     = CARLRun.$(ClusterId).log
 should_transfer_files   = YES
 transfer_input_files    = carl-torch.tar.gz
+transfer_output_files   = models_out.tar.gz, data_out.tar.gz
 when_to_transfer_output = ON_EXIT
-+JobFlavour              = "longlunch"
++JobFlavour             = "espresso"
 request_GPUs = 1
 request_CPUs = 0
 queue

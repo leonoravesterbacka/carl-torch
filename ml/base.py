@@ -5,6 +5,7 @@ import os
 import json
 import numpy as np
 import torch
+import tarfile
 
 from .utils.tools import create_missing_folders, load_and_check
 try:
@@ -98,13 +99,20 @@ class Estimator(object):
         if save_model:
             logger.debug("Saving model to %s_model.pt", filename)
             torch.save(self.model, filename + "_model.pt")
-        
+
         # Export model to onnx
         if export_model:
             x = load_and_check(x)
             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
             dummy_input = torch.from_numpy(x[0].reshape(1, -1)).float().to(device)
             torch.onnx.export(self.model, dummy_input,filename+".onnx", export_params=True, input_names = ['input'],output_names = ['r_hat', 's_hat'], verbose = True)
+
+        # Tar model if training is done on GPU
+        if torch.cuda.is_available():
+            tar = tarfile.open("models_out.tar.gz", "w:gz")
+            for name in [filename+".onnx", filename + "_x_stds.npy", filename + "_x_means.npy", filename + "_settings.json",  filename + "_state_dict.pt"]:
+                tar.add(name)
+            tar.close()
 
     def makeConfusion(self, filename, x,y):
         print("x ", x)

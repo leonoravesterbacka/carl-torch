@@ -34,7 +34,7 @@ if os.path.exists('data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'):
 else:
     x, y, x0, x1 = loading.loading(
         folder = './data/',
-        plot = False,
+        plot = True,
         var = var,
         do = sample,
         randomize = False,
