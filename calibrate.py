@@ -43,7 +43,7 @@ loading.load_calibration(y_true = y,
                          label = 'calibrated',
                          do = sample,
                          var = var,
-                         save = True,
+                         plot = True,
 )
 
 evaluate = ['train']
