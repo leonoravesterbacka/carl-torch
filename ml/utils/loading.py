@@ -128,6 +128,7 @@ class Loader():
         y_train = np.concatenate((y0_train, y1_train), axis=None)
         X_val   = np.vstack([X0_val, X1_val])
         y_val = np.concatenate((y0_val, y1_val), axis=None)
+        print("y_val, ", y_val)
         # save data
         if folder is not None and save:
             np.save(folder + do + '/' + var + "/X_train_" +str(nentries)+".npy", X_train)
@@ -206,7 +207,7 @@ class Loader():
         label = None,
         do = 'dilepton',
         var = 'qsf',
-        save = False
+        plot = False
     ):
         """
         Parameters
@@ -223,4 +224,4 @@ class Loader():
 
         # load samples
         y_true  = load_and_check(y_true,  memmap_files_larger_than_gb=1.0)
-        plot_calibration_curve(y_true, p1_raw, p1_cal, do, var, save)                                                                                                                                                                                                                                                                   
+        plot_calibration_curve(y_true, p1_raw, p1_cal, do, var, plot)                                                                                                                                                                                                                                                                   

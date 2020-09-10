@@ -90,7 +90,7 @@ def resampled_discriminator_and_roc(original, target, weights):
     roc_auc = auc(fpr, tpr)
     return fpr,tpr,roc_auc
  
-def draw_ROC(X0, X1, weights, label, legend, do, n, save = False):
+def draw_ROC(X0, X1, weights, label, legend, do, n, plot = True):
     plt.figure(figsize=(4, 3))
     no_weights_scaled = np.ones(X0.shape[0])/np.ones(X0.shape[0]).sum() * len(X1)
     fpr_t,tpr_t,roc_auc_t = resampled_discriminator_and_roc(X0, X1, no_weights_scaled)
@@ -105,7 +105,7 @@ def draw_ROC(X0, X1, weights, label, legend, do, n, save = False):
     plt.ylabel('True Positive Rate')
     plt.legend(loc="lower right", title = label)
     plt.tight_layout()
-    if save:
+    if plot:
         plt.savefig('plots/roc_nominalVs%s_%s_%s_%s.png'%(legend,do,label, n)) 
         plt.clf()    
     logger.info("CARL weighted %s AUC is %.3f"%(label,roc_auc_tC))

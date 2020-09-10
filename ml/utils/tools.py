@@ -62,7 +62,7 @@ def load(f = None, events = None, jets = None, leps = None, n = 0, t = None, do 
     for j in range(1, nJet+1):
         labels.append('Jet '+str(j)+' $\mathrm{p_{T}}$ [GeV]')
         labels.append('Jet '+str(j)+' mass [GeV]')
-    for l in range(nLep):
+    for l in range(1, nLep+1):
         labels.append('Lepton '+str(j)+' $\mathrm{p_{T}}$ [GeV]')
 
     return final, labels

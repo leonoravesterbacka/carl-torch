@@ -2,6 +2,8 @@ import os
 import sys
 import logging
 import optparse
+import torch
+import tarfile
 from ml import RatioEstimator
 from ml import Loader
 
@@ -31,6 +33,11 @@ if os.path.exists('data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'):
     x0='data/'+ sample +'/'+ var +'/X0_train_'+str(n)+'.npy'
     x1='data/'+ sample +'/'+ var +'/X1_train_'+str(n)+'.npy'
     print("Loaded existing datasets ")
+    if torch.cuda.is_available():
+        tar = tarfile.open("data_out.tar.gz", "w:gz")
+        for name in ['data/'+ sample +'/'+ var +'/X0_train_'+str(n)+'.npy']:
+            tar.add(name)
+        tar.close()
 else:
     x, y, x0, x1 = loading.loading(
         folder = './data/',
@@ -52,8 +59,8 @@ estimator = RatioEstimator(
 )
 estimator.train(
     method='carl',
-    batch_size = 5000,
-    n_epochs = 500,
+    batch_size = 1024,
+    n_epochs = 100,
     x=x,
     y=y,
     x0=x0, 
