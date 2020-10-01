@@ -1,6 +1,6 @@
 CARL-TORCH
 ==================================
-https://zenodo.org/badge/255859123.svg
+<a href="https://zenodo.org/badge/latestdoi/255859123"><img src="https://zenodo.org/badge/255859123.svg" alt="DOI"></a>
 
 *Work in progress by Leonora Vesterbacka, with input from Stephen Jiggins, Johann Brehmer, Kyle Cranmer and Gilles Louppe*
 
