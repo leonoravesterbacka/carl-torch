@@ -20,9 +20,10 @@ Therefore, a multivariate reweighting technique is proposed which can take into 
 The technique is based on approximating a density ratio `r=p1(x)/p0(x)` as `s(x) / 1 - s(x)`, where `s` is a classifier trained to distinguish samples `x ~ p0` from samples `x ~ p1`, and where `s(x)` is the classifier approximate of the probability `p0(x) / (p0(x) + p1(x))`. 
 The classification is done using a PyTorch DNN, with Adam optimizer and sigmoid activation function, and the calibration of the classifier is done using histogram or isotonic regression. Other optimizers and activation functions are available.  
 
-The performance of the weights, i.e. how well the reweighted original sample matches the target one, is assessed by training a classifier to discriminate the original distribution with weights applied from a target distribution. 
+The performance of the weights, i.e. how well the reweighted original sample matches the target one, is assessed by training another classifier to discriminate the original distribution with weights applied from a target distribution. 
 If the classifier is able to discriminate between the two samples (area under the curve, AUC > 0.5), the weights are not doing a good job, whereas if the classifier is unable to discriminate the target sample from the weighted original sample, the weights are doing a good job (AUC close to 0.5).  
-The trained model now can be exported to onnx to be able to be loaded within a production environment. 
+The trained model can be exported to .onnx format to be able to be loaded within a production environment. 
+
 ## Documentation
 * Extensive details regarding likelihood-free inference with calibrated
   classifiers can be found in the companion paper _"Approximating Likelihood
@@ -32,11 +33,12 @@ The trained model now can be exported to onnx to be able to be loaded within a p
 
 ## Installation
 The following dependencies are required:
-- uproot
-- Numpy
-- Scipy
-- PyTorch 
-- scikit-learn 
+ - numpy>=1.13.0
+ - scipy>=1.0.0
+ - scikit-learn>=0.19.0
+ - torch>=1.0.0
+ - uproot
+ - matplotlib>=2.0.0
 
 For hyperparameter search skorch is also required. 
 
@@ -45,9 +47,13 @@ Once satisfied, `carl-torch` can be installed from source using the following:
 git clone https://github.com/leonoravesterbacka/carl-torch.git
 ```
 
+## Execution
 The code is based on three scripts:
 - [train.py](train.py) trains neural networks on loaded data.
 - [evaluate.py](evaluate.py) evaluates the neural network by calculating the weights and making validation and ROC plots.
 - [calibrate.py](calibrate.py) calibrated network predictions based on histograms of the network output.
 
 Hyperparameter search for optimization of the classifier is done in branch hyperparameter-search using skorch.
+
+## Support
+If you have any questions, please email leonora.vesterbacka@cern.ch
