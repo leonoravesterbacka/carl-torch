@@ -1,5 +1,7 @@
 CARL-TORCH
 ==================================
+https://zenodo.org/badge/255859123.svg
+
 *Work in progress by Leonora Vesterbacka, with input from Stephen Jiggins, Johann Brehmer, Kyle Cranmer and Gilles Louppe*
 
 ## Introduction
