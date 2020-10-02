@@ -6,7 +6,8 @@ CARL-TORCH
 
 ## Introduction
 `carl-torch` is a toolbox for multivariate reweighting using PyTorch. 
-`carl-torch` is based on carl (https://github.com/diana-hep/carl/) originally developed for likelihood ratio estimation, but repurposed to be used as a multivariate reweighting technique to be used in the context of particle physics research. 
+`carl-torch` is based on [carl](https://github.com/diana-hep/carl/) originally developed for likelihood ratio estimation, but repurposed to be used as a multivariate reweighting technique to be used in the context of particle physics research. 
+
 ## Background
 The principle is to reweight one simulation to look like another. 
 In the context of particle physics, where a lot of the research is done using simulated data (Monte-Carlos samples), optimizing the use of the generated samples is the name of the game since computing resources are finite. 
@@ -18,18 +19,13 @@ The obvious drawback of this approach is that one or two dimensions is not nearl
 
 Therefore, a multivariate reweighting technique is proposed which can take into account the full space instead of just two dimensions. 
 The technique is based on approximating a density ratio `r=p1(x)/p0(x)` as `s(x) / 1 - s(x)`, where `s` is a classifier trained to distinguish samples `x ~ p0` from samples `x ~ p1`, and where `s(x)` is the classifier approximate of the probability `p0(x) / (p0(x) + p1(x))`. 
-The classification is done using a PyTorch DNN, with Adam optimizer and sigmoid activation function, and the calibration of the classifier is done using histogram or isotonic regression. Other optimizers and activation functions are available.  
+The classification is done using a PyTorch DNN, with Adam optimizer and relu activation function, and the calibration of the classifier is done using histogram or isotonic regression. Other optimizers and activation functions are available.  
 
 The performance of the weights, i.e. how well the reweighted original sample matches the target one, is assessed by training another classifier to discriminate the original distribution with weights applied from a target distribution. 
 If the classifier is able to discriminate between the two samples (area under the curve, AUC > 0.5), the weights are not doing a good job, whereas if the classifier is unable to discriminate the target sample from the weighted original sample, the weights are doing a good job (AUC close to 0.5).  
-The trained model can be exported to .onnx format to be able to be loaded within a production environment. 
 
 ## Documentation
-* Extensive details regarding likelihood-free inference with calibrated
-  classifiers can be found in the companion paper _"Approximating Likelihood
-  Ratios with Calibrated Discriminative Classifiers", Kyle Cranmer, Juan Pavez,
-  Gilles Louppe._
-  [http://arxiv.org/abs/1506.02169](http://arxiv.org/abs/1506.02169)
+Extensive details regarding likelihood-free inference with calibrated classifiers can be found in th paper _"Approximating Likelihood Ratios with Calibrated Discriminative Classifiers", Kyle Cranmer, Juan Pavez, Gilles Louppe._ [http://arxiv.org/abs/1506.02169](http://arxiv.org/abs/1506.02169)
 
 ## Installation
 The following dependencies are required:
@@ -54,6 +50,7 @@ The code is based on three scripts:
 - [calibrate.py](calibrate.py) calibrated network predictions based on histograms of the network output.
 
 Hyperparameter search for optimization of the classifier is done in branch hyperparameter-search using skorch.
+
 ## Deployment
 The model trained in the train.py step is exported to [onnx](https://github.com/onnx/onnx) format to be loaded in a C++ production environment using [onnxruntime](https://github.com/microsoft/onnxruntime). 
 ### For ATLAS users
