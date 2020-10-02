@@ -55,9 +55,9 @@ The code is based on three scripts:
 
 Hyperparameter search for optimization of the classifier is done in branch hyperparameter-search using skorch.
 ## Deployment
-The model trained in the train.py step is exported to [https://github.com/onnx/onnx](onnx) format to be loaded in a C++ production environment using [https://github.com/microsoft/onnxruntime](onnxruntime). 
+The model trained in the train.py step is exported to [onnx](https://github.com/onnx/onnx) format to be loaded in a C++ production environment using [onnxruntime](https://github.com/microsoft/onnxruntime). 
 ### For ATLAS users
-The [https://gitlab.cern.ch/mvesterb/carlathenaonnx/-/tree/master/carlAthenaOnnx](carlAthenaOnnx) is package that loads the models trained with carl-torch in AthDerivation.  
+The [carlAthenaOnnx](https://gitlab.cern.ch/mvesterb/carlathenaonnx/-/tree/master/carlAthenaOnnx) is package that loads the models trained with carl-torch in AthDerivation.  
 
 ## Support
 If you have any questions, please email leonora.vesterbacka@cern.ch
