@@ -49,11 +49,15 @@ The code is based on three scripts:
 - [evaluate.py](evaluate.py) evaluates the neural network by calculating the weights and making validation and ROC plots.
 - [calibrate.py](calibrate.py) calibrated network predictions based on histograms of the network output.
 
+Validation plots are made with option plot set to True in [evaluate.py](evaluate.py), and saved in plots/. 
+
 Hyperparameter search for optimization of the classifier is done in branch hyperparameter-search using skorch.
+
+The training is preferrably done on GPUs. [HTCondor_README.md](HTCondor_README.md) includes instructions on how to train on GPUS on HTCondor (ATLAS users only for now). The evaluation and calibration steps are done instantly and thus not require GPUs. 
 
 ## Deployment
 The model trained in the train.py step is exported to [onnx](https://github.com/onnx/onnx) format to be loaded in a C++ production environment using [onnxruntime](https://github.com/microsoft/onnxruntime). 
-### For ATLAS users
+#### For ATLAS users
 The [carlAthenaOnnx](https://gitlab.cern.ch/mvesterb/carlathenaonnx/-/tree/master/carlAthenaOnnx) is package that loads the models trained with carl-torch in AthDerivation.  
 
 ## Support
