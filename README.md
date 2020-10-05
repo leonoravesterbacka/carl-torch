@@ -25,8 +25,8 @@ An example of two variables (out of n possible ones that can be used in the trai
 ![variable1](images/1_nominalVsVar_1000000.png)
 ![variable2](images/2_nominalVsVar_1000000.png)
 
-![weightedVariable1](images/w_1_nominalVsVar_1000000.png)
-![weightedVariable2](images/w_5_nominalVsVar_1000000.png)
+![weightedVariable1](images/w_1_nominalVsVar_train_1000000.png)
+![weightedVariable2](images/w_5_nominalVsVar_train_1000000.png)
 
 ![roc](images/roc_nominalVsQSFDOWN_dilepton_train_True.png)
 The classification is done using a PyTorch DNN, with Adam optimizer and relu activation function, and the calibration of the classifier is done using histogram or isotonic regression. Other optimizers and activation functions are available.  
