@@ -1,6 +1,7 @@
 CARL-TORCH
 ==================================
-<a href="https://zenodo.org/badge/latestdoi/255859123"><img src="https://zenodo.org/badge/255859123.svg" alt="DOI"></a>
+[![DOI](https://zenodo.org/badge/255859123.svg)](https://zenodo.org/badge/latestdoi/255859123)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 *Work in progress by Leonora Vesterbacka, with input from Stephen Jiggins, Johann Brehmer, Kyle Cranmer and Gilles Louppe*
 
