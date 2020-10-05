@@ -22,21 +22,26 @@ The obvious drawback of this approach is that one or two dimensions is not nearl
 Therefore, a *multivariate* reweighting technique is proposed which can take into account the full space instead of just two dimensions. 
 The technique utilizes a binary classifier trained to differntiate the sample `p0(x)` from sample `p1(x)`, where `x` is an n-dimensional feature vector. 
 An ideal classifier will estimate `s(x) = p0(x) / (p0(x) + p1(x))`, and by identifying the weight `r(x)=p1(x)/p0(x)`, the output of the classifier can be rewritten as `s(x) = r(x) / (1 + r(x))`. 
-The actual weight `r(x)` is retrieved after expressing `r(x)` as a function of `s(x)`: `r(x)~s(x)/(1-s(x))`
-In example of two variables (out of n possible ones that can be used in the training) is shown below, for the two distributions `p0(x)` and `p1(x)`. 
+The actual weight `r(x)` is retrieved after expressing `r(x)` as a function of `s(x)`: `r(x)~s(x)/(1-s(x))`. In example of two variables (out of n possible ones that can be used in the training) is shown below, for the two distributions `p0(x)` and `p1(x)`. 
+<p align="center">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/1_nominalVsVar_1000000.png" width="300">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/2_nominalVsVar_1000000.png" width="300">
+</p>
 
 The classification is done using a PyTorch DNN, with Adam optimizer and relu activation function, and the calibration of the classifier is done using histogram or isotonic regression. Other optimizers and activation functions are available.  
 Once the weights are calculated as a function of the classifier output `r(x)~s(x)/(1-s(x))`, they are applied to the original sample `p0(x)` (orange histogram), and will ideally line up with the `p1(x)` sample (dashed histogram). 
+<p align="center">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_1_nominalVsVar_train_1000000.png" width="300">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_5_nominalVsVar_train_1000000.png" width="300">
+</p>
 
 The performance of the weights, i.e. how well the reweighted original sample matches the target one, is assessed by training another classifier to discriminate the original sample with weights applied from a target sample. 
 The metric to assess the performance of the weights is the area under the curve (AUC) of the ROC curve of another classifier trained to differentiate the target sample from the nominal sample and from the nominal sample *with* the weights applied. 
 If the classifier is able to discriminate between the two samples the resulting AUC is larger than 0.5, as in the case of comparing the original sample `p0(x)` and the target sample `p1(x)`.  
 On the other hand, if the weights are applied to the nominal sample, the classifier *is unable to discriminate* the target sample from the weighted original sample, which results in an AUC of exactly 0.5, meaning that the weighted original sample and the target one are *virtually identical!*   
+<p align="center">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/roc_nominalVsQSFDOWN_dilepton_train_True.png" width="300">
+</p>
 
 ## Documentation
 Extensive details regarding likelihood-free inference with calibrated classifiers can be found in th paper _"Approximating Likelihood Ratios with Calibrated Discriminative Classifiers", Kyle Cranmer, Juan Pavez, Gilles Louppe._ [http://arxiv.org/abs/1506.02169](http://arxiv.org/abs/1506.02169)
