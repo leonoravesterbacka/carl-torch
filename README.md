@@ -31,10 +31,11 @@ The classification is done using a PyTorch DNN, with Adam optimizer and relu act
 Once the weights are calculated as a function of the classifier output `r(x)~s(x)/(1-s(x))`, they are applied to the original sample `p0(x)` (orange histogram), and will ideally line up with the `p1(x)` sample (dashed histogram). 
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_1_nominalVsVar_train_1000000.png" width="300">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_5_nominalVsVar_train_1000000.png" width="300">
+
 The performance of the weights, i.e. how well the reweighted original sample matches the target one, is assessed by training another classifier to discriminate the original sample with weights applied from a target sample. 
-The metric to assess the performance of the weights is the area under the curve (AUC) of another classifier trained to differentiate the target sample from the nominal sample and from the nominal sample *with* the weights applied. 
+The metric to assess the performance of the weights is the area under the curve (AUC) of the ROC curve of another classifier trained to differentiate the target sample from the nominal sample and from the nominal sample *with* the weights applied. 
 If the classifier is able to discriminate between the two samples the resulting AUC is larger than 0.5, as in the case of comparing the original sample `p0(x)` and the target sample `p1(x)`.  
-On the other hand, if the weights are applied to the nominal sample, the classifier *is unable to discriminate* the target sample from the weighted original sample, which results in an AUC of exaclty 0.5, meaning that the weighted original sample and the target one are *virtually identical*!   
+On the other hand, if the weights are applied to the nominal sample, the classifier *is unable to discriminate* the target sample from the weighted original sample, which results in an AUC of exactly 0.5, meaning that the weighted original sample and the target one are *virtually identical!*   
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/roc_nominalVsQSFDOWN_dilepton_train_True.png" width="300">
 
 ## Documentation
