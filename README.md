@@ -21,18 +21,20 @@ The obvious drawback of this approach is that one or two dimensions is not nearl
 
 Therefore, a *multivariate* reweighting technique is proposed which can take into account the full space instead of just two dimensions. 
 The technique utilizes a binary classifier trained to differntiate the sample `p0(x)` from sample `p1(x)`, where `x` is an n-dimensional feature vector. 
-An ideal classifier will estimate `s(x) = p0(x) / (p0(x) + p1(x))`, and by identifying the weight `r(x)=p1(x)/p0(x)`, the output of the classifier can be rewritten as `s(x) = r(x) / (1 + r(x))`. 
-The actual weight `r(x)` is retrieved after expressing `r(x)` as a function of `s(x)`: `r(x)~s(x)/(1-s(x))`. In example of two variables (out of n possible ones that can be used in the training) is shown below, for the two distributions `p0(x)` and `p1(x)`. 
+An ideal classifier will estimate `s(x) = p0(x) / (p0(x) + p1(x))`, and by identifying the weight `r(x) = p1(x) / p0(x)`, the output of the classifier can be rewritten as `s(x) = r(x) / (1 + r(x))`. 
+The actual weight `r(x)` is retrieved after expressing `r(x)` as a function of `s(x)`: `r(x) ~ s(x) / (1 - s(x))`. For example three variables (out of n possible ones that can be used in the training) is shown below, for the two distributions `p0(x)` and `p1(x)`. 
 <p align="center">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/1_nominalVsVar_1000000.png" width="300">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/2_nominalVsVar_1000000.png" width="300">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/4_nominalVsVar_1000000.png" width="300">
 </p>
 
 The classification is done using a PyTorch DNN, with Adam optimizer and relu activation function, and the calibration of the classifier is done using histogram or isotonic regression. Other optimizers and activation functions are available.  
-Once the weights are calculated as a function of the classifier output `r(x)~s(x)/(1-s(x))`, they are applied to the original sample `p0(x)` (orange histogram), and will ideally line up with the `p1(x)` sample (dashed histogram). 
+Once the weights have been calculated as a function of the classifier output `r(x) ~ s(x) / (1 - s(x))`, they are applied to the original sample `p0(x)` (orange histogram), and will ideally line up with the `p1(x)` sample (dashed histogram), for the three arbitrary variables (out of n) that was used in the training. 
 <p align="center">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_1_nominalVsVar_train_1000000_fix.png" width="300">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_5_nominalVsVar_train_1000000.png" width="300">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_4_nominalVsVar_train_1000000.png" width="300">
 </p>
 
 The performance of the weights, i.e. how well the reweighted original sample matches the target one, is assessed by training another classifier to discriminate the original sample with weights applied from a target sample. 
