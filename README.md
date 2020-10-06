@@ -21,7 +21,7 @@ A naive approach to reweighting a sample `p0(x)` to look like another `p1(x)` is
 ### Multivariate reweighting
 In order to capture the effects in the full phase space, a *multivariate* reweighting technique is proposed which can take into account n dimensions instead of just two. The technique utilizes a binary classifier trained to differntiate the sample `p0(x)` from sample `p1(x)`, where `x` is an n-dimensional feature vector. 
 An ideal classifier will estimate `s(x) = p0(x) / (p0(x) + p1(x))`, and by identifying the weight `r(x) = p1(x) / p0(x)`, the output of the classifier can be rewritten as `s(x) = r(x) / (1 + r(x))`. 
-The actual weight `r(x)` is retrieved after expressing `r(x)` as a function of `s(x)`: `r(x) ~ s(x) / (1 - s(x))`. The weights derived using this method are called CARL weights, referring to the name of the method originally proposed in [http://arxiv.org/abs/1506.02169](http://arxiv.org/abs/1506.02169). Three variables (out of n possible ones that can be used in the training) is shown below, for the two distributions `p0(x)` and `p1(x)`. 
+The actual weight `r(x)` is retrieved after expressing `r(x)` as a function of `s(x)`: `r(x) ~ s(x) / (1 - s(x))`. The weights derived using this method are called CARL weights, referring to the name of the method originally proposed in [http://arxiv.org/abs/1506.02169](http://arxiv.org/abs/1506.02169). Three arbitrary variables (out of n possible ones that can be used in the training) are shown below, for the two distributions `p0(x)` and `p1(x)`. 
 <p align="center">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/1_nominalVsVar_1000000.png" width="260">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/2_nominalVsVar_1000000.png" width="260">
@@ -43,6 +43,7 @@ If the classifier is able to discriminate between the two samples the resulting 
 <p align="center">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/roc_nominalVsQSFDOWN_dilepton_train_True.png" width="400">
 </p>
+The foreseen gain using this method is the ability to mimic a variational sample by generating weights using much smaller samples (down to 1/20th of the number of events of the nominal sample), instead of generating each variational sample with the same statistical power as the nominal one. As the training of the classifier that is the base of the weight derivation is much lighter in terms of CPU than the full Monte-Carlo sample generation, this method has immense potential in reducing CPU usage. 
 
 ## Documentation
 Extensive details regarding likelihood-free inference with calibrated classifiers can be found in th paper _"Approximating Likelihood Ratios with Calibrated Discriminative Classifiers", Kyle Cranmer, Juan Pavez, Gilles Louppe._ [http://arxiv.org/abs/1506.02169](http://arxiv.org/abs/1506.02169)
