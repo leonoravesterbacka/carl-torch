@@ -14,14 +14,12 @@ CARL-TORCH
 The motivation behind this toolbox is to enable a reweighting of one simulation to look like another. 
 In the context of particle physics, the research is done largely using simulated data (Monte-Carlos samples). 
 As computing resources are finite, effort is put into minimizing the number of simulated samples to be generated, and make the most use of the ones that have to be generated.  
-Searches for new physics and measurements of known Standard Model processes are relying on Monte-Carlo samples generated with multiple theoretical settings in order to evaluate theire effect on the modelling of the physics process. 
-As it is computationally impractical to generate samples for all theoretical settings with full statistical power, smaller samples are generated for each variation, and a weight is derived to reweight a nominal sample of full statistical power to look like a sample generated with a variational setting. 
-The hope is that the derived weight is able to emulate the effect of the theoretical variation without having to generate it with full statistical power.
+
+Searches for new physics and measurements of known Standard Model processes are relying on Monte-Carlo samples generated with multiple theoretical settings in order to evaluate their effect on the modelling of the physics process. As it is computationally impractical to generate samples for all theoretical settings with full statistical power, smaller samples are generated for each variation, and a weight is derived to reweight a nominal sample of full statistical power to look like a sample generated with a variational setting. The hope is that the derived weight is able to emulate the effect of the theoretical variation without having to generate it with full statistical power.
 ### Traditional reweighting in 2 dimensions 
 A naive approach to reweighting a sample `p0(x)` to look like another `p1(x)` is by calculating a weight defined as `r(x) = p1(x) / p0(x)` parameterized in one or two dimensions, i.e. as a function of one or two physical variables, and apply this weight to the nominal sample `p0(x)`. By definition, there will be perfect closure when applying the weight to one of the two variables used to calculate the weight. The problem arise when examining the application of the weight to the rest of the variables, where the closure is far from guaranteed. As the disagreement in the other variables will result in large systematic errors, there is a clear motivation to move to a method that can derive the weights using the full phase space. 
 ### Multivariate reweighting
-In order to capture the effects in the full phase space, a *multivariate* reweighting technique is proposed which can take into account n dimensions instead of just two. 
-The technique utilizes a binary classifier trained to differntiate the sample `p0(x)` from sample `p1(x)`, where `x` is an n-dimensional feature vector. 
+In order to capture the effects in the full phase space, a *multivariate* reweighting technique is proposed which can take into account n dimensions instead of just two. The technique utilizes a binary classifier trained to differntiate the sample `p0(x)` from sample `p1(x)`, where `x` is an n-dimensional feature vector. 
 An ideal classifier will estimate `s(x) = p0(x) / (p0(x) + p1(x))`, and by identifying the weight `r(x) = p1(x) / p0(x)`, the output of the classifier can be rewritten as `s(x) = r(x) / (1 + r(x))`. 
 The actual weight `r(x)` is retrieved after expressing `r(x)` as a function of `s(x)`: `r(x) ~ s(x) / (1 - s(x))`. The weights derived using this method are called CARL weights, referring to the name of the method originally proposed in [http://arxiv.org/abs/1506.02169](http://arxiv.org/abs/1506.02169). Three variables (out of n possible ones that can be used in the training) is shown below, for the two distributions `p0(x)` and `p1(x)`. 
 <p align="center">
@@ -39,10 +37,9 @@ Once the weights have been calculated as a function of the classifier output `r(
 </p>
 
 ### Performance
-The performance of the weights, i.e. how well the reweighted original sample matches the target one, is assessed by training another classifier to discriminate the original sample with weights applied from a target sample. 
-The metric to assess the performance of the weights is the area under the curve (AUC) of the ROC curve of the classifier trained to differentiate the target sample from the nominal sample and from the nominal sample *with* the weights applied, as shown below. 
-If the classifier is able to discriminate between the two samples the resulting AUC is larger than 0.5, as in the case of comparing the original sample `p0(x)` and the target sample `p1(x)` (blue curve).  
-On the other hand, if the weights are applied to the nominal sample, the classifier *is unable to discriminate* the target sample from the weighted original sample (orange curve), which results in an AUC of exactly 0.5, meaning that the weighted original sample and the target one are *virtually identical!*.    
+The performance of the weights, i.e. how well the reweighted original sample matches the target one, is assessed by training another classifier to discriminate the original sample with weights applied from a target sample. The metric to assess the performance of the weights is the area under the curve (AUC) of the ROC curve of the classifier trained to differentiate the target sample from the nominal sample and from the nominal sample *with* the weights applied, as shown below. 
+
+If the classifier is able to discriminate between the two samples the resulting AUC is larger than 0.5, as in the case of comparing the original sample `p0(x)` and the target sample `p1(x)` (blue curve).  On the other hand, if the weights are applied to the nominal sample, the classifier *is unable to discriminate* the target sample from the weighted original sample (orange curve), which results in an AUC of exactly 0.5, meaning that the weighted original sample and the target one are *virtually identical!*.    
 <p align="center">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/roc_nominalVsQSFDOWN_dilepton_train_True.png" width="400">
 </p>
