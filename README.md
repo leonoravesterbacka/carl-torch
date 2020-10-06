@@ -4,37 +4,39 @@ CARL-TORCH
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![arXiv](http://img.shields.io/badge/arXiv-1506.02169-B31B1B.svg)](https://arxiv.org/abs/1506.02169)
 
-*Work in progress by Leonora Vesterbacka, with input from Stephen Jiggins, Johann Brehmer, Kyle Cranmer and Gilles Louppe*
+*Work in progress by Leonora Vesterbacka (NYU) and Stephen Jiggins (U Freiburg), with input from Johann Brehmer (NYU), Kyle Cranmer (NYU) and Gilles Louppe (U Liège)*
 
 ## Introduction
 `carl-torch` is a toolbox for multivariate reweighting using PyTorch. 
 `carl-torch` is based on [carl](https://github.com/diana-hep/carl/) originally developed for likelihood ratio estimation, but repurposed to be used as a multivariate reweighting technique to be used in the context of particle physics research. 
 
 ## Background
-The principle is to reweight one simulation to look like another. 
-In the context of particle physics, where a lot of the research is done using simulated data (Monte-Carlos samples), optimizing the use of the generated samples is the name of the game since computing resources are finite. 
-Searches for new physics and measurements of known Standard Model processes are relying on Monte-Carlo samples generated with multiple theoretical settings in order to evaluate the effect of these systematic uncertainties. 
+The motivation behind this toolbox is to enable a reweighting of one simulation to look like another. 
+In the context of particle physics, the research is done largely using simulated data (Monte-Carlos samples). 
+As computing resources are finite, effort is put into minimizing the number of simulated samples to be generated, and make the most use of the ones that have to be generated.  
+Searches for new physics and measurements of known Standard Model processes are relying on Monte-Carlo samples generated with multiple theoretical settings in order to evaluate theire effect on the modelling of the physics process. 
 As it is computationally impractical to generate samples for all theoretical settings with full statistical power, smaller samples are generated for each variation, and a weight is derived to reweight a nominal sample of full statistical power to look like a sample generated with a variational setting. 
-
+The hope is that the derived weight is able to emulate the effect of the theoretical variation without having to generate it with full statistical power.
+### Traditional reweighting in 2 dimensions 
 A naive approach to reweighting a sample `p0(x)` to look like another `p1(x)` is by calculating a weight defined as `r(x)=p1(x)/p0(x)` parameterized in one or two dimensions, i.e. as a function of one or two physical variables, and apply this weight to the nominal sample `p0(x)`. 
 The obvious drawback of this approach is that one or two dimensions is not nearly enough to capture the effects in the full phase space. 
-
-Therefore, a *multivariate* reweighting technique is proposed which can take into account the full space instead of just two dimensions. 
+### Multivariate reweighting
+In order to capture the effects in the full phase space, a *multivariate* reweighting technique is proposed which can take into account n dimensions instead of just two. 
 The technique utilizes a binary classifier trained to differntiate the sample `p0(x)` from sample `p1(x)`, where `x` is an n-dimensional feature vector. 
 An ideal classifier will estimate `s(x) = p0(x) / (p0(x) + p1(x))`, and by identifying the weight `r(x) = p1(x) / p0(x)`, the output of the classifier can be rewritten as `s(x) = r(x) / (1 + r(x))`. 
 The actual weight `r(x)` is retrieved after expressing `r(x)` as a function of `s(x)`: `r(x) ~ s(x) / (1 - s(x))`. For example three variables (out of n possible ones that can be used in the training) is shown below, for the two distributions `p0(x)` and `p1(x)`. 
 <p align="center">
-<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/1_nominalVsVar_1000000.png" width="250">
-<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/2_nominalVsVar_1000000.png" width="250">
-<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/4_nominalVsVar_1000000.png" width="250">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/1_nominalVsVar_1000000.png" width="290">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/2_nominalVsVar_1000000.png" width="290">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/4_nominalVsVar_1000000.png" width="290">
 </p>
 
 The classification is done using a PyTorch DNN, with Adam optimizer and relu activation function, and the calibration of the classifier is done using histogram or isotonic regression. Other optimizers and activation functions are available.  
 Once the weights have been calculated as a function of the classifier output `r(x) ~ s(x) / (1 - s(x))`, they are applied to the original sample `p0(x)` (orange histogram), and will ideally line up with the `p1(x)` sample (dashed histogram), for the three arbitrary variables (out of n) that was used in the training. 
 <p align="center">
-<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_1_nominalVsVar_train_1000000_fix.png" width="250">
-<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_5_nominalVsVar_train_1000000.png" width="250">
-<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_4_nominalVsVar_train_1000000.png" width="250">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_1_nominalVsVar_train_1000000_fix.png" width="290">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_5_nominalVsVar_train_1000000.png" width="290">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_4_nominalVsVar_train_1000000.png" width="290">
 </p>
 
 The performance of the weights, i.e. how well the reweighted original sample matches the target one, is assessed by training another classifier to discriminate the original sample with weights applied from a target sample. 
