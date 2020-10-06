@@ -24,17 +24,17 @@ The technique utilizes a binary classifier trained to differntiate the sample `p
 An ideal classifier will estimate `s(x) = p0(x) / (p0(x) + p1(x))`, and by identifying the weight `r(x) = p1(x) / p0(x)`, the output of the classifier can be rewritten as `s(x) = r(x) / (1 + r(x))`. 
 The actual weight `r(x)` is retrieved after expressing `r(x)` as a function of `s(x)`: `r(x) ~ s(x) / (1 - s(x))`. For example three variables (out of n possible ones that can be used in the training) is shown below, for the two distributions `p0(x)` and `p1(x)`. 
 <p align="center">
-<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/1_nominalVsVar_1000000.png" width="300">
-<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/2_nominalVsVar_1000000.png" width="300">
-<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/4_nominalVsVar_1000000.png" width="300">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/1_nominalVsVar_1000000.png" width="250">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/2_nominalVsVar_1000000.png" width="250">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/4_nominalVsVar_1000000.png" width="250">
 </p>
 
 The classification is done using a PyTorch DNN, with Adam optimizer and relu activation function, and the calibration of the classifier is done using histogram or isotonic regression. Other optimizers and activation functions are available.  
 Once the weights have been calculated as a function of the classifier output `r(x) ~ s(x) / (1 - s(x))`, they are applied to the original sample `p0(x)` (orange histogram), and will ideally line up with the `p1(x)` sample (dashed histogram), for the three arbitrary variables (out of n) that was used in the training. 
 <p align="center">
-<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_1_nominalVsVar_train_1000000_fix.png" width="300">
-<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_5_nominalVsVar_train_1000000.png" width="300">
-<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_4_nominalVsVar_train_1000000.png" width="300">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_1_nominalVsVar_train_1000000_fix.png" width="250">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_5_nominalVsVar_train_1000000.png" width="250">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_4_nominalVsVar_train_1000000.png" width="250">
 </p>
 
 The performance of the weights, i.e. how well the reweighted original sample matches the target one, is assessed by training another classifier to discriminate the original sample with weights applied from a target sample. 
@@ -42,7 +42,7 @@ The metric to assess the performance of the weights is the area under the curve 
 If the classifier is able to discriminate between the two samples the resulting AUC is larger than 0.5, as in the case of comparing the original sample `p0(x)` and the target sample `p1(x)`.  
 On the other hand, if the weights are applied to the nominal sample, the classifier *is unable to discriminate* the target sample from the weighted original sample, which results in an AUC of exactly 0.5, meaning that the weighted original sample and the target one are *virtually identical!*   
 <p align="center">
-<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/roc_nominalVsQSFDOWN_dilepton_train_True.png" width="300">
+<img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/roc_nominalVsQSFDOWN_dilepton_train_True.png" width="400">
 </p>
 
 ## Documentation
