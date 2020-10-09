@@ -46,7 +46,7 @@ If the classifier is able to discriminate between the two samples the resulting 
 The foreseen gain using this method is the ability to mimic a variational sample by generating weights using much smaller samples (down to 1/20th of the number of events of the nominal sample), instead of generating each variational sample with the same statistical power as the nominal one. As the training of the classifier that is the base of the weight derivation is much lighter in terms of CPU than the full Monte-Carlo sample generation, this method has immense potential in reducing CPU usage. 
 
 ## Documentation
-Extensive details regarding likelihood-free inference with calibrated classifiers can be found in the paper _"Approximating Likelihood Ratios with Calibrated Discriminative Classifiers", Kyle Cranmer, Juan Pavez, Gilles Louppe._ [http://arxiv.org/abs/1506.02169](http://arxiv.org/abs/1506.02169), as well as Kyles talk  [Multivariate-Reweighting-ATLAS-ML.pdf](https://indico.cern.ch/event/483999/contributions/1160703/attachments/1249836/1842257/Multivariate-Reweighting-ATLAS-ML.pdf).
+Extensive details regarding likelihood-free inference with calibrated classifiers can be found in the paper _"Approximating Likelihood Ratios with Calibrated Discriminative Classifiers", Kyle Cranmer, Juan Pavez, Gilles Louppe._ [http://arxiv.org/abs/1506.02169](http://arxiv.org/abs/1506.02169), as well as Kyles keynote at [NIPS 2016](https://figshare.com/articles/journal_contribution/NIPS_2016_Keynote_Machine_Learning_Likelihood_Free_Inference_in_Particle_Physics/4291565/1).
 ## Installation
 The following dependencies are required:
  - numpy>=1.13.0
