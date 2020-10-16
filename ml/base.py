@@ -6,6 +6,8 @@ import json
 import numpy as np
 import torch
 import tarfile
+import onnxruntime as ort
+
 
 from .utils.tools import create_missing_folders, load_and_check
 try:
@@ -106,6 +108,15 @@ class Estimator(object):
             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
             dummy_input = torch.from_numpy(x[0].reshape(1, -1)).float().to(device)
             torch.onnx.export(self.model, dummy_input,filename+".onnx", export_params=True, input_names = ['input'],output_names = ['r_hat', 's_hat'], verbose = True)
+
+        # Manipulate onnx model using 'onnxruntime' module directly
+        #  Note: This is inefficient due to I/O reasons, however
+        #        torch.onnx interface seemingly has no options for this
+        if export_model and os.pth.isfile(filename+".onnx"):
+            # Start the normal onnxruntime session using the model
+            # just saved
+            ort_session = ort.InferenceSession(filename+".onnx")
+            
 
         # Tar model if training is done on GPU
         if torch.cuda.is_available():
