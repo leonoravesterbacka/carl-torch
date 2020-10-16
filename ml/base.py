@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import tarfile
 import onnxruntime as ort
+import onnx as onnx
 
 
 from .utils.tools import create_missing_folders, load_and_check
@@ -112,10 +113,69 @@ class Estimator(object):
         # Manipulate onnx model using 'onnxruntime' module directly
         #  Note: This is inefficient due to I/O reasons, however
         #        torch.onnx interface seemingly has no options for this
-        if export_model and os.pth.isfile(filename+".onnx"):
+        if export_model and os.path.isfile(filename+".onnx"):
+            ####################################
+            ####################################
+            ## Start the normal onnxruntime session using the model
+            ## just saved
+            #ort_session = ort.InferenceSession(filename+".onnx")
+            ## Model Meta data
+            #metaData = ort_session.get_modelmeta()
+            ## Get the custom map
+            #CustomMap = metaData.custom_metadata_map
+            #print("Custom Meta-Data Map: {}".format(CustomMap))
+
+            ## Define a new custom meta data map
+            #CustomMap_new = {"Var1" : 200.0, 
+            #                 "Var2" : 5.0,
+            #                 "Var3" : 1000.0,
+            #                 "Var4" : 400.0,
+            #                 "Var5" : 6.0,
+            #             }
+            #
+            ## Load new custom map into mode
+            #metaData.custom_metadata_map = CustomMap_new
+            ####################################
+            ####################################
+            
+            ####################################
+            ####################################
+            # Define a new custom meta data map
+            CustomMap_new = {"Var1" : 200.0, 
+                             "Var2" : 5.0,
+                             "Var3" : 1000.0,
+                             "Var4" : 400.0,
+                             "Var5" : 6.0,
+                         }
+            
+            # Load model
+            model = onnx.load(filename+".onnx")
+            # Get Meta Data
+            meta = model.metadata_props.add()
+            meta.key = "Var1" 
+            meta.value = "200.0"
+            # Check value
+            print("New Meta data:  {}".format(model.metadata_props[0]))
+            # Save model
+            onnx.save(model, filename+"_new"+".onnx")
+            
             # Start the normal onnxruntime session using the model
             # just saved
-            ort_session = ort.InferenceSession(filename+".onnx")
+            ort_session = ort.InferenceSession(filename+"_new"+".onnx")
+            # Model Meta data
+            metaData = ort_session.get_modelmeta()
+            # Print Metadata
+            CustomMap = metaData.custom_metadata_map
+            print("Custom Meta-Data Map (OMG!!): {}".format(CustomMap))
+            #metaData.custom_metadata_map = CustomMap_new
+            #print("Custom Meta-Data Map: {}".format(metaData.custom_metadata_map))
+            #print("Meta-Data Map: {}".format(metaData))
+            #ort_session.SaveModelMetadata()
+
+            
+            
+            ####################################
+            ###################################
             
 
         # Tar model if training is done on GPU
