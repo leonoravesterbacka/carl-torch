@@ -114,7 +114,11 @@ class Estimator(object):
         #  Note: This is inefficient due to I/O reasons, however
         #        torch.onnx interface seemingly has no options for this
         if export_model and os.path.isfile(filename+".onnx"):
+            
             ####################################
+            ##        ONNXRUNTIME
+            ## Example using Onnxruntime instead of Onxx
+            ## Keeping only for prosperity for now
             ####################################
             ## Start the normal onnxruntime session using the model
             ## just saved
@@ -135,10 +139,16 @@ class Estimator(object):
             #
             ## Load new custom map into mode
             #metaData.custom_metadata_map = CustomMap_new
+
+            # Unable to save Onnx model from Onnxruntime Inference session it seems
+            #   -> Makes sense given InferenceSession is designed to access and infer, not 
+            #      a data/model editor session.
+            #ort_session.SaveModelMetadata() # Believe that this does not work
             ####################################
             ####################################
             
             ####################################
+            ##        ONNX
             ####################################
             # Define a new custom meta data map
             CustomMap_new = {"Var1" : 200.0, 
@@ -151,29 +161,27 @@ class Estimator(object):
             # Load model
             model = onnx.load(filename+".onnx")
             # Get Meta Data
-            meta = model.metadata_props.add()
-            meta.key = "Var1" 
-            meta.value = "200.0"
-            # Check value
-            print("New Meta data:  {}".format(model.metadata_props[0]))
+            for index,(cust_key,cust_var) in enumerate(CustomMap_new.items()): 
+                meta = model.metadata_props.add()
+                meta.key = cust_key
+                meta.value = str(cust_var)
+                # Check value
+                print("New Meta data:  {}".format(model.metadata_props[index]))
+
+                
             # Save model
             onnx.save(model, filename+"_new"+".onnx")
             
             # Start the normal onnxruntime session using the model
-            # just saved
+            # just saved to check that the model was saved with the correct 
+            # metadata
             ort_session = ort.InferenceSession(filename+"_new"+".onnx")
             # Model Meta data
             metaData = ort_session.get_modelmeta()
             # Print Metadata
             CustomMap = metaData.custom_metadata_map
-            print("Custom Meta-Data Map (OMG!!): {}".format(CustomMap))
-            #metaData.custom_metadata_map = CustomMap_new
-            #print("Custom Meta-Data Map: {}".format(metaData.custom_metadata_map))
-            #print("Meta-Data Map: {}".format(metaData))
-            #ort_session.SaveModelMetadata()
-
-            
-            
+            print("Custom Meta-Data Map: {}".format(CustomMap))
+            # Need to close the ort session for comleteness (C-style)
             ####################################
             ###################################
             
