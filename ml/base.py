@@ -6,6 +6,9 @@ import json
 import numpy as np
 import torch
 import tarfile
+import onnxruntime as ort
+import onnx as onnx
+
 
 from .utils.tools import create_missing_folders, load_and_check
 try:
@@ -106,6 +109,82 @@ class Estimator(object):
             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
             dummy_input = torch.from_numpy(x[0].reshape(1, -1)).float().to(device)
             torch.onnx.export(self.model, dummy_input,filename+".onnx", export_params=True, input_names = ['input'],output_names = ['r_hat', 's_hat'], verbose = True)
+
+        # Manipulate onnx model using 'onnxruntime' module directly
+        #  Note: This is inefficient due to I/O reasons, however
+        #        torch.onnx interface seemingly has no options for this
+        if export_model and os.path.isfile(filename+".onnx"):
+            
+            ####################################
+            ##        ONNXRUNTIME
+            ## Example using Onnxruntime instead of Onxx
+            ## Keeping only for prosperity for now
+            ####################################
+            ## Start the normal onnxruntime session using the model
+            ## just saved
+            #ort_session = ort.InferenceSession(filename+".onnx")
+            ## Model Meta data
+            #metaData = ort_session.get_modelmeta()
+            ## Get the custom map
+            #CustomMap = metaData.custom_metadata_map
+            #print("Custom Meta-Data Map: {}".format(CustomMap))
+
+            ## Define a new custom meta data map
+            #CustomMap_new = {"Var1" : 200.0, 
+            #                 "Var2" : 5.0,
+            #                 "Var3" : 1000.0,
+            #                 "Var4" : 400.0,
+            #                 "Var5" : 6.0,
+            #             }
+            #
+            ## Load new custom map into mode
+            #metaData.custom_metadata_map = CustomMap_new
+
+            # Unable to save Onnx model from Onnxruntime Inference session it seems
+            #   -> Makes sense given InferenceSession is designed to access and infer, not 
+            #      a data/model editor session.
+            #ort_session.SaveModelMetadata() # Believe that this does not work
+            ####################################
+            ####################################
+            
+            ####################################
+            ##        ONNX
+            ####################################
+            # Define a new custom meta data map
+            CustomMap_new = {"Var1" : 200.0, 
+                             "Var2" : 5.0,
+                             "Var3" : 1000.0,
+                             "Var4" : 400.0,
+                             "Var5" : 6.0,
+                         }
+            
+            # Load model
+            model = onnx.load(filename+".onnx")
+            # Get Meta Data
+            for index,(cust_key,cust_var) in enumerate(CustomMap_new.items()): 
+                meta = model.metadata_props.add()
+                meta.key = cust_key
+                meta.value = str(cust_var)
+                # Check value
+                print("New Meta data:  {}".format(model.metadata_props[index]))
+
+                
+            # Save model
+            onnx.save(model, filename+"_new"+".onnx")
+            
+            # Start the normal onnxruntime session using the model
+            # just saved to check that the model was saved with the correct 
+            # metadata
+            ort_session = ort.InferenceSession(filename+"_new"+".onnx")
+            # Model Meta data
+            metaData = ort_session.get_modelmeta()
+            # Print Metadata
+            CustomMap = metaData.custom_metadata_map
+            print("Custom Meta-Data Map: {}".format(CustomMap))
+            # Need to close the ort session for comleteness (C-style)
+            ####################################
+            ###################################
+            
 
         # Tar model if training is done on GPU
         if torch.cuda.is_available():
