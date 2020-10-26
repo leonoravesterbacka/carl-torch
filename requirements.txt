@@ -18,4 +18,5 @@ six==1.15.0
 threadpoolctl==2.1.0
 torch==1.6.0
 torchvision==0.7.0
-uproot4==0.0.27
+uproot==3.12.0
+uproot-methods==0.7.4
