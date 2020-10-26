@@ -6,6 +6,7 @@ import os
 import stat
 import numpy as np
 import uproot
+import uproot4
 import pandas as pd
 import torch
 from torch.nn import functional as F
