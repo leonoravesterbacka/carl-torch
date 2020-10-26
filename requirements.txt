@@ -20,3 +20,4 @@ torch==1.6.0
 torchvision==0.7.0
 uproot==3.12.0
 uproot-methods==0.7.4
+uproot4==0.0.27
