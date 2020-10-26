@@ -3,6 +3,7 @@ CARL-TORCH
 [![DOI](https://zenodo.org/badge/255859123.svg)](https://zenodo.org/badge/latestdoi/255859123)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![arXiv](http://img.shields.io/badge/arXiv-1506.02169-B31B1B.svg)](https://arxiv.org/abs/1506.02169)
+[![Build Status](https://travis-ci.com/leonoravesterbacka/carl-torch.svg?branch=master)](https://travis-ci.com/leonoravesterbacka/carl-torch)
 
 *Work in progress by Leonora Vesterbacka (NYU) and Stephen Jiggins (U Freiburg), with input from Johann Brehmer (NYU), Kyle Cranmer (NYU) and Gilles Louppe (U Liège)*
 
