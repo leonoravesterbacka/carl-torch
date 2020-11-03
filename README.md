@@ -74,7 +74,7 @@ Validation plots are made with option plot set to True in [evaluate.py](evaluate
 
 Hyperparameter search for optimization of the classifier is done in branch hyperparameter-search using skorch.
 
-The training is preferrably done on GPUs. [HTCondor_README.md](HTCondor_README.md) includes instructions on how to train on GPUS on HTCondor (ATLAS users only for now). The evaluation and calibration steps are done instantly and thus not require GPUs. 
+The training is preferrably done on GPUs. [HTCondor_README.md](HTCondor_README.md) includes instructions on how to train on GPUs on HTCondor (ATLAS users only for now). The evaluation and calibration steps are done instantly and thus not require GPUs. 
 
 ## Deployment
 The model trained in the train.py step is exported to [onnx](https://github.com/onnx/onnx) format to be loaded in a C++ production environment using [onnxruntime](https://github.com/microsoft/onnxruntime). 
