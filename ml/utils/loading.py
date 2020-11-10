@@ -4,6 +4,7 @@ import time
 import logging
 import tarfile
 import torch
+import pickle
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -114,6 +115,10 @@ class Loader():
                 plt.savefig('plots/scatterMatrix_'+do+'_'+var+'.png')
                 plt.clf()
 
+        # get metadata, i.e. max, min, mean, std of all the variables in the dataframes
+        metaData = {v : {x0[v].min(), x0[v].max() } for v in  x0.columns }
+        print("metaData", metaData)
+
         X0 = x0.to_numpy()
         X1 = x1.to_numpy()
         # combine
@@ -128,7 +133,6 @@ class Loader():
         y_train = np.concatenate((y0_train, y1_train), axis=None)
         X_val   = np.vstack([X0_val, X1_val])
         y_val = np.concatenate((y0_val, y1_val), axis=None)
-        print("y_val, ", y_val)
         # save data
         if folder is not None and save:
             np.save(folder + do + '/' + var + "/X_train_" +str(nentries)+".npy", X_train)
@@ -139,6 +143,9 @@ class Loader():
             np.save(folder + do + '/' + var + "/X1_val_"  +str(nentries)+".npy", X1_val)
             np.save(folder + do + '/' + var + "/X0_train_"+str(nentries)+".npy", X0_train)
             np.save(folder + do + '/' + var + "/X1_train_"+str(nentries)+".npy", X1_train)
+            f = open(folder + do + '/' + var + "/metaData_"+str(nentries)+".pkl", "wb")
+            pickle.dump(metaData, f)
+            f.close()
             #Tar data files if training is done on GPU
             if torch.cuda.is_available():
                 plot = False #don't plot on GPU...
@@ -157,7 +164,7 @@ class Loader():
         if plot and int(nentries) > 10000: # no point in plotting distributions with too few events
             draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, var, do, nentries, plot) 
             print("saving plots")
-        return X_train, y_train, X0_train, X1_train
+        return X_train, y_train, X0_train, X1_train, metaData
 
     def load_result(
         self,

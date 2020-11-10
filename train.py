@@ -4,6 +4,7 @@ import logging
 import optparse
 import torch
 import tarfile
+import pickle
 from ml import RatioEstimator
 from ml import Loader
 
@@ -32,6 +33,10 @@ if os.path.exists('data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'):
     y='data/'+ sample +'/'+ var +'/y_train_'+str(n)+'.npy'
     x0='data/'+ sample +'/'+ var +'/X0_train_'+str(n)+'.npy'
     x1='data/'+ sample +'/'+ var +'/X1_train_'+str(n)+'.npy'
+    f = open('data/'+ sample +'/'+ var +'/metaData_'+str(n)+".pkl", "rb")
+    metaData = pickle.load(f)
+    f.close()
+    print("metaData!! ",metaData)
     print("Loaded existing datasets ")
     if torch.cuda.is_available():
         tar = tarfile.open("data_out.tar.gz", "w:gz")
@@ -39,7 +44,7 @@ if os.path.exists('data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'):
             tar.add(name)
         tar.close()
 else:
-    x, y, x0, x1 = loading.loading(
+    x, y, x0, x1, metaData = loading.loading(
         folder = './data/',
         plot = True,
         var = var,
@@ -60,7 +65,7 @@ estimator = RatioEstimator(
 estimator.train(
     method='carl',
     batch_size = 1024,
-    n_epochs = 100,
+    n_epochs = 10,
     x=x,
     y=y,
     x0=x0, 
@@ -69,4 +74,4 @@ estimator.train(
 #    early_stopping = True,
 #    early_stopping_patience = 10
 )
-estimator.save('models/'+ sample +'/'+ var +'_carl_'+str(n), x=x, export_model = True)
+estimator.save('models/'+ sample +'/'+ var +'_carl_'+str(n), x, metaData, export_model = True)

@@ -54,7 +54,7 @@ class Estimator(object):
     def evaluate(self, *args, **kwargs):
         raise NotImplementedError
 
-    def save(self, filename, x, save_model=False, export_model=False):
+    def save(self, filename, x, metaData, save_model=False, export_model=False):
 
         """
         Saves the trained model to four files: a JSON file with the settings, a pickled pyTorch state dict
@@ -151,17 +151,16 @@ class Estimator(object):
             ##        ONNX
             ####################################
             # Define a new custom meta data map
-            CustomMap_new = {"Var1" : 200.0, 
-                             "Var2" : 5.0,
-                             "Var3" : 1000.0,
-                             "Var4" : 400.0,
-                             "Var5" : 6.0,
-                         }
-            
+            #CustomMap_new = {"Var1" : 200.0, 
+            #                 "Var2" : 5.0,
+            #                 "Var3" : 1000.0,
+            #                 "Var4" : 400.0,
+            #                 "Var5" : 6.0,
+            #             }
             # Load model
             model = onnx.load(filename+".onnx")
             # Get Meta Data
-            for index,(cust_key,cust_var) in enumerate(CustomMap_new.items()): 
+            for index,(cust_key,cust_var) in enumerate(metaData.items()): 
                 meta = model.metadata_props.add()
                 meta.key = cust_key
                 meta.value = str(cust_var)
