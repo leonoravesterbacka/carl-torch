@@ -20,7 +20,7 @@ Searches for new physics and measurements of known Standard Model processes are 
 ### Traditional reweighting in 2 dimensions 
 A naive approach to reweighting a sample `p0(x)` to look like another `p1(x)` is by calculating a weight defined as `r(x) = p1(x) / p0(x)` parameterized in one or two dimensions, i.e. as a function of one or two physical variables, and apply this weight to the nominal sample `p0(x)`. By definition, there will be perfect closure when applying the weight to one of the two variables used to calculate the weight. The problem arise when examining the application of the weight to the rest of the variables, where the closure is far from guaranteed. As the disagreement in the other variables will result in large systematic errors, there is a clear motivation to move to a method that can derive the weights using the full phase space. 
 ### Multivariate reweighting
-In order to capture the effects in the full phase space, a *multivariate* reweighting technique is proposed which can take into account n dimensions instead of just two. The technique utilizes a binary classifier trained to differntiate the sample `p0(x)` from sample `p1(x)`, where `x` is an n-dimensional feature vector. 
+In order to capture the effects in the full phase space, a *multivariate* reweighting technique is proposed which can take into account n dimensions instead of just two. The technique utilizes a binary classifier trained to differentiate the sample `p0(x)` from sample `p1(x)`, where `x` is an n-dimensional feature vector. 
 An ideal classifier will estimate `s(x) = p0(x) / (p0(x) + p1(x))`, and by identifying the weight `r(x) = p1(x) / p0(x)`, the output of the classifier can be rewritten as `s(x) = r(x) / (1 + r(x))`. 
 The actual weight `r(x)` is retrieved after expressing `r(x)` as a function of `s(x)`: `r(x) ~ s(x) / (1 - s(x))`. The weights derived using this method are called CARL weights, referring to the name of the method originally proposed in [http://arxiv.org/abs/1506.02169](http://arxiv.org/abs/1506.02169). Three arbitrary variables (out of n possible ones that can be used in the training) are shown below, for the two distributions `p0(x)` and `p1(x)`. 
 <p align="center">
@@ -74,7 +74,7 @@ Validation plots are made with option plot set to True in [evaluate.py](evaluate
 
 Hyperparameter search for optimization of the classifier is done in branch hyperparameter-search using skorch.
 
-The training is preferrably done on GPUs. [HTCondor_README.md](HTCondor_README.md) includes instructions on how to train on GPUS on HTCondor (ATLAS users only for now). The evaluation and calibration steps are done instantly and thus not require GPUs. 
+The training is preferrably done on GPUs. [HTCondor_README.md](HTCondor_README.md) includes instructions on how to train on GPUs on HTCondor (ATLAS users only for now). The evaluation and calibration steps are done instantly and thus not require GPUs. 
 
 ## Deployment
 The model trained in the train.py step is exported to [onnx](https://github.com/onnx/onnx) format to be loaded in a C++ production environment using [onnxruntime](https://github.com/microsoft/onnxruntime). 
