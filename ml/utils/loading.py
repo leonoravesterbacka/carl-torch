@@ -88,6 +88,7 @@ class Loader():
         x1, vlabels = load(f = path+'/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_'+var+'.root', 
                            events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
         binning = [range(0, 12, 1), range(0, 900, 25)]+jetBinning+jetBinning+lepBinning+lepBinning
+        logger.info(" Starting filtering")
         if preprocessing:
             factor = 5
             x00 = len(x0)
@@ -101,8 +102,8 @@ class Loader():
                 x1 = x1[(x1[column] < upper_lim) & (x1[column] > lower_lim)]
             x0 = x0.round(decimals=2)
             x1 = x1.round(decimals=2)
-            print("filtered x0 outliers: ", (x00-len(x0))/len(x0)*100, "% ")
-            print("filtered x1 outliers: ", (x10-len(x1))/len(x1)*100, "% ")
+            logger.info(" Filtered x0 outliers in percent: %.2f", (x00-len(x0))/len(x0)*100)
+            logger.info(" Filtered x1 outliers in percent: %.2f", (x10-len(x1))/len(x1)*100)
 
 
         if correlation:
@@ -110,7 +111,6 @@ class Loader():
             sns.heatmap(cor0, annot=True, cmap=plt.cm.Reds)
             cor_target = abs(cor0[x0.columns[0]])
             relevant_features = cor_target[cor_target>0.5]
-            print("relevant_features ", relevant_features)
             if plot:
                 plt.savefig('plots/scatterMatrix_'+do+'_'+var+'.png')
                 plt.clf()
@@ -162,7 +162,7 @@ class Loader():
 
         if plot and int(nentries) > 10000: # no point in plotting distributions with too few events
             draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, var, do, nentries, plot) 
-            print("saving plots")
+            logger.info(" Making plots")
         return X_train, y_train, X0_train, X1_train, metaData
 
     def load_result(

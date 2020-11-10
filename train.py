@@ -20,13 +20,14 @@ var     = opts.variation
 n       = opts.nentries
 p       = opts.datapath
 loading = Loader()
+logger = logging.getLogger(__name__)
 if os.path.exists(p+'/Sh_228_ttbar_'+sample+'_EnhMaxHTavrgTopPT_'+var+'.root'):
-    print("Doing training of model with datasets: ",sample, ", generator variation: ", var, " with ", n, " events." )
+    logger.info(" Doing training of model with datasets: %s , generator variation: %s  with %s  events.", sample, var, n)
 else:
-    print("Trying to do training with datasets: ",sample, ", generator variation: ", var, " with ", n, " events, but they don't exist in ", p )
-    print("Try one of the following options:")
-    print("Generator variation: -v QSFUP, QSFDOWN, CKKW20, CKKW50")
-    print("ttbar sample       : -s dilepton, singleLepton, allHadronic")
+    logger.info(" Trying to do training of model with datasets: %s , generator variation: %s  with %s  events.", sample, var, n)
+    logger.info(" Try one of the following options:")
+    logger.info(" Generator variation: -v QSFUP, QSFDOWN, CKKW20, CKKW50")
+    logger.info(" ttbar sample       : -s dilepton, singleLepton, allHadronic")
     sys.exit()
 if os.path.exists('data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'):
     x='data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'
@@ -36,7 +37,7 @@ if os.path.exists('data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'):
     f = open('data/'+ sample +'/'+ var +'/metaData_'+str(n)+".pkl", "rb")
     metaData = pickle.load(f)
     f.close()
-    print("Loaded existing datasets ")
+    logger.info(" Loaded existing datasets ")
     if torch.cuda.is_available():
         tar = tarfile.open("data_out.tar.gz", "w:gz")
         for name in ['data/'+ sample +'/'+ var +'/X0_train_'+str(n)+'.npy']:
@@ -55,7 +56,7 @@ else:
         nentries = n,
         path = p,
     )
-    print("Loaded new datasets ")
+    logger.info(" Loaded new datasets ")
 
 estimator = RatioEstimator(
     n_hidden=(10,10,10),
