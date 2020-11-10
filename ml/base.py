@@ -190,21 +190,13 @@ class Estimator(object):
             tar = tarfile.open("models_out.tar.gz", "w:gz")
             for name in [filename+".onnx", filename + "_x_stds.npy", filename + "_x_means.npy", filename + "_settings.json",  filename + "_state_dict.pt"]:
                 tar.add(name)
-            tar.close(
+            tar.close()
 
     def makeConfusion(self, filename, x,y):
-        print("x ", x)
-        print("len x ", len(x))
         X = torch.from_numpy(x).type(torch.FloatTensor)
-        print("X ", X)
         y_pred = self.model(X)
-        #y_pred = self.model.predict(X)
-        print("y", y)
-        print("len(y)", len(y))
-        print("y pred", y_pred)
-        print("len y pred", len(y_pred))
-        print("acc ",accuracy_score(y_pred,y))
-        print("conf ",confusion_matrix(y, y_pred))
+        logger.info("acc %.2f",accuracy_score(y_pred,y))
+        logger.info(confusion_matrix(y, y_pred))
 
     def load(self, filename):
 

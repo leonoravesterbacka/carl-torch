@@ -1,5 +1,6 @@
 import os
 import sys
+import logging
 import optparse
 from ml import RatioEstimator
 from ml.utils.loading import Loader
@@ -15,11 +16,12 @@ sample = opts.samples
 var    = opts.variation
 n      = opts.nentries
 p      = opts.datapath
+logger = logging.getLogger(__name__)
 if os.path.exists('data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'):
-    print("Doing evaluation of model trained with datasets: ",sample, ", generator variation: ", var, " with ", n, " events." )
+    logger.info(" Doing evaluation of model trained with datasets: %s , generator variation: %s  with %s  events.", sample, var, n)
 else:
-    print("No datasets available for evaluation of model trained with ",sample, ", generator variation: ", var, " with ", n, " events." )
-    print("ABORTING")
+    logger.info(" No datasets available for evaluation of model trained with datasets: %s , generator variation: %s  with %s  events.", sample, var, n)
+    logger.info("ABORTING")
     sys.exit()
     
 loading = Loader()
