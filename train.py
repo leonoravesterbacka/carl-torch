@@ -36,7 +36,6 @@ if os.path.exists('data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'):
     f = open('data/'+ sample +'/'+ var +'/metaData_'+str(n)+".pkl", "rb")
     metaData = pickle.load(f)
     f.close()
-    print("metaData!! ",metaData)
     print("Loaded existing datasets ")
     if torch.cuda.is_available():
         tar = tarfile.open("data_out.tar.gz", "w:gz")

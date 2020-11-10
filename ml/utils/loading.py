@@ -117,7 +117,6 @@ class Loader():
 
         # get metadata, i.e. max, min, mean, std of all the variables in the dataframes
         metaData = {v : {x0[v].min(), x0[v].max() } for v in  x0.columns }
-        print("metaData", metaData)
 
         X0 = x0.to_numpy()
         X1 = x1.to_numpy()
