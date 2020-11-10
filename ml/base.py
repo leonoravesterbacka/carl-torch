@@ -165,7 +165,7 @@ class Estimator(object):
                 meta.key = cust_key
                 meta.value = str(cust_var)
                 # Check value
-                print("New Meta data:  {}".format(model.metadata_props[index]))
+                logger.info(" New Meta data: %s ",model.metadata_props[index])
 
                 
             # Save model
@@ -179,7 +179,7 @@ class Estimator(object):
             metaData = ort_session.get_modelmeta()
             # Print Metadata
             CustomMap = metaData.custom_metadata_map
-            print("Custom Meta-Data Map: {}".format(CustomMap))
+            logger.info(" Custom Meta-Data Map: %s",CustomMap)
             # Need to close the ort session for comleteness (C-style)
             ####################################
             ###################################
@@ -190,7 +190,7 @@ class Estimator(object):
             tar = tarfile.open("models_out.tar.gz", "w:gz")
             for name in [filename+".onnx", filename + "_x_stds.npy", filename + "_x_means.npy", filename + "_settings.json",  filename + "_state_dict.pt"]:
                 tar.add(name)
-            tar.close()
+            tar.close(
 
     def makeConfusion(self, filename, x,y):
         print("x ", x)
