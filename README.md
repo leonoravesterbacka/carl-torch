@@ -21,7 +21,7 @@ Searches for new physics and measurements of known Standard Model processes are 
 A naive approach to reweighting a sample `p0(x)` to look like another `p1(x)` is by calculating a weight defined as `r(x) = p1(x) / p0(x)` parameterized in one or two dimensions, i.e. as a function of one or two physical variables, and apply this weight to the nominal sample `p0(x)`. By definition, there will be perfect closure when applying the weight to one of the two variables used to calculate the weight. The problem arise when examining the application of the weight to the rest of the variables, where the closure is far from guaranteed. As the disagreement in the other variables will result in large systematic errors, there is a clear motivation to move to a method that can derive the weights using the full phase space. 
 ### Multivariate reweighting
 In order to capture the effects in the full phase space, a *multivariate* reweighting technique is proposed which can take into account n dimensions instead of just two. The technique utilizes a binary classifier trained to differentiate the sample `p0(x)` from sample `p1(x)`, where `x` is an n-dimensional feature vector. 
-An ideal classifier will estimate `s(x) = p0(x) / (p0(x) + p1(x))`, and by identifying the weight `r(x) = p1(x) / p0(x)`, the output of the classifier can be rewritten as `s(x) = r(x) / (1 + r(x))`. 
+An ideal binary classifier will estimate `s(x) = p0(x) / (p0(x) + p1(x))` (i.e. the output will be `[0,1]`), and by identifying the weight `r(x) = p1(x) / p0(x)`, the output of the classifier can be rewritten as `s(x) = r(x) / (1 + r(x))`. 
 The actual weight `r(x)` is retrieved after expressing `r(x)` as a function of `s(x)`: `r(x) ~ s(x) / (1 - s(x))`. The weights derived using this method are called CARL weights, referring to the name of the method originally proposed in [http://arxiv.org/abs/1506.02169](http://arxiv.org/abs/1506.02169). Three arbitrary variables (out of n possible ones that can be used in the training) are shown below, for the two distributions `p0(x)` and `p1(x)`. 
 <p align="center">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/1_nominalVsVar_1000000.png" width="260">
@@ -29,7 +29,7 @@ The actual weight `r(x)` is retrieved after expressing `r(x)` as a function of `
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/4_nominalVsVar_1000000.png" width="260">
 </p>
 
-The classification is done using a PyTorch DNN, with Adam optimizer and relu activation function, and the calibration of the classifier is done using histogram or isotonic regression. Other optimizers and activation functions are available.  
+The classification is done using a PyTorch fully connected DNN, with Adam optimizer and relu activation function, and the calibration of the classifier is done using histogram or isotonic regression. Other optimizers and activation functions are available.  
 Once the weights have been calculated as a function of the classifier output `r(x) ~ s(x) / (1 - s(x))`, they are applied to the original sample `p0(x)` (orange histogram), and will ideally line up with the `p1(x)` sample (dashed histogram), for the three arbitrary variables (out of n) that was used in the training. 
 <p align="center">
 <img src="https://github.com/leonoravesterbacka/carl-torch/blob/master/images/w_1_nominalVsVar_train_1000000_fix.png" width="260">
@@ -56,8 +56,9 @@ The following dependencies are required:
  - torch>=1.0.0
  - uproot
  - matplotlib>=2.0.0
+ - onnxruntime>=1.5.0
 
-For hyperparameter search skorch is also required. 
+For hyperparameter optimization skorch is also required. 
 
 Once satisfied, `carl-torch` can be installed from source using the following:
 ```
@@ -66,7 +67,7 @@ git clone https://github.com/leonoravesterbacka/carl-torch.git
 
 ## Execution
 The code is based on three scripts:
-- [train.py](train.py) trains neural networks on simulated samples.
+- [train.py](train.py) trains neural networks to discriminate between two simulated samples.
 - [evaluate.py](evaluate.py) evaluates the neural network by calculating the weights and making validation and ROC plots.
 - [calibrate.py](calibrate.py) calibrated network predictions based on histograms of the network output.
 
