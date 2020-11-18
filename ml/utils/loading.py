@@ -157,6 +157,9 @@ class Loader():
                              folder + do + '/' + var + "/X1_val_"  +str(nentries)+".npy",
                              folder + do + '/' + var + "/X0_train_"+str(nentries)+".npy",
                              folder + do + '/' + var + "/X1_train_"+str(nentries)+".npy"]:
+                             f = open(folder + do + '/' + var + "/metaData_"+str(nentries)+".pkl", "wb")
+                             pickle.dump(metaData, f)
+                             f.close()
                     tar.add(name)
                 tar.close()
 
