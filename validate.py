@@ -24,3 +24,20 @@ else:
     logger.info("ABORTING")
     sys.exit()
     
+loading = Loader()
+carl = RatioEstimator()
+carl.load('models/'+ sample + '/' + var + '_carl_'+str(n))
+evaluate = ['train', 'val']
+for i in evaluate:
+    r_hat, _ = carl.evaluate(x='data/'+ sample + '/' + var + '/X0_'+i+'_'+str(n)+'.npy')
+    w = 1./r_hat
+    loading.validate_result(x0='data/'+ sample + '/' + var + '/X0_'+i+'_'+str(n)+'.npy',     
+                        x1='data/'+ sample + '/' + var + '/X1_'+i+'_'+str(n)+'.npy',
+                        weights=w, 
+                        label = i,
+                        do = sample,
+                        var = var,
+                        plot = True,
+                        n = n,
+                        path = p,
+    )

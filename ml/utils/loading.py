@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from functools import partial
 
 from .tools import create_missing_folders, load, load_and_check
-from .plotting import draw_weighted_distributions, draw_unweighted_distributions, draw_ROC, resampled_discriminator_and_roc, plot_calibration_curve
+from .plotting import draw_weighted_distributions, draw_unweighted_distributions, draw_ROC, resampled_discriminator_and_roc, plot_calibration_curve, draw_weights, draw_scatter
 from sklearn.model_selection import train_test_split
 logger = logging.getLogger(__name__)
 
@@ -207,6 +207,33 @@ class Loader():
             draw_ROC(X0, X1, weights, label, var, do, plot)
             # plot reweighted distributions     
             draw_weighted_distributions(X0, X1, weights, x0df.columns, labels, binning, label, var, do, n, plot) 
+
+    def validate_result(
+        self,
+        x0,
+        x1,
+        weights = None,
+        label = None,
+        do = 'dilepton',
+        var = 'qsf',
+        plot = False,
+        n = 0,
+        path = '',
+    ):
+        """
+        Parameters
+        ----------
+        weights : ndarray
+            r_hat weights:
+        Returns
+        -------
+        """
+        # load samples
+        X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
+        X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)
+        #weights = weights / weights.sum() * len(X1)
+        draw_weights(weights,label, var, do, n, plot)
+        draw_scatter(weights, weights, label, var, do, n)
 
     def load_calibration(
         self,
