@@ -13,7 +13,7 @@ CARL-TORCH
 
 ## Background
 The motivation behind this toolbox is to enable a reweighting of one simulation to look like another. 
-In the context of particle physics, the research is done largely using simulated data (Monte-Carlos samples). 
+In the context of particle physics, the research is done largely using simulated data (Monte-Carlo samples). 
 As computing resources are finite, effort is put into minimizing the number of simulated samples to be generated, and make the most use of the ones that have to be generated.  
 
 Searches for new physics and measurements of known Standard Model processes are relying on Monte-Carlo samples generated with multiple theoretical settings in order to evaluate their effect on the modelling of the physics process. As it is computationally impractical to generate samples for all theoretical settings with full statistical power, smaller samples are generated for each variation, and a weight is derived to reweight a nominal sample of full statistical power to look like a sample generated with a variational setting. The hope is that the derived weight is able to emulate the effect of the theoretical variation without having to generate it with full statistical power.
