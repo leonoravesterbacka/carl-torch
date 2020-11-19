@@ -22,13 +22,13 @@ logger.info(" Doing validation of weights trained with datasets: %s , generator 
     
 #carl-torch inference###
 #get the weight from carl-torch (weightCT) evaluated on the same model used for carlAthena and the root file from carlAthena
-carl = RatioEstimator()
-carl.load('models/'+ sample + '/' + var + '_carl_3000000')
 eventVarsCT = ['Njets', 'MET'] ;
 eventVarsCA = ['Njets', 'MET', 'weight']
 jetVars     = ['Jet_Pt', 'Jet_Mass']; 
 lepVars     = ['Lepton_Pt']
 xCT ,_ = load(f = p + '/test.root', events = eventVarsCT, jets = jetVars, leps = lepVars, n = int(n), t = 'Tree', do = sample)
+carl = RatioEstimator()
+carl.load('models/'+ sample + '/' + var + '_carl_3000000')
 r_hat, _ = carl.evaluate(x=xCT.to_numpy())
 weightCT = 1./r_hat
 
