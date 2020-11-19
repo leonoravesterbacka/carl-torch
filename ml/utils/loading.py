@@ -132,6 +132,8 @@ class Loader():
         y_train = np.concatenate((y0_train, y1_train), axis=None)
         X_val   = np.vstack([X0_val, X1_val])
         y_val = np.concatenate((y0_val, y1_val), axis=None)
+        X = np.vstack([X0, X1])
+        y = np.concatenate((y0, y1), axis=None)
         # save data
         if folder is not None and save:
             np.save(folder + do + '/' + var + "/X_train_" +str(nentries)+".npy", X_train)
@@ -166,6 +168,7 @@ class Loader():
         if plot and int(nentries) > 10000: # no point in plotting distributions with too few events
             draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, var, do, nentries, plot) 
             logger.info(" Making plots")
+
         return X_train, y_train, X0_train, X1_train, metaData
 
     def load_result(
@@ -175,7 +178,7 @@ class Loader():
         weights = None,
         label = None,
         do = 'dilepton',
-        var = 'qsf',
+        var = 'QSFUP',
         plot = False,
         n = 0,
         path = '',
@@ -210,12 +213,10 @@ class Loader():
 
     def validate_result(
         self,
-        x0,
-        x1,
-        weights = None,
-        label = None,
+        weightCT = None,
+        weightCA = None,
         do = 'dilepton',
-        var = 'qsf',
+        var = 'QSFUP',
         plot = False,
         n = 0,
         path = '',
@@ -223,17 +224,16 @@ class Loader():
         """
         Parameters
         ----------
-        weights : ndarray
-            r_hat weights:
+        weightsCT : ndarray
+            weights from carl-torch:
+        weightsCA : ndarray
+            weights from carlAthena:
         Returns
         -------
         """
-        # load samples
-        X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
-        X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)
-        #weights = weights / weights.sum() * len(X1)
-        draw_weights(weights,label, var, do, n, plot)
-        draw_scatter(weights, weights, label, var, do, n)
+        # draw histograms comparing weight from carl-torch (weightCT) from weight infered through carlAthena (ca.weight)
+        draw_weights(weightCT, weightCA, var, do, n, plot)
+        draw_scatter(weightCT, weightCA, var, do, n)
 
     def load_calibration(
         self,
@@ -242,7 +242,7 @@ class Loader():
         p1_cal = None,
         label = None,
         do = 'dilepton',
-        var = 'qsf',
+        var = 'QSFUP',
         plot = False
     ):
         """

@@ -20,10 +20,10 @@ def load(f = None, events = None, jets = None, leps = None, n = 0, t = None, do 
     if f is None:
         return None
     tree = uproot.open(f)[t]
-    if n > 0: # if n > 0 n is the number of entries to do training on 
-        df    = tree.pandas.df(events, entrystop = n)
-        jetdf = tree.pandas.df(jets, entrystop = n)
-        lepdf = tree.pandas.df(leps, entrystop = n)
+    if int(n) > 0: # if n > 0 n is the number of entries to do training on 
+        df    = tree.pandas.df(events, entrystop = int(n))
+        jetdf = tree.pandas.df(jets, entrystop = int(n))
+        lepdf = tree.pandas.df(leps, entrystop = int(n))
     else: # else do training on the full sample
         df    = tree.pandas.df(events)
         jetdf = tree.pandas.df(jets)
@@ -66,6 +66,7 @@ def load(f = None, events = None, jets = None, leps = None, n = 0, t = None, do 
         labels.append('Lepton '+str(j)+' $\mathrm{p_{T}}$ [GeV]')
 
     return final, labels
+
 
 def create_missing_folders(folders):
     if folders is None:
