@@ -81,6 +81,5 @@ The training is preferrably done on GPUs. [HTCondor_README.md](HTCondor_README.m
 The model trained in the train.py step is exported to [onnx](https://github.com/onnx/onnx) format to be loaded in a C++ production environment using [onnxruntime](https://github.com/microsoft/onnxruntime). 
 #### For ATLAS users
 The [carlAthenaOnnx](https://gitlab.cern.ch/mvesterb/carlathenaonnx/-/tree/master/carlAthenaOnnx) is a package that loads the models trained with carl-torch in AthDerivation production environment, with the purpose of centrally providing the weights for each theory variation to the user.  
-
 ## Support
 If you have any questions, please email leonora.vesterbacka@cern.ch
