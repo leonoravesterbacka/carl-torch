@@ -93,6 +93,8 @@ class Estimator(object):
             logger.debug("Saving input scaling information to %s_x_means.npy and %s_x_stds.npy", filename, filename)
             np.save(filename + "_x_means.npy", self.x_scaling_means)
             np.save(filename + "_x_stds.npy", self.x_scaling_stds)
+            np.save(filename + "_x_mins.npy", self.x_scaling_mins)
+            np.save(filename + "_x_maxs.npy", self.x_scaling_maxs)
 
         # Save state dict
         logger.debug("Saving state dictionary to %s_state_dict.pt", filename)
@@ -188,7 +190,7 @@ class Estimator(object):
         # Tar model if training is done on GPU
         if torch.cuda.is_available():
             tar = tarfile.open("models_out.tar.gz", "w:gz")
-            for name in [filename+".onnx", filename + "_x_stds.npy", filename + "_x_means.npy", filename + "_settings.json",  filename + "_state_dict.pt"]:
+            for name in [filename+".onnx", filename + "_x_stds.npy", filename + "_x_means.npy",  filename + "_x_mins.npy",  filename + "_x_maxs.npy", filename + "_settings.json",  filename + "_state_dict.pt"]:
                 tar.add(name)
             tar.close()
 
@@ -223,21 +225,25 @@ class Estimator(object):
         # Load scaling
         try:
             self.x_scaling_means = np.load(filename + "_x_means.npy")
-            self.x_scaling_stds = np.load(filename + "_x_stds.npy")
+            self.x_scaling_stds =  np.load(filename + "_x_stds.npy")
+            self.x_scaling_mins =  np.load(filename + "_x_mins.npy")
+            self.x_scaling_maxs =  np.load(filename + "_x_maxs.npy")
             logger.debug(
-                "  Found input scaling information: means %s, stds %s", self.x_scaling_means, self.x_scaling_stds
+                "  Found input scaling information: means %s, stds %s, mins %s, maxs %s  ", self.x_scaling_means, self.x_scaling_stds, self.x_scaling_mins, self.x_scaling_maxs
             )
         except FileNotFoundError:
             logger.warning("Scaling information not found in %s", filename)
             self.x_scaling_means = None
             self.x_scaling_stds = None
+            self.x_scaling_mins = None
+            self.x_scaling_maxs = None
 
         # Load state dict
         logger.debug("Loading state dictionary from %s_state_dict.pt", filename)
         self.model.load_state_dict(torch.load(filename + "_state_dict.pt", map_location="cpu"))
 
     def initialize_input_transform(self, x, transform=True, overwrite=True):
-        if self.x_scaling_stds is not None and self.x_scaling_means is not None and not overwrite:
+        if self.x_scaling_stds is not None and self.x_scaling_means is not None and self.x_scaling_mins is not None and self.x_scaling_maxs is not None and not overwrite:
             logger.info(
                 "Input rescaling already defined. To overwrite, call initialize_input_transform(x, overwrite=True)."
             )
@@ -245,15 +251,20 @@ class Estimator(object):
             logger.info("Setting up input rescaling")
             self.x_scaling_means = np.mean(x, axis=0)
             self.x_scaling_stds = np.maximum(np.std(x, axis=0), 1.0e-6)
+            self.x_scaling_mins = np.min(x, axis=0)
+            self.x_scaling_maxs = np.max(x, axis=0)
         else:
             logger.info("Disabling input rescaling")
             n_parameters = x.shape[0]
 
             self.x_scaling_means = np.zeros(n_parameters)
             self.x_scaling_stds = np.ones(n_parameters)
+            self.x_scaling_mins = np.zeros(n_parameters)
+            self.x_scaling_maxs = np.ones(n_parameters)
 
     def _transform_inputs(self, x, scaling = "minmax"):
         if scaling == "standard":    
+            print("doing standard")
             if self.x_scaling_means is not None and self.x_scaling_stds is not None:
                 if isinstance(x, torch.Tensor):
                     x_scaled = x - torch.tensor(self.x_scaling_means, dtype=x.dtype, device=x.device)
@@ -264,7 +275,15 @@ class Estimator(object):
             else:
                 x_scaled = x
         else:
-            x_scaled = (x-np.min(x,axis=0))/(np.max(x,axis=0)-np.min(x,axis=0))
+            print("doing min max")
+            if self.x_scaling_mins is not None and self.x_scaling_maxs is not None:
+                if isinstance(x, torch.Tensor):
+                    x_scaled = (x-torch.tensor(self.x_scaling_mins, dtype=x.dtype, device=x.device))
+                    x_scaled = x_scaled/(torch.tensor(self.x_scaling_maxs, dtype=x.dtype, device=x.device) - torch.tensor(self.x_scaling_mins, dtype=x.dtype, device=x.device))
+                else:
+                    x_scaled = (x - self.x_scaling_mins)/(self.x_scaling_maxs - self.x_scaling_mins)
+            else:
+                x_scaled = x
         return x_scaled
 
     def _wrap_settings(self):
