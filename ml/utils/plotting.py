@@ -141,7 +141,6 @@ def draw_weights(weightCT, weightCA, legend, do, n, save = False):
     plt.hist(weightCT, bins = np.exp(np.linspace(-0.5,1.1,50)), label = 'carl-torch', **hist_settings0)
     plt.hist(weightCA, bins = np.exp(np.linspace(-0.5,1.1,50)), label = 'carlAthena', **hist_settings0)
     plt.xlabel('weights', horizontalalignment='right',x=1)
-    plt.semilogx()
     plt.legend(frameon=False)
     plt.savefig("plots/weights_%s_%s_%s.png"%(do, legend, n))
     plt.clf()
