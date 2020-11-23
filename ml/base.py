@@ -281,7 +281,8 @@ class Estimator(object):
                     x_scaled = (x-torch.tensor(self.x_scaling_mins, dtype=x.dtype, device=x.device))
                     x_scaled = x_scaled/(torch.tensor(self.x_scaling_maxs, dtype=x.dtype, device=x.device) - torch.tensor(self.x_scaling_mins, dtype=x.dtype, device=x.device))
                 else:
-                    x_scaled = (x - self.x_scaling_mins)/(self.x_scaling_maxs - self.x_scaling_mins)
+                    x_scaled = (x - self.x_scaling_mins)
+                    x_scaled = x_scaled/(self.x_scaling_maxs - self.x_scaling_mins)
             else:
                 x_scaled = x
         return x_scaled

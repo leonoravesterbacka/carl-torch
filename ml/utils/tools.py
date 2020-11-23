@@ -35,7 +35,7 @@ def load(f = None, events = None, jets = None, leps = None, n = 0, t = None, do 
         dfl1 = lepdf.xs(0, level='subentry')
         dfl2 = lepdf.xs(1, level='subentry')
         final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Mass=dfj1['Jet_Mass'], 
-                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Mass=dfj2['Jet_Mass'],                       
+                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Mass=dfj2['Jet_Mass'], 
                           Lep1_Pt = dfl1['Lepton_Pt'],
                           Lep2_Pt = dfl2['Lepton_Pt']).fillna(0.0)   
     if do == "SingleLepP" or do == "SingleLepM":
