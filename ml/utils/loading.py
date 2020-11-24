@@ -115,11 +115,19 @@ class Loader():
                 plt.savefig('plots/scatterMatrix_'+do+'_'+var+'.png')
                 plt.clf()
 
+        if plot and int(nentries) > 10000: # no point in plotting distributions with too few events
+            logger.info(" Making plots")
+            draw_unweighted_distributions(x0.to_numpy(), x1.to_numpy(), np.ones(x0.to_numpy()[:,0].size), x0.columns, vlabels, binning, var, do, nentries, plot) 
+
+        # sort dataframes alphanumerically 
+        x0 = x0[sorted(x0.columns)]
+        x1 = x1[sorted(x1.columns)]
+    
         # get metadata, i.e. max, min, mean, std of all the variables in the dataframes
         metaData = {v : {x0[v].min(), x0[v].max() } for v in  x0.columns }
-
         X0 = x0.to_numpy()
         X1 = x1.to_numpy()
+
         # combine
         y0 = np.zeros(x0.shape[0])
         y1 = np.ones(x1.shape[0])
@@ -164,10 +172,6 @@ class Loader():
                     pickle.dump(metaData, f)
                     f.close()
                 tar.close()
-
-        if plot and int(nentries) > 10000: # no point in plotting distributions with too few events
-            draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, var, do, nentries, plot) 
-            logger.info(" Making plots")
 
         return X_train, y_train, X0_train, X1_train, metaData
 
