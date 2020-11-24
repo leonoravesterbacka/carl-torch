@@ -149,7 +149,7 @@ def draw_weights(weightCT, weightCA, legend, do, n, save = False):
 def draw_scatter(weightsCT, weightsCA, legend, do, n):
     print("weights carl-torch ", len(weightsCT))
     print("weights carlAthena ", len(weightsCA))
-    plt.scatter(weightsCT, weightsCA, alpha=0.01)
+    plt.scatter(weightsCT, weightsCA, alpha=0.5)
     max_temp=1.5
     plt.plot([0,max_temp],[0,max_temp], lw=2, c='r')
     plt.xlim(0,max_temp)

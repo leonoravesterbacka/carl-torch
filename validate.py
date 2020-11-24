@@ -27,9 +27,10 @@ eventVarsCA = ['Njets', 'MET', 'weight']
 jetVars     = ['Jet_Pt', 'Jet_Mass']; 
 lepVars     = ['Lepton_Pt']
 xCT ,_ = load(f = p + '/test.root', events = eventVarsCT, jets = jetVars, leps = lepVars, n = int(n), t = 'Tree', do = sample)
+xCT = xCT[sorted(xCT.columns)]
 carl = RatioEstimator()
-carl.load('models/'+ sample + '/' + var + '_carl_3000000')
-r_hat, _ = carl.evaluate(x=xCT.to_numpy())
+carl.load('models/'+ sample + '/' + var + '_carl_2000001')
+r_hat, s_hat = carl.evaluate(x=xCT.to_numpy())
 weightCT = 1./r_hat
 
 ###carlAthena inference###
