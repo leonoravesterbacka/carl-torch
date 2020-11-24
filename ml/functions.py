@@ -51,7 +51,7 @@ def get_optimizer(optimizer, nesterov_momentum):
 
 
 def ratio_xe(s_hat, y_true, w = 1):
-    loss = BCEWithLogitsLoss(pos_weight = torch.tensor(w))(s_hat, y_true)
+    loss = BCELoss()(s_hat, y_true)
     return loss
 
 @contextmanager
