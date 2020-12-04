@@ -82,6 +82,6 @@ The model trained in the train.py step is exported to [onnx](https://github.com/
 #### For ATLAS users
 The [carlAthenaOnnx](https://gitlab.cern.ch/mvesterb/carlathenaonnx/-/tree/master/carlAthenaOnnx) is a package that loads the models trained with carl-torch in AthDerivation production environment, with the purpose of centrally providing the weights for each theory variation to the user.  
 In order to validate that the weights infered using carl-torch agree with weights infered through an external deployment, the validate.py script can be used:
-- [validate.py](validate.py) compares the weights obtained from carl-torch agrees with weights infered through external deployment procedure, such as using [carlAthenaOnnx](https://gitlab.cern.ch/mvesterb/carlathenaonnx/-/tree/master/carlAthenaOnnx).
+- [validate.py](validate.py) compares the weights obtained from carl-torch agrees with weights infered through external deployment procedure, such as using [carlAthenaOnnx](https://gitlab.cern.ch/mvesterb/carlathenaonnx/-/tree/master/carlAthenaOnnx). N.B. carlAthenaOnnx now supports weight derivation for both EVNT and xAOD samples. 
 ## Support
 If you have any questions, please email leonora.vesterbacka@cern.ch
