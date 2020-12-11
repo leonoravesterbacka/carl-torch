@@ -13,11 +13,11 @@ parser.add_option('-p', '--datapath',  action='store', type=str, dest='datapath'
 
 (opts, args) = parser.parse_args()
 sample = opts.samples
-var    = opts.variation
-n      = opts.nentries
-p      = opts.datapath
+var = opts.variation
+n = opts.nentries
+p = opts.datapath
 logger = logging.getLogger(__name__)
-if os.path.exists('data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'):
+if os.path.exists('data/'+sample+'/'+var+'/X_train_'+str(n)+'.npy'):
     logger.info(" Doing evaluation of model trained with datasets: %s , generator variation: %s  with %s  events.", sample, var, n)
 else:
     logger.info(" No datasets available for evaluation of model trained with datasets: %s , generator variation: %s  with %s  events.", sample, var, n)
@@ -26,19 +26,19 @@ else:
     
 loading = Loader()
 carl = RatioEstimator()
-carl.load('models/'+ sample + '/' + var + '_carl_'+str(n))
-evaluate = ['train', 'val']
+carl.load('models/'+sample+'/'+var+'_carl_'+str(n))
+evaluate = ['train','val']
 for i in evaluate:
-    r_hat, _ = carl.evaluate(x='data/'+ sample + '/' + var + '/X0_'+i+'_'+str(n)+'.npy')
+    r_hat, _ = carl.evaluate(x='data/'+sample+'/'+var+'/X0_'+i+'_'+str(n)+'.npy')
     w = 1./r_hat
-    loading.load_result(x0='data/'+ sample + '/' + var + '/X0_'+i+'_'+str(n)+'.npy',     
-                        x1='data/'+ sample + '/' + var + '/X1_'+i+'_'+str(n)+'.npy',
+    loading.load_result(x0='data/'+sample+'/'+var+'/X0_'+i+'_'+str(n)+'.npy',     
+                        x1='data/'+sample+'/'+var+'/X1_'+i+'_'+str(n)+'.npy',
                         weights=w, 
-                        label = i,
-                        do = sample,
-                        var = var,
-                        plot = True,
-                        n = n,
-                        path = p,
+                        label=i,
+                        do=sample,
+                        var=var,
+                        plot=True,
+                        n=n,
+                        path=p,
     )
-carl.evaluate_performance(x='data/'+ sample + '/' + var + '/X_val_'+str(n)+'.npy',y='data/' + sample + '/' + var +'/y_val_'+str(n)+'.npy')
+carl.evaluate_performance(x='data/'+sample+'/'+var+'/X_val_'+str(n)+'.npy',y='data/'+sample+'/'+var+'/y_val_'+str(n)+'.npy')

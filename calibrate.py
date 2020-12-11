@@ -15,12 +15,12 @@ parser.add_option('-p', '--datapath',  action='store', type=str, dest='datapath'
 
 (opts, args) = parser.parse_args()
 sample  = opts.samples
-var     = opts.variation
-n       = opts.nentries
-p       = opts.datapath
+var = opts.variation
+n = opts.nentries
+p = opts.datapath
 loading = Loader()
 logger = logging.getLogger(__name__)
-if os.path.exists('data/'+ sample +'/'+ var +'/X_train_'+str(n)+'.npy'):
+if os.path.exists('data/'+sample+'/'+var+'/X_train_'+str(n)+'.npy'):
     logger.info(" Doing calibration of model trained with datasets: %s , generator variation: %s  with %s  events.", sample, var, n)
 else:
     logger.info(" No datasets available for calibration of model trained with datasets: %s , generator variation: %s  with %s  events.", sample, var, n)
@@ -28,15 +28,15 @@ else:
     sys.exit()
 
 carl = RatioEstimator()
-carl.load('models/'+ sample + '/' + var + '_carl_'+str(n))
+carl.load('models/'+sample+'/'+var+'_carl_'+str(n))
 #load
 evaluate = ['train']
-X  = 'data/'+ sample + '/' + var + '/X_train_'+str(n)+'.npy'
-y  = 'data/'+ sample + '/' + var + '/y_train_'+str(n)+'.npy'
+X = 'data/'+sample+'/'+var+'/X_train_'+str(n)+'.npy'
+y = 'data/'+sample+'/'+var+'/y_train_'+str(n)+'.npy'
 r_hat, s_hat = carl.evaluate(X)
 calib = CalibratedClassifier(carl)
-calib.fit(X = X,y = y)
-p0, p1, r_cal = calib.predict(X = X)
+calib.fit(X=X,y=y)
+p0, p1, r_cal = calib.predict(X=X)
 w_cal = 1/r_cal
 loading.load_calibration(y_true = y,
                          p1_raw = s_hat, 
@@ -49,16 +49,16 @@ loading.load_calibration(y_true = y,
 
 evaluate = ['train']
 for i in evaluate:
-    p0, p1, r_cal = calib.predict(X = 'data/'+ sample + '/' + var + '/X0_'+i+'_'+str(n)+'.npy')
+    p0, p1, r_cal = calib.predict(X ='data/'+sample+'/'+var+'/X0_'+i+'_'+str(n)+'.npy')
     w = 1./r_cal
-    loading.load_result(x0='data/'+ sample + '/' + var + '/X0_'+i+'_'+str(n)+'.npy',
-                        x1='data/'+ sample + '/' + var + '/X1_'+i+'_'+str(n)+'.npy',
+    loading.load_result(x0='data/'+sample+'/'+var+'/X0_'+i+'_'+str(n)+'.npy',
+                        x1='data/'+sample+'/'+var+'/X1_'+i+'_'+str(n)+'.npy',
                         weights=w, 
-                        label = i+'_calib',
-                        do = sample,
-                        var = var,    
-                        plot = True,
-                        n = n,
-                        path = p,
+                        label=i+'_calib',
+                        do=sample,
+                        var=var,    
+                        plot=True,
+                        n=n,
+                        path=p,
     )
 

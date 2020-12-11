@@ -14,28 +14,28 @@ parser.add_option('-p', '--datapath',  action='store', type=str, dest='datapath'
 
 (opts, args) = parser.parse_args()
 sample = opts.samples
-var    = opts.variation
-n      = opts.nentries
-p      = opts.datapath
+var = opts.variation
+n = opts.nentries
+p = opts.datapath
 logger = logging.getLogger(__name__)
 logger.info(" Doing validation of weights trained with datasets: %s , generator variation: %s  with %s  events.", sample, var, n)
     
 #carl-torch inference###
 #get the weight from carl-torch (weightCT) evaluated on the same model used for carlAthena and the root file from carlAthena
-eventVarsCT = ['Njets', 'MET'] ;
-eventVarsCA = ['Njets', 'MET', 'weight']
-jetVars     = ['Jet_Pt', 'Jet_Mass']; 
-lepVars     = ['Lepton_Pt']
-xCT ,_ = load(f = p + '/test.root', events = eventVarsCT, jets = jetVars, leps = lepVars, n = int(n), t = 'Tree', do = sample)
+eventVarsCT = ['Njets','MET']
+eventVarsCA = ['Njets','MET','weight']
+jetVars = ['Jet_Pt','Jet_Mass'] 
+lepVars = ['Lepton_Pt']
+xCT ,_ = load(f= p+'/test.root',events=eventVarsCT,jets=jetVars,leps=lepVars,n=int(n),t='Tree',do=sample)
 xCT = xCT[sorted(xCT.columns)]
 carl = RatioEstimator()
-carl.load('models/'+ sample + '/' + var + '_carl_2000001')
+carl.load('models/'+sample+'/'+var+'_carl_2000001')
 r_hat, s_hat = carl.evaluate(x=xCT.to_numpy())
 weightCT = 1./r_hat
 
 ###carlAthena inference###
 #load sample with weight infered from carlAthena
-xCA, _ = load(f = p + '/test.root', events = eventVarsCA, jets = jetVars, leps = lepVars, n = int(n), t = 'Tree')
+xCA, _ = load(f=p+'/test.root',events=eventVarsCA,jets=jetVars,leps=lepVars,n=int(n),t='Tree')
 weightCA = xCA.weight
 
 ###compare weights###
@@ -43,9 +43,9 @@ weightCA = xCA.weight
 loading = Loader()
 loading.validate_result(weightCT=weightCT, 
                         weightCA=weightCA, 
-                        do = sample,
-                        var = var,
-                        plot = True,
-                        n = n,
-                        path = p,
+                        do=sample,
+                        var=var,
+                        plot=True,
+                        n=n,
+                        path=p,
 )
