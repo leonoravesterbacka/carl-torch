@@ -39,6 +39,7 @@ class Estimator(object):
         self.n_parameters = None
         self.x_scaling_means = None
         self.x_scaling_stds = None
+        self.VarScaling = None
 
     def train(self, *args, **kwargs):
         raise NotImplementedError

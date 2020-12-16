@@ -25,7 +25,8 @@ class Loader():
     Loading of data.
     """
     def __init__(self):
-        super(Loader, self).__init__()
+        #Why super? Plan on making this a derived class?
+        super(Loader, self).__init__() 
 
     def loading(
         self,
@@ -114,8 +115,11 @@ class Loader():
                 plt.savefig('plots/scatterMatrix_'+do+'_'+var+'.png')
                 plt.clf()
 
-        X0 = x0.to_numpy()
-        X1 = x1.to_numpy()
+        #print("Dataset 0 columns: {}".format(x0.columns))
+        #X0 = x0.to_numpy()
+        X0 = x0.to_records()
+        #X1 = x1.to_numpy()
+        X1 = x1.to_records()
         # combine
         y0 = np.zeros(x0.shape[0])
         y1 = np.ones(x1.shape[0])
