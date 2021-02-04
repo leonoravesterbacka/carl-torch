@@ -4,6 +4,7 @@ import time
 import logging
 import tarfile
 import torch
+import pickle
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -15,7 +16,7 @@ import matplotlib.pyplot as plt
 from functools import partial
 
 from .tools import create_missing_folders, load, load_and_check
-from .plotting import draw_weighted_distributions, draw_unweighted_distributions, draw_ROC, resampled_discriminator_and_roc, plot_calibration_curve
+from .plotting import draw_weighted_distributions, draw_unweighted_distributions, draw_ROC, resampled_discriminator_and_roc, plot_calibration_curve, draw_weights, draw_scatter
 from sklearn.model_selection import train_test_split
 logger = logging.getLogger(__name__)
 
@@ -87,6 +88,7 @@ class Loader():
         x1, vlabels = load(f = path+'/Sh_228_ttbar_'+do+'_EnhMaxHTavrgTopPT_'+var+'.root', 
                            events = eventVars, jets = jetVars, leps = lepVars, n = int(nentries), t = 'Tree', do = do)
         binning = [range(0, 12, 1), range(0, 900, 25)]+jetBinning+jetBinning+lepBinning+lepBinning
+        logger.info(" Starting filtering")
         if preprocessing:
             factor = 5
             x00 = len(x0)
@@ -100,8 +102,8 @@ class Loader():
                 x1 = x1[(x1[column] < upper_lim) & (x1[column] > lower_lim)]
             x0 = x0.round(decimals=2)
             x1 = x1.round(decimals=2)
-            print("filtered x0 outliers: ", (x00-len(x0))/len(x0)*100, "% ")
-            print("filtered x1 outliers: ", (x10-len(x1))/len(x1)*100, "% ")
+            logger.info(" Filtered x0 outliers in percent: %.2f", (x00-len(x0))/len(x0)*100)
+            logger.info(" Filtered x1 outliers in percent: %.2f", (x10-len(x1))/len(x1)*100)
 
 
         if correlation:
@@ -109,13 +111,23 @@ class Loader():
             sns.heatmap(cor0, annot=True, cmap=plt.cm.Reds)
             cor_target = abs(cor0[x0.columns[0]])
             relevant_features = cor_target[cor_target>0.5]
-            print("relevant_features ", relevant_features)
             if plot:
                 plt.savefig('plots/scatterMatrix_'+do+'_'+var+'.png')
                 plt.clf()
 
+        if plot and int(nentries) > 10000: # no point in plotting distributions with too few events
+            logger.info(" Making plots")
+            draw_unweighted_distributions(x0.to_numpy(), x1.to_numpy(), np.ones(x0.to_numpy()[:,0].size), x0.columns, vlabels, binning, var, do, nentries, plot) 
+
+        # sort dataframes alphanumerically 
+        x0 = x0[sorted(x0.columns)]
+        x1 = x1[sorted(x1.columns)]
+    
+        # get metadata, i.e. max, min, mean, std of all the variables in the dataframes
+        metaData = {v : {x0[v].min(), x0[v].max() } for v in  x0.columns }
         X0 = x0.to_numpy()
         X1 = x1.to_numpy()
+
         # combine
         y0 = np.zeros(x0.shape[0])
         y1 = np.ones(x1.shape[0])
@@ -128,7 +140,8 @@ class Loader():
         y_train = np.concatenate((y0_train, y1_train), axis=None)
         X_val   = np.vstack([X0_val, X1_val])
         y_val = np.concatenate((y0_val, y1_val), axis=None)
-        print("y_val, ", y_val)
+        X = np.vstack([X0, X1])
+        y = np.concatenate((y0, y1), axis=None)
         # save data
         if folder is not None and save:
             np.save(folder + do + '/' + var + "/X_train_" +str(nentries)+".npy", X_train)
@@ -139,6 +152,9 @@ class Loader():
             np.save(folder + do + '/' + var + "/X1_val_"  +str(nentries)+".npy", X1_val)
             np.save(folder + do + '/' + var + "/X0_train_"+str(nentries)+".npy", X0_train)
             np.save(folder + do + '/' + var + "/X1_train_"+str(nentries)+".npy", X1_train)
+            f = open(folder + do + '/' + var + "/metaData_"+str(nentries)+".pkl", "wb")
+            pickle.dump(metaData, f)
+            f.close()
             #Tar data files if training is done on GPU
             if torch.cuda.is_available():
                 plot = False #don't plot on GPU...
@@ -152,12 +168,12 @@ class Loader():
                              folder + do + '/' + var + "/X0_train_"+str(nentries)+".npy",
                              folder + do + '/' + var + "/X1_train_"+str(nentries)+".npy"]:
                     tar.add(name)
+                    f = open(folder + do + '/' + var + "/metaData_"+str(nentries)+".pkl", "wb")
+                    pickle.dump(metaData, f)
+                    f.close()
                 tar.close()
 
-        if plot and int(nentries) > 10000: # no point in plotting distributions with too few events
-            draw_unweighted_distributions(X0, X1, np.ones(X0[:,0].size), x0.columns, vlabels, binning, var, do, nentries, plot) 
-            print("saving plots")
-        return X_train, y_train, X0_train, X1_train
+        return X_train, y_train, X0_train, X1_train, metaData
 
     def load_result(
         self,
@@ -166,7 +182,7 @@ class Loader():
         weights = None,
         label = None,
         do = 'dilepton',
-        var = 'qsf',
+        var = 'QSFUP',
         plot = False,
         n = 0,
         path = '',
@@ -199,6 +215,30 @@ class Loader():
             # plot reweighted distributions     
             draw_weighted_distributions(X0, X1, weights, x0df.columns, labels, binning, label, var, do, n, plot) 
 
+    def validate_result(
+        self,
+        weightCT = None,
+        weightCA = None,
+        do = 'dilepton',
+        var = 'QSFUP',
+        plot = False,
+        n = 0,
+        path = '',
+    ):
+        """
+        Parameters
+        ----------
+        weightsCT : ndarray
+            weights from carl-torch:
+        weightsCA : ndarray
+            weights from carlAthena:
+        Returns
+        -------
+        """
+        # draw histograms comparing weight from carl-torch (weightCT) from weight infered through carlAthena (ca.weight)
+        draw_weights(weightCT, weightCA, var, do, n, plot)
+        draw_scatter(weightCT, weightCA, var, do, n)
+
     def load_calibration(
         self,
         y_true,
@@ -206,7 +246,7 @@ class Loader():
         p1_cal = None,
         label = None,
         do = 'dilepton',
-        var = 'qsf',
+        var = 'QSFUP',
         plot = False
     ):
         """

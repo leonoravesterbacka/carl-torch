@@ -400,6 +400,7 @@ class Trainer(object):
         return loss
 
     def optimizer_step(self, optimizer, loss, clip_gradient):
+        # Zero gradients (optimizer.zero_grad()), perform a backward pass (loss.backward()), and update the weights (optimizer.step()).
         self._timer(start="opt: zero grad")
         optimizer.zero_grad()
         self._timer(stop="opt: zero grad", start="opt: backward")

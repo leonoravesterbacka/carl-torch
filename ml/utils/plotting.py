@@ -135,3 +135,27 @@ def plot_calibration_curve(y, probs_raw, probs_cal, do, var, save = False):
         plt.savefig('plots/calibration_'+do+'_'+var+'.png')
         plt.clf() 
     logger.info("Saving calibration curves to /plots")
+
+def draw_weights(weightCT, weightCA, legend, do, n, save = False):
+    plt.yscale('log')
+    plt.hist(weightCT, bins = np.exp(np.linspace(-0.5,1.1,50)), label = 'carl-torch', **hist_settings0)
+    plt.hist(weightCA, bins = np.exp(np.linspace(-0.5,1.1,50)), label = 'carlAthena', **hist_settings0)
+    plt.xlabel('weights', horizontalalignment='right',x=1)
+    plt.legend(frameon=False)
+    plt.savefig("plots/weights_%s_%s_%s.png"%(do, legend, n))
+    plt.clf()
+    plt.close()
+
+def draw_scatter(weightsCT, weightsCA, legend, do, n):
+    print("weights carl-torch ", len(weightsCT))
+    print("weights carlAthena ", len(weightsCA))
+    plt.scatter(weightsCT, weightsCA, alpha=0.5)
+    max_temp=1.5
+    plt.plot([0,max_temp],[0,max_temp], lw=2, c='r')
+    plt.xlim(0,max_temp)
+    plt.ylim(0,max_temp)
+    plt.xlabel('weights carl-torch')
+    plt.ylabel('weights carlAthena')
+    plt.savefig("plots/scatter_weights_%s_%s_%s.png"%(do, legend, n))
+    plt.clf()
+    plt.close()

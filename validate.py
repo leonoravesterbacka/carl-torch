@@ -4,6 +4,7 @@ import logging
 import optparse
 from ml import RatioEstimator
 from ml.utils.loading import Loader
+from ml.utils.tools   import load
 
 parser = optparse.OptionParser(usage="usage: %prog [opts]", version="%prog 1.0")
 parser.add_option('-s', '--samples',   action='store', type=str, dest='samples',   default='dilepton', help='samples to derive weights for. Sherpa 2.2.8 ttbar dilepton')
@@ -17,28 +18,34 @@ var = opts.variation
 n = opts.nentries
 p = opts.datapath
 logger = logging.getLogger(__name__)
-if os.path.exists('data/'+sample+'/'+var+'/X_train_'+str(n)+'.npy'):
-    logger.info(" Doing evaluation of model trained with datasets: %s , generator variation: %s  with %s  events.", sample, var, n)
-else:
-    logger.info(" No datasets available for evaluation of model trained with datasets: %s , generator variation: %s  with %s  events.", sample, var, n)
-    logger.info("ABORTING")
-    sys.exit()
+logger.info(" Doing validation of weights trained with datasets: %s , generator variation: %s  with %s  events.", sample, var, n)
     
-loading = Loader()
+#carl-torch inference###
+#get the weight from carl-torch (weightCT) evaluated on the same model used for carlAthena and the root file from carlAthena
+eventVarsCT = ['Njets','MET']
+eventVarsCA = ['Njets','MET','weight']
+jetVars = ['Jet_Pt','Jet_Mass'] 
+lepVars = ['Lepton_Pt']
+xCT ,_ = load(f= p+'/test.root',events=eventVarsCT,jets=jetVars,leps=lepVars,n=int(n),t='Tree',do=sample)
+xCT = xCT[sorted(xCT.columns)]
 carl = RatioEstimator()
-carl.load('models/'+sample+'/'+var+'_carl_'+str(n))
-evaluate = ['train','val']
-for i in evaluate:
-    r_hat, _ = carl.evaluate(x='data/'+sample+'/'+var+'/X0_'+i+'_'+str(n)+'.npy')
-    w = 1./r_hat
-    loading.load_result(x0='data/'+sample+'/'+var+'/X0_'+i+'_'+str(n)+'.npy',     
-                        x1='data/'+sample+'/'+var+'/X1_'+i+'_'+str(n)+'.npy',
-                        weights=w, 
-                        label=i,
+carl.load('models/'+sample+'/'+var+'_carl_2000001')
+r_hat, s_hat = carl.evaluate(x=xCT.to_numpy())
+weightCT = 1./r_hat
+
+###carlAthena inference###
+#load sample with weight infered from carlAthena
+xCA, _ = load(f=p+'/test.root',events=eventVarsCA,jets=jetVars,leps=lepVars,n=int(n),t='Tree')
+weightCA = xCA.weight
+
+###compare weights###
+# draw histograms comparing weight from carl-torch (weightCT) from weight infered through carlAthena (ca.weight)
+loading = Loader()
+loading.validate_result(weightCT=weightCT, 
+                        weightCA=weightCA, 
                         do=sample,
                         var=var,
                         plot=True,
                         n=n,
                         path=p,
-    )
-carl.evaluate_performance(x='data/'+sample+'/'+var+'/X_val_'+str(n)+'.npy',y='data/'+sample+'/'+var+'/y_val_'+str(n)+'.npy')
+)
