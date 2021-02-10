@@ -516,6 +516,7 @@ class RatioTrainer(Trainer):
         self._timer(start="fwd: move data")
         x = batch_data["x"].to(self.device, self.dtype, non_blocking=True)
         y = batch_data["y"].to(self.device, self.dtype, non_blocking=True)
+        w = batch_data["w"].to(self.device, self.dtype, non_blocking=True) #sjiggins
         
         self._timer(stop="fwd: move data", start="fwd: check for nans")
         self._timer(start="fwd: model.forward", stop="fwd: check for nans")
@@ -527,7 +528,7 @@ class RatioTrainer(Trainer):
 
         self._timer(start="fwd: calculate losses", stop="fwd: check for nans")
         losses = [
-            loss_function(s_hat, y) for loss_function in loss_functions
+            loss_function(s_hat, y, w) for loss_function in loss_functions
         ]
         self._timer(stop="fwd: calculate losses", start="fwd: check for nans")
         self._check_for_nans("Loss", *losses)

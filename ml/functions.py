@@ -28,11 +28,13 @@ def get_activation(activation):
 def get_loss(method, alpha):
     if method in ["carl", "carl2"]:
         loss_functions = [ratio_xe]
-        loss_weights = [1.0]
+        # It is advised not to use loss_weights inside this function like this
+        loss_weights = [1.0] #sjiggins
         loss_labels = ["xe"]
     else:
         raise NotImplementedError("Unknown method {}".format(method))
-    return loss_functions, loss_labels, loss_weights
+        return loss_functions, loss_labels, loss_weights #sjiggins
+        
 
 def get_optimizer(optimizer, nesterov_momentum):
     opt_kwargs = None
@@ -50,8 +52,15 @@ def get_optimizer(optimizer, nesterov_momentum):
     return opt, opt_kwargs
 
 
-def ratio_xe(s_hat, y_true):
-    loss = BCEWithLogitsLoss()(s_hat, y_true)
+def ratio_xe(s_hat, y_true, w):
+    # Original loss
+    #loss = BCEWithLogitsLoss()(s_hat, y_true) #sjiggins
+    
+    # New weighted loss functions - sjiggins
+    if w is None:
+        w = torch.ones(y_true.shape[0])
+    assert w.dim() == 1, "Weights must be a rank 1 tensor"
+    loss = (BCEWithLogitLoss(reduction='none')(s_hat, y_true) * w / w.sum()).sum()
     return loss
 
 @contextmanager

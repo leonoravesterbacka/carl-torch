@@ -126,6 +126,7 @@ class RatioEstimator(Estimator):
         memmap_threshold = 1.0 if memmap else None
         x = load_and_check(x, memmap_files_larger_than_gb=memmap_threshold)
         y = load_and_check(y, memmap_files_larger_than_gb=memmap_threshold)
+        w = load_and_check(w, memmap_files_larger_than_gb=memmap_threshold)
 
         # Infer dimensions of problem
         n_samples = x.shape[0]
@@ -136,6 +137,7 @@ class RatioEstimator(Estimator):
         if external_validation:
             x_val = load_and_check(x_val, memmap_files_larger_than_gb=memmap_threshold)
             y_val = load_and_check(y_val, memmap_files_larger_than_gb=memmap_threshold)
+            w_val = load_and_check(w_val, memmap_files_larger_than_gb=memmap_threshold)
             logger.info("Found %s separate validation samples", x_val.shape[0])
 
             assert x_val.shape[1] == n_observables
@@ -169,9 +171,9 @@ class RatioEstimator(Estimator):
             )
 
         # Data
-        data = self._package_training_data(method, x, y)
+        data = self._package_training_data(method, x, y, w) #sjiggins
         if external_validation:
-            data_val = self._package_training_data(method, x_val, y_val)
+            data_val = self._package_training_data(method, x_val, y_val, w_val) #sjiggins
         else:
             data_val = None
         # Create model
@@ -179,7 +181,7 @@ class RatioEstimator(Estimator):
             logger.info("Creating model")
             self._create_model()
         # Losses
-        loss_functions, loss_labels, loss_weights = get_loss(method + "2", alpha)
+        loss_functions, loss_labels, loss_weights = get_loss(method + "2", alpha) #sjiggins
         # Optimizer
         opt, opt_kwargs = get_optimizer(optimizer, nesterov_momentum)
 
@@ -190,7 +192,8 @@ class RatioEstimator(Estimator):
             data=data,
             data_val=data_val,
             loss_functions=loss_functions,
-            loss_weights=loss_weights,
+            loss_weights=loss_weights, #sjiggins
+            #loss_weights=w, #sjiggins
             loss_labels=loss_labels,
             epochs=n_epochs,
             batch_size=batch_size,
@@ -281,10 +284,11 @@ class RatioEstimator(Estimator):
             dropout_prob=self.dropout_prob,
         )
     @staticmethod
-    def _package_training_data(method, x,  y):
+    def _package_training_data(method, x, y, w): #sjiggins
         data = OrderedDict()
         data["x"] = x
         data["y"] = y
+        data["w"] = w #sjiggins
         return data
 
     def _wrap_settings(self):
