@@ -9,55 +9,84 @@ from ml import RatioEstimator
 from ml import Loader
 
 
+#################################################
+# Arugment parsing
 parser = optparse.OptionParser(usage="usage: %prog [opts]", version="%prog 1.0")
-parser.add_option('-s', '--samples',   action='store', type=str, dest='samples',   default='dilepton', help='samples to derive weights for. Sherpa 2.2.8 ttbar dilepton')
-parser.add_option('-v', '--variation', action='store', type=str, dest='variation', default='QSFUP', help='variation to derive weights for. default QSF down to QSF up')
-parser.add_option('-n', '--nentries',  action='store', type=str, dest='nentries',  default=1000, help='specify the number of events do do the training on, default None means full sample')
-parser.add_option('-p', '--datapath',  action='store', type=str, dest='datapath',  default='/eos/atlas/unpledged/group-tokyo/users/tatsuya/TruthAOD/Temp/Tuples/', help='path to where the data is stored')
+parser.add_option('-n', '--nominal',   action='store', type=str, dest='nominal',   default='', help='Nominal sample name (root file name excluding the .root extension)')
+parser.add_option('-v', '--variation', action='store', type=str, dest='variation', default='', help='Variation sample name (root file name excluding the .root extension)')
+parser.add_option('-e', '--nentries',  action='store', type=str, dest='nentries',  default=1000, help='specify the number of events to do the training on, None means full sample')
+parser.add_option('-p', '--datapath',  action='store', type=str, dest='datapath',  default='./Inputs/', help='path to where the data is stored')
+parser.add_option('-g', '--global_name',  action='store', type=str, dest='global_name',  default='Test', help='Global name for identifying this run - used in folder naming and output naming')
+parser.add_option('-f', '--features',  action='store', type=str, dest='features',  default='', help='Comma separated list of features within tree')
+parser.add_option('-w', '--weightFeature',  action='store', type=str, dest='weightFeature',  default='', help='Name of event weights feature in TTree')
+parser.add_option('-t', '--TreeName',  action='store', type=str, dest='treename',  default='Tree', help='Name of TTree name inside root files')
 (opts, args) = parser.parse_args()
-sample  = opts.samples
-var = opts.variation
+nominal  = opts.nominal
+variation = opts.variation
 n = opts.nentries
 p = opts.datapath
+global_name = opts.global_name
+features = opts.features.split(",")
+weightFeature = opts.weightFeature
+treename = opts.treename
+#################################################
+
+#################################################
+# Loading of data from root of numpy arrays
 loading = Loader()
 logger = logging.getLogger(__name__)
-if os.path.exists(p+'/Sh_228_ttbar_'+sample+'_EnhMaxHTavrgTopPT_'+var+'.root'):
-    logger.info(" Doing training of model with datasets: %s , generator variation: %s  with %s  events.", sample, var, n)
+
+# Exception handling for input files - .root
+if os.path.exists(p+nominal+'.root'):
+    logger.info(" Doing training of model with datasets: %s with %s  events.", nominal, n)
 else:
-    logger.info(" Trying to do training of model with datasets: %s , generator variation: %s  with %s  events.", sample, var, n)
-    logger.info(" Try one of the following options:")
-    logger.info(" Generator variation: -v QSFUP, QSFDOWN, CKKW20, CKKW50")
-    logger.info(" ttbar sample       : -s dilepton, singleLepton, allHadronic")
+    logger.info(" Trying to do training of model with datasets: %s with %s  events.", nominal, n)
+    logger.info(" This file or directory does not exist.")
     sys.exit()
-if os.path.exists('data/'+sample+'/'+var+'/X_train_'+str(n)+'.npy'):
-    x='data/'+sample+'/'+var+'/X_train_'+str(n)+'.npy'
-    y='data/'+sample+'/'+var+'/y_train_'+str(n)+'.npy'
-    x0='data/'+sample+'/'+var+'/X0_train_'+str(n)+'.npy'
-    x1='data/'+sample+'/'+var+'/X1_train_'+str(n)+'.npy'
-    f = open('data/'+sample+'/'+var+'/metaData_'+str(n)+".pkl","rb")
-    metaData = pickle.load(f)
-    f.close()
+if os.path.exists(p+variation+'.root'):
+    logger.info(" Doing training of model with datasets: %s with %s  events.", variation, n)
+else:
+    logger.info(" Trying to do training of model with datasets: %s with %s  events.", variation, n)
+    logger.info(" This file or directory does not exist.")
+    sys.exit()
+
+if os.path.exists("data_out.tar.gz"):
+#    tar = tarfile.open("data_out.tar.gz", "r:gz")
+    tar = tarfile.open("data_out.tar.gz")
+    tar.extractall()
+    tar.close()
+
+# Check if already pre-processed numpy arrays exist
+if os.path.exists('data/'+nominal+'/X_train_'+str(n)+'.npy'):
     logger.info(" Loaded existing datasets ")
-    if torch.cuda.is_available():
-        tar = tarfile.open("data_out.tar.gz", "w:gz")
-        for name in ['data/'+sample +'/'+var+'/X0_train_'+str(n)+'.npy']:
-            tar.add(name)
-        tar.close()
+    x='data/'+global_name+'/X_train_'+str(n)+'.npy'
+    y='data/'+global_name+'/y_train_'+str(n)+'.npy'
+    x0='data/'+global_name+'/X0_train_'+str(n)+'.npy'
+    x1='data/'+global_name+'/X1_train_'+str(n)+'.npy'
+    f = open('data/'+global_name+'/metaData_'+str(n)+".pkl","rb")
+    metaData = pickle.load(f)
+    f.close()   
 else:
     x, y, x0, x1, metaData = loading.loading(
         folder='./data/',
         plot=True,
-        var=var,
-        do=sample,
+        global_name=global_name,
+        features=features,
+        weightFeature=weightFeature,
+        TreeName=treename,
         randomize=False,
         save=True,
         correlation=True,
         preprocessing=True,
         nentries=n,
-        path=p,
+        pathA=p+nominal+".root",
+        pathB=p+variation+".root",
     )
     logger.info(" Loaded new datasets ")
+#######################################
 
+#######################################
+# Estimate the likelihood ratio
 estimator = RatioEstimator(
     n_hidden=(10,10,10),
     activation="relu"
@@ -72,4 +101,5 @@ estimator.train(
     x1=x1,
     scale_inputs=True,
 )
-estimator.save('models/'+ sample +'/'+ var +'_carl_'+str(n), x, metaData, export_model = True)
+estimator.save('models/'+ global_name +'_carl_'+str(n), x, metaData, export_model = True)
+########################################

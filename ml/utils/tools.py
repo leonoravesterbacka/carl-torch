@@ -16,56 +16,107 @@ logger = logging.getLogger(__name__)
 
 initialized = False
 
-def load(f = None, events = None, jets = None, leps = None, n = 0, t = None, do = "dilepton"):
-    if f is None:
-        return None
-    tree = uproot.open(f)[t]
-    if int(n) > 0: # if n > 0 n is the number of entries to do training on 
-        df    = tree.pandas.df(events, entrystop = int(n))
-        jetdf = tree.pandas.df(jets, entrystop = int(n))
-        lepdf = tree.pandas.df(leps, entrystop = int(n))
-    else: # else do training on the full sample
-        df    = tree.pandas.df(events)
-        jetdf = tree.pandas.df(jets)
-        lepdf = tree.pandas.df(leps)
-    if do == "dilepton":
-        nJet = 2; nLep = 2
-        dfj1 = jetdf.xs(0, level='subentry')
-        dfj2 = jetdf.xs(1, level='subentry')
-        dfl1 = lepdf.xs(0, level='subentry')
-        dfl2 = lepdf.xs(1, level='subentry')
-        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Mass=dfj1['Jet_Mass'], 
-                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Mass=dfj2['Jet_Mass'], 
-                          Lep1_Pt = dfl1['Lepton_Pt'],
-                          Lep2_Pt = dfl2['Lepton_Pt']).fillna(0.0)   
-    if do == "SingleLepP" or do == "SingleLepM":
-        nJet = 3; nLep = 1
-        dfj1 = jetdf.xs(0, level='subentry')
-        dfj2 = jetdf.xs(1, level='subentry')
-        dfj3 = jetdf.xs(2, level='subentry')
-        dfl1 = lepdf.xs(0, level='subentry')
-        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Mass=dfj1['Jet_Mass'], 
-                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Mass=dfj2['Jet_Mass'],     
-                          Jet3_Pt = dfj3['Jet_Pt'], Jet3_Mass=dfj3['Jet_Mass'],     
-                          Lep1_Pt = dfl1['Lepton_Pt']).fillna(0.0)            
-    if do == "AllHadronic":
-        nJet = 4; nLep = 0
-        dfj1 = jetdf.xs(0, level='subentry')
-        dfj2 = jetdf.xs(1, level='subentry')
-        dfj3 = jetdf.xs(2, level='subentry')
-        dfj4 = jetdf.xs(3, level='subentry')
-        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Mass=dfj1['Jet_Mass'], 
-                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Mass=dfj2['Jet_Mass'],   
-                          Jet3_Pt = dfj3['Jet_Pt'], Jet3_Mass=dfj3['Jet_Mass'],   
-                          Jet4_Pt = dfj4['Jet_Pt'], Jet4_Mass=dfj4['Jet_Mass']).fillna(0.0)          
-    labels =  ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]']
-    for j in range(1, nJet+1):
-        labels.append('Jet '+str(j)+' $\mathrm{p_{T}}$ [GeV]')
-        labels.append('Jet '+str(j)+' mass [GeV]')
-    for l in range(1, nLep+1):
-        labels.append('Lepton '+str(j)+' $\mathrm{p_{T}}$ [GeV]')
+def load(
+    f="",
+    features=[],
+    weightFeature="",
+    n=0,
+    t="Tree"        
+):
+    # grab our data and iterate over chunks of it with uproot
+    print("Uproot open file")
+    file = uproot.open(f)
+    
+    # Now get the Tree
+    print("Getting TTree from file")
+    X_tree = file[t]
 
-    return final, labels
+    # Check that features were set by user, if not then will use all features 
+    #   -  may double up on weight feature but will warn user
+    if not features:
+        # Set the features to all keys in tree - warn user!!!
+        print("<tools.py::load()>::   Attempting extract features however user did not define values. Using all keys inside TTree as features.")
+        features = X_Tree.keys()
+        
+    # Extract the pandas dataframe - warning about jagged arrays
+    df = X_tree.pandas.df(features, flatten=False)
+    print(df)
+
+    # Find the columns that are none scalarsand get all object type columns
+    #maxListLength = df.select_dtypes(object).apply(lambda x: x.list.len()).max(axis=1)
+    df_objects = df.select_dtypes(object)
+    maxObjectLen = -1
+    for column in df_objects:
+        #print(df[column].dtypes )
+        elemLen = df[column].apply(lambda x: len(x)).max() 
+        maxObjectLen = elemLen if elemLen > maxObjectLen else maxObjectLen
+    print("Max list length:", maxObjectLen)
+
+    # Now breadk up each column into elements of max size 'macObjectLen'
+
+    # Extract the weights from the Tree if specificed 
+    if weightFeature == "":
+        weights = len(df.index)
+    else:
+        weights = X_tree[weightFeature]
+
+    
+    # For the moment one should siply use the features
+    labels  = features
+
+    return (df, weights, labels)
+
+
+#def load(f = None, events = None, jets = None, leps = None, n = 0, t = None, do = "dilepton"):
+#    if f is None:
+#        return None
+#    tree = uproot.open(f)[t]
+#    if int(n) > 0: # if n > 0 n is the number of entries to do training on 
+#        df    = tree.pandas.df(events, entrystop = int(n))
+#        jetdf = tree.pandas.df(jets, entrystop = int(n))
+#        lepdf = tree.pandas.df(leps, entrystop = int(n))
+#    else: # else do training on the full sample
+#        df    = tree.pandas.df(events)
+#        jetdf = tree.pandas.df(jets)
+#        lepdf = tree.pandas.df(leps)
+#    if do == "dilepton":
+#        nJet = 2; nLep = 2
+#        dfj1 = jetdf.xs(0, level='subentry')
+#        dfj2 = jetdf.xs(1, level='subentry')
+#        dfl1 = lepdf.xs(0, level='subentry')
+#        dfl2 = lepdf.xs(1, level='subentry')
+#        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Mass=dfj1['Jet_Mass'], 
+#                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Mass=dfj2['Jet_Mass'], 
+#                          Lep1_Pt = dfl1['Lepton_Pt'],
+#                          Lep2_Pt = dfl2['Lepton_Pt']).fillna(0.0)   
+#    if do == "SingleLepP" or do == "SingleLepM":
+#        nJet = 3; nLep = 1
+#        dfj1 = jetdf.xs(0, level='subentry')
+#        dfj2 = jetdf.xs(1, level='subentry')
+#        dfj3 = jetdf.xs(2, level='subentry')
+#        dfl1 = lepdf.xs(0, level='subentry')
+#        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Mass=dfj1['Jet_Mass'], 
+#                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Mass=dfj2['Jet_Mass'],     
+#                          Jet3_Pt = dfj3['Jet_Pt'], Jet3_Mass=dfj3['Jet_Mass'],     
+#                          Lep1_Pt = dfl1['Lepton_Pt']).fillna(0.0)            
+#    if do == "AllHadronic":
+#        nJet = 4; nLep = 0
+#        dfj1 = jetdf.xs(0, level='subentry')
+#        dfj2 = jetdf.xs(1, level='subentry')
+#        dfj3 = jetdf.xs(2, level='subentry')
+#        dfj4 = jetdf.xs(3, level='subentry')
+#        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Mass=dfj1['Jet_Mass'], 
+#                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Mass=dfj2['Jet_Mass'],   
+#                          Jet3_Pt = dfj3['Jet_Pt'], Jet3_Mass=dfj3['Jet_Mass'],   
+#                          Jet4_Pt = dfj4['Jet_Pt'], Jet4_Mass=dfj4['Jet_Mass']).fillna(0.0)          
+#    labels =  ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]']
+#    for j in range(1, nJet+1):
+#        labels.append('Jet '+str(j)+' $\mathrm{p_{T}}$ [GeV]')
+#        labels.append('Jet '+str(j)+' mass [GeV]')
+#    for l in range(1, nLep+1):
+#        labels.append('Lepton '+str(j)+' $\mathrm{p_{T}}$ [GeV]')
+#
+#    return final, labels
 
 
 def create_missing_folders(folders):
