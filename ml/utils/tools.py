@@ -47,12 +47,17 @@ def load(
     df_objects = df.select_dtypes(object)
     maxObjectLen = -1
     for column in df_objects:
-        #print(df[column].dtypes )
         elemLen = df[column].apply(lambda x: len(x)).max() 
+        print("Variable: {}({}),   max size = {}", column, df[column].dtypes, elemLen)
+        # Now break up each column into elements of max size 'macObjectLen'
+        df_flattened = pd.DataFrame(df[column].to_list(), columns=[column+str(idx) for idx in range(elemLen)])
+        df_flattened = df_flattened.fillna(0)
+        print("Flattened Columns:")
+        print(df_flattened)
         maxObjectLen = elemLen if elemLen > maxObjectLen else maxObjectLen
     print("Max list length:", maxObjectLen)
 
-    # Now breadk up each column into elements of max size 'macObjectLen'
+
 
     # Extract the weights from the Tree if specificed 
     if weightFeature == "":
@@ -60,7 +65,7 @@ def load(
     else:
         weights = X_tree[weightFeature]
 
-    
+        
     # For the moment one should siply use the features
     labels  = features
 
