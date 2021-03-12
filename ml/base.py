@@ -264,7 +264,8 @@ class Estimator(object):
 
     def _transform_inputs(self, x, scaling = "minmax"):
         if scaling == "standard":    
-            print("doing standard")
+            print("<base.py::_transform_inputs()>::   Doing Standard Scaling")
+            #Check for standard deviation = 0 and none values
             if self.x_scaling_means is not None and self.x_scaling_stds is not None:
                 if isinstance(x, torch.Tensor):
                     x_scaled = x - torch.tensor(self.x_scaling_means, dtype=x.dtype, device=x.device)
@@ -275,14 +276,17 @@ class Estimator(object):
             else:
                 x_scaled = x
         else:
-            print("doing min max")
+            print("<base.py::_transform_inputs()>::   Doing min-max scaling")
+            # Check for none and 0 values
             if self.x_scaling_mins is not None and self.x_scaling_maxs is not None:
                 if isinstance(x, torch.Tensor):
                     x_scaled = (x-torch.tensor(self.x_scaling_mins, dtype=x.dtype, device=x.device))
                     x_scaled = x_scaled/(torch.tensor(self.x_scaling_maxs, dtype=x.dtype, device=x.device) - torch.tensor(self.x_scaling_mins, dtype=x.dtype, device=x.device))
                 else:
                     x_scaled = (x - self.x_scaling_mins)
-                    x_scaled = x_scaled/(self.x_scaling_maxs - self.x_scaling_mins)
+                    #x_scaled = x_scaled/(self.x_scaling_maxs - self.x_scaling_mins)
+                    diff = (self.x_scaling_maxs - self.x_scaling_mins)
+                    x_scaled = np.divide(x_scaled, diff, out=np.zeros_like(x_scaled), where=diff!=0) 
             else:
                 x_scaled = x
         return x_scaled
