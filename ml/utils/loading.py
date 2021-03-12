@@ -146,16 +146,16 @@ class Loader():
                 plt.savefig('plots/scatterMatrix_'+global_name+'.png')
                 plt.clf()
         
-        if plot and int(nentries) > 10000: # no point in plotting distributions with too few events
-            logger.info(" Making plots")
-            draw_unweighted_distributions(x0.to_numpy(), x1.to_numpy(), 
-                                          np.ones(x0.to_numpy()[:,0].size), 
-                                          x0.columns, 
-                                          vlabels1, 
-                                          binning, 
-                                          global_name, 
-                                          nentries, 
-                                          plot) 
+        #if plot and int(nentries) > 10000: # no point in plotting distributions with too few events
+        #    logger.info(" Making plots")
+        #    draw_unweighted_distributions(x0.to_numpy(), x1.to_numpy(), 
+        #                                  np.ones(x0.to_numpy()[:,0].size), 
+        #                                  x0.columns, 
+        #                                  vlabels1, 
+        #                                  binning, 
+        #                                  global_name, 
+        #                                  nentries, 
+        #                                  plot) 
             
         # sort dataframes alphanumerically 
         x0 = x0[sorted(x0.columns)]
