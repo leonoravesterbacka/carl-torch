@@ -21,7 +21,14 @@ logger = logging.getLogger(__name__)
 hist_settings0 = {'alpha': 0.3}
 hist_settings1 = {'histtype':'step', 'color':'black', 'linewidth':1, 'linestyle':'--'}
 
-def draw_unweighted_distributions(x0, x1, weights, variables, vlabels, binning, legend, do, n, save = False):
+def draw_unweighted_distributions(x0, x1, 
+                                  weights, 
+                                  variables,
+                                  vlabels, 
+                                  binning, 
+                                  legend, 
+                                  n, 
+                                  save = False):
     plt.figure(figsize=(14, 10))
     columns = range(len(variables))
     for id, column in enumerate(columns, 1):
@@ -30,33 +37,46 @@ def draw_unweighted_distributions(x0, x1, weights, variables, vlabels, binning, 
         plt.yscale('log')
         plt.hist(x0[:,column], bins = binning[id-1], weights=weights, label = "nominal", **hist_settings0)
         plt.hist(x1[:,column], bins = binning[id-1], label = legend, **hist_settings1)
-        plt.xlabel('ttbar %s, %s'%(do, vlabels[id-1]), horizontalalignment='right',x=1) 
+        plt.xlabel('%s'%(vlabels[id-1]), horizontalalignment='right',x=1) 
         plt.legend(frameon=False)
         axes = plt.gca()
         axes.set_ylim([len(x0)*0.001,len(x0)*2])                  
         if save:
             create_missing_folders(["plots"])                                                              
-            plt.savefig("plots/%s_%s_nominalVs%s_%s.png"%(variables[id-1], do, legend, n))                                                                
+            plt.savefig("plots/%s_nominalVs%s_%s.png"%(variables[id-1],legend, n))                                                                
             plt.clf()
             plt.close()
 
-def draw_weighted_distributions(x0, x1, weights, variables, vlabels, binning, label, legend, do, n, save = False):
+def draw_weighted_distributions(x0, x1, 
+                                weights, 
+                                variables, 
+                                binning, label, 
+                                legend, 
+                                n, 
+                                save = False):
     plt.figure(figsize=(14, 10))
-    columns = range(len(variables))
-    for id, column in enumerate(columns, 1):
+    #columns = range(len(variables))
+
+    for id, column in enumerate(variables):
+        print("<plotting.py::draw_weighted_distribution()>::   id: {},   column: {}".format(id,column))
+        print("<plotting.py::draw_weighted_distribution()>::     binning: {}".format(binning[id]))
         if save: plt.figure(figsize=(5, 4)) 
         else: plt.subplot(3,4, id)
         plt.yscale('log')
-        plt.hist(x0[:,column], bins = binning[id-1], label = "nominal", **hist_settings0)
-        plt.hist(x0[:,column], bins = binning[id-1], weights=weights, label = 'nominal*CARL', **hist_settings0)
-        plt.hist(x1[:,column], bins = binning[id-1], label = legend, **hist_settings1)
-        plt.xlabel('ttbar %s, %s'%(do, vlabels[id-1]), horizontalalignment='right',x=1) 
+        #plt.hist(x0[:,id], bins = binning[column], label = "nominal", **hist_settings0)
+        #plt.hist(x0[:,id], bins = binning[column], weights=weights, label = 'nominal*CARL', **hist_settings0)
+        #plt.hist(x1[:,id], bins = binning[column], label = legend, **hist_settings1)
+
+        plt.hist(x0[:,id], bins = binning[id], label = "nominal", **hist_settings0)
+        plt.hist(x0[:,id], bins = binning[id], weights=weights, label = 'nominal*CARL', **hist_settings0)
+        plt.hist(x1[:,id], bins = binning[id], label = legend, **hist_settings1)
+        plt.xlabel('%s'%(column), horizontalalignment='right',x=1) 
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()
         axes.set_ylim([len(x0)*0.001,len(x0)*2])                 
         if save:
             create_missing_folders(["plots"])                                                              
-            plt.savefig("plots/w_%s_%s_nominalVs%s_%s_%s.png"%(variables[id-1], do, legend,label, n)) 
+            plt.savefig("plots/w_%s_nominalVs%s_%s_%s.png"%(column, legend,label, n)) 
             plt.clf()
             plt.close()
 
@@ -90,7 +110,7 @@ def resampled_discriminator_and_roc(original, target, weights):
     roc_auc = auc(fpr, tpr)
     return fpr,tpr,roc_auc
  
-def draw_ROC(X0, X1, weights, label, legend, do, n, plot = True):
+def draw_ROC(X0, X1, weights, label, legend, n, plot = True):
     plt.figure(figsize=(4, 3))
     no_weights_scaled = np.ones(X0.shape[0])/np.ones(X0.shape[0]).sum() * len(X1)
     fpr_t,tpr_t,roc_auc_t = resampled_discriminator_and_roc(X0, X1, no_weights_scaled)
@@ -106,7 +126,7 @@ def draw_ROC(X0, X1, weights, label, legend, do, n, plot = True):
     plt.legend(loc="lower right", title = label)
     plt.tight_layout()
     if plot:
-        plt.savefig('plots/roc_nominalVs%s_%s_%s_%s.png'%(legend,do,label, n)) 
+        plt.savefig('plots/roc_nominalVs%s_%s_%s.png'%(legend,label, n)) 
         plt.clf()    
     logger.info("CARL weighted %s AUC is %.3f"%(label,roc_auc_tC))
     logger.info("Unweighted %s AUC is %.3f"%(label,roc_auc_t))
