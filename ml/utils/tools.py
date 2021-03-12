@@ -9,12 +9,96 @@ import uproot
 import pandas as pd
 import torch
 from torch.nn import functional as F
-
+from collections import defaultdict
 from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
 
 initialized = False
+
+def HarmonisedLoading(fA="",
+                      fB="",
+                      features=[],
+                      weightFeature="",
+                      nentries=0,
+                      TreeName="Tree"        
+                  ):
+    
+
+    x0, w0, vlabels0 = load(f = fA, 
+                            features=features, weightFeature=weightFeature, 
+                            n = int(nentries), t = TreeName)
+    x1, w1, vlabels1 = load(f = fB, 
+                            features=features, weightFeature=weightFeature,
+                            n = int(nentries), t = TreeName)
+    
+    x0, x1 = CoherentFlattening(x0,x1)
+
+    return x0, w0, vlabels0, x1, w1, vlabels1
+    
+
+    
+def CoherentFlattening(df0, df1):
+    
+    # Find the lowest common denominator for object lengths
+    df0_objects = df0.select_dtypes(object)
+    df1_objects = df1.select_dtypes(object)
+    minObjectLen = defaultdict()
+    for column in df0_objects:
+        elemLen0 = df0[column].apply(lambda x: len(x)).max() 
+        elemLen1 = df1[column].apply(lambda x: len(x)).max() 
+        
+        minObjectLen[column] = elemLen0 if elemLen0 < elemLen1 else elemLen1
+        print("<tools.py::CoherentFlattening()>::   Variable: {}({}),   min size = {}".format( column, df0[column].dtypes, minObjectLen))
+        print("<tools.py::CoherentFlattening()>::      Element Length 0 = {}".format( elemLen0))
+        print("<tools.py::CoherentFlattening()>::      Element Length 1 = {}".format( elemLen1))
+        
+    # Warn user
+    if elemLen0 != elemLen1:
+        print("<tools.py::CoherentFlattening()>::   The two datasets do not have the same length for features '{}', please be warned that we choose zero-padding using lowest dimensionatlity".format(column))
+        
+    # Find the columns that are not scalars and get all object type columns
+    #maxListLength = df.select_dtypes(object).apply(lambda x: x.list.len()).max(axis=1)
+    for column in df0_objects:
+        elemLen0 = df0[column].apply(lambda x: len(x)).max() 
+        elemLen1 = df1[column].apply(lambda x: len(x)).max() 
+
+
+        # Now break up each column into elements of max size 'macObjectLen'
+        df0_flattened = pd.DataFrame(df0[column].to_list(), columns=[column+str(idx) for idx in range(elemLen0)])
+        df0_flattened = df0_flattened.fillna(0)
+        
+        # Delete extra dimensions if needed due to non-matching dimensionality of df0 & df1
+        if elemLen0 > minObjectLen[column]:
+            delColumns0 = [column+str(idx) for idx in range(minObjectLen[column], elemLen0)]
+            print("<tools.py::CoherentFlattening()>::   Deleting {}".format(delColumns0))
+            for idx in range(minObjectLen[column], elemLen0):
+                del df0_flattened[column+str(idx)]
+
+        #print(df[column])
+        #print(df_flattened)
+        del df0[column]
+        df0 = df0.join(df0_flattened)
+
+        # Now break up each column into elements of max size 'macObjectLen'
+        df1_flattened = pd.DataFrame(df1[column].to_list(), columns=[column+str(idx) for idx in range(elemLen1)])
+        df1_flattened = df1_flattened.fillna(0)
+
+        # Delete extra dimensions if needed due to non-matching dimensionality of df0 & df1
+        if elemLen1 > minObjectLen[column]:
+            delColumns1 = [column+str(idx) for idx in range(minObjectLen[column], elemLen1)]
+            print("<tools.py::CoherentFlattening()>::   Deleting {}".format(delColumns1))
+            for idx in range(minObjectLen[column], elemLen1):
+                del df1_flattened[column+str(idx) ]
+
+        #print(df[column])
+        #print(df_flattened)
+        del df1[column]
+        df1 = df1.join(df1_flattened)
+
+    print("<loading.py::load()>::    Flattened Dataframe")
+    #print(df)
+    return df0,df1
 
 def load(
     f="",
@@ -40,88 +124,17 @@ def load(
         
     # Extract the pandas dataframe - warning about jagged arrays
     df = X_tree.pandas.df(features, flatten=False)
-    print(df)
-
-    # Find the columns that are none scalarsand get all object type columns
-    #maxListLength = df.select_dtypes(object).apply(lambda x: x.list.len()).max(axis=1)
-    df_objects = df.select_dtypes(object)
-    maxObjectLen = -1
-    for column in df_objects:
-        elemLen = df[column].apply(lambda x: len(x)).max() 
-        print("Variable: {}({}),   max size = {}", column, df[column].dtypes, elemLen)
-        # Now break up each column into elements of max size 'macObjectLen'
-        df_flattened = pd.DataFrame(df[column].to_list(), columns=[column+str(idx) for idx in range(elemLen)])
-        df_flattened = df_flattened.fillna(0)
-        print("Flattened Columns:")
-        print(df_flattened)
-        maxObjectLen = elemLen if elemLen > maxObjectLen else maxObjectLen
-    print("Max list length:", maxObjectLen)
-
-
 
     # Extract the weights from the Tree if specificed 
     if weightFeature == "":
         weights = len(df.index)
     else:
         weights = X_tree[weightFeature]
-
         
     # For the moment one should siply use the features
     labels  = features
 
     return (df, weights, labels)
-
-
-#def load(f = None, events = None, jets = None, leps = None, n = 0, t = None, do = "dilepton"):
-#    if f is None:
-#        return None
-#    tree = uproot.open(f)[t]
-#    if int(n) > 0: # if n > 0 n is the number of entries to do training on 
-#        df    = tree.pandas.df(events, entrystop = int(n))
-#        jetdf = tree.pandas.df(jets, entrystop = int(n))
-#        lepdf = tree.pandas.df(leps, entrystop = int(n))
-#    else: # else do training on the full sample
-#        df    = tree.pandas.df(events)
-#        jetdf = tree.pandas.df(jets)
-#        lepdf = tree.pandas.df(leps)
-#    if do == "dilepton":
-#        nJet = 2; nLep = 2
-#        dfj1 = jetdf.xs(0, level='subentry')
-#        dfj2 = jetdf.xs(1, level='subentry')
-#        dfl1 = lepdf.xs(0, level='subentry')
-#        dfl2 = lepdf.xs(1, level='subentry')
-#        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Mass=dfj1['Jet_Mass'], 
-#                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Mass=dfj2['Jet_Mass'], 
-#                          Lep1_Pt = dfl1['Lepton_Pt'],
-#                          Lep2_Pt = dfl2['Lepton_Pt']).fillna(0.0)   
-#    if do == "SingleLepP" or do == "SingleLepM":
-#        nJet = 3; nLep = 1
-#        dfj1 = jetdf.xs(0, level='subentry')
-#        dfj2 = jetdf.xs(1, level='subentry')
-#        dfj3 = jetdf.xs(2, level='subentry')
-#        dfl1 = lepdf.xs(0, level='subentry')
-#        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Mass=dfj1['Jet_Mass'], 
-#                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Mass=dfj2['Jet_Mass'],     
-#                          Jet3_Pt = dfj3['Jet_Pt'], Jet3_Mass=dfj3['Jet_Mass'],     
-#                          Lep1_Pt = dfl1['Lepton_Pt']).fillna(0.0)            
-#    if do == "AllHadronic":
-#        nJet = 4; nLep = 0
-#        dfj1 = jetdf.xs(0, level='subentry')
-#        dfj2 = jetdf.xs(1, level='subentry')
-#        dfj3 = jetdf.xs(2, level='subentry')
-#        dfj4 = jetdf.xs(3, level='subentry')
-#        final = df.assign(Jet1_Pt = dfj1['Jet_Pt'], Jet1_Mass=dfj1['Jet_Mass'], 
-#                          Jet2_Pt = dfj2['Jet_Pt'], Jet2_Mass=dfj2['Jet_Mass'],   
-#                          Jet3_Pt = dfj3['Jet_Pt'], Jet3_Mass=dfj3['Jet_Mass'],   
-#                          Jet4_Pt = dfj4['Jet_Pt'], Jet4_Mass=dfj4['Jet_Mass']).fillna(0.0)          
-#    labels =  ['Number of jets', '$\mathrm{p_{T}^{miss}}$ [GeV]']
-#    for j in range(1, nJet+1):
-#        labels.append('Jet '+str(j)+' $\mathrm{p_{T}}$ [GeV]')
-#        labels.append('Jet '+str(j)+' mass [GeV]')
-#    for l in range(1, nLep+1):
-#        labels.append('Lepton '+str(j)+' $\mathrm{p_{T}}$ [GeV]')
-#
-#    return final, labels
 
 
 def create_missing_folders(folders):
