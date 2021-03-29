@@ -47,16 +47,16 @@ def CoherentFlattening(df0, df1):
     for column in df0_objects:
         elemLen0 = df0[column].apply(lambda x: len(x)).max() 
         elemLen1 = df1[column].apply(lambda x: len(x)).max() 
-        
+    
+        # Warn user
+        if elemLen0 != elemLen1:
+            print("<tools.py::CoherentFlattening()>::   The two datasets do not have the same length for features '{}', please be warned that we choose zero-padding using lowest dimensionatlity".format(column))
+    
         minObjectLen[column] = elemLen0 if elemLen0 < elemLen1 else elemLen1
         print("<tools.py::CoherentFlattening()>::   Variable: {}({}),   min size = {}".format( column, df0[column].dtypes, minObjectLen))
         print("<tools.py::CoherentFlattening()>::      Element Length 0 = {}".format( elemLen0))
         print("<tools.py::CoherentFlattening()>::      Element Length 1 = {}".format( elemLen1))
-        
-    # Warn user
-    if elemLen0 != elemLen1:
-        print("<tools.py::CoherentFlattening()>::   The two datasets do not have the same length for features '{}', please be warned that we choose zero-padding using lowest dimensionatlity".format(column))
-        
+
     # Find the columns that are not scalars and get all object type columns
     #maxListLength = df.select_dtypes(object).apply(lambda x: x.list.len()).max(axis=1)
     for column in df0_objects:
