@@ -47,16 +47,18 @@ for i in evaluate:
     print("<evaluate.py::__init__>::   Loading Result for {}".format(i))
     loading.load_result(x0='data/'+global_name+'/X0_'+i+'_'+str(n)+'.npy',     
                         x1='data/'+global_name+'/X1_'+i+'_'+str(n)+'.npy',
+                        w0='data/'+global_name+'/w0_'+i+'_'+str(n)+'.npy',     
+                        w1='data/'+global_name+'/w1_'+i+'_'+str(n)+'.npy',
                         metaData='data/'+global_name+'/metaData_'+str(n)+'.pkl',
                         weights=w, 
                         features=features,
-                        weightFeature=weightFeature,
+                        #weightFeature=weightFeature,
                         label=i,
                         plot=True,
                         nentries=n,
-                        TreeName=treename,
-                        pathA=p+nominal+".root",
-                        pathB=p+variation+".root",
+                        #TreeName=treename,
+                        #pathA=p+nominal+".root",
+                        #pathB=p+variation+".root",
                         global_name=global_name,
                     )
 # Evaluate performance

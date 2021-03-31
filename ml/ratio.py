@@ -41,10 +41,12 @@ class RatioEstimator(Estimator):
         method,
         x,
         y,
+        w=None,
         x0=None,
         x1=None,
         x_val=None,
         y_val=None,
+        w_val=None,
         alpha=1.0,
         optimizer="amsgrad",
         n_epochs=50,
@@ -175,7 +177,7 @@ class RatioEstimator(Estimator):
             )
 
         # Data
-        data = self._package_training_data(method, x, y, w) #sjiggins
+        data = self._package_training_data(method, x, y, w) #sjiggins - may be a problem if w = None
         if external_validation:
             data_val = self._package_training_data(method, x_val, y_val, w_val) #sjiggins
         else:
@@ -185,13 +187,11 @@ class RatioEstimator(Estimator):
             logger.info("Creating model")
             self._create_model()
         # Losses
-<<<<<<< HEAD
-        w = len(x0)/len(x1)
-        logger.info("Passing weight %s to the loss function to account for imbalanced dataset: ", w)
-        loss_functions, loss_labels, loss_weights = get_loss(method + "2", alpha, w)
-=======
-        loss_functions, loss_labels, loss_weights = get_loss(method + "2", alpha) #sjiggins
->>>>>>> master-weightedLoss
+        if w is None:
+            w = len(x0)/len(x1) 
+            logger.info("Passing weight %s to the loss function to account for imbalanced dataset: ", w) #sjiggins
+        loss_functions, loss_labels, loss_weights = get_loss(method, alpha, w)
+
         # Optimizer
         opt, opt_kwargs = get_optimizer(optimizer, nesterov_momentum)
 

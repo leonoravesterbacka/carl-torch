@@ -47,7 +47,7 @@ def draw_unweighted_distributions(x0, x1,
             plt.clf()
             plt.close()
 
-def draw_weighted_distributions(x0, x1, 
+def draw_weighted_distributions(x0, x1, w0, w1,
                                 weights, 
                                 variables, 
                                 binning, label, 
@@ -67,13 +67,15 @@ def draw_weighted_distributions(x0, x1,
         #plt.hist(x0[:,id], bins = binning[column], weights=weights, label = 'nominal*CARL', **hist_settings0)
         #plt.hist(x1[:,id], bins = binning[column], label = legend, **hist_settings1)
 
-        plt.hist(x0[:,id], bins = binning[id], label = "nominal", **hist_settings0)
-        plt.hist(x0[:,id], bins = binning[id], weights=weights, label = 'nominal*CARL', **hist_settings0)
-        plt.hist(x1[:,id], bins = binning[id], label = legend, **hist_settings1)
+        plt.hist(x0[:,id], bins = binning[id], weights = w0, label = "nominal", **hist_settings0)
+        plt.hist(x0[:,id], bins = binning[id], weights = np.multiply(w0.flatten(),weights)
+                 , label = 'nominal*CARL', **hist_settings0)
+        plt.hist(x1[:,id], bins = binning[id], weights = w1, label = legend, **hist_settings1)
         plt.xlabel('%s'%(column), horizontalalignment='right',x=1) 
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()
-        axes.set_ylim([len(x0)*0.001,len(x0)*2])                 
+        #axes.set_ylim([len(x0)*0.001,len(x0)*2]) #sjiggins
+        axes.set_ylim([w0.sum()*0.001,w0.sum()*2]) #sjiggins
         if save:
             create_missing_folders(["plots"])                                                              
             plt.savefig("plots/w_%s_nominalVs%s_%s_%s.png"%(column, legend,label, n)) 
@@ -110,9 +112,10 @@ def resampled_discriminator_and_roc(original, target, weights):
     roc_auc = auc(fpr, tpr)
     return fpr,tpr,roc_auc
  
-def draw_ROC(X0, X1, weights, label, legend, n, plot = True):
+def draw_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True):
     plt.figure(figsize=(4, 3))
-    no_weights_scaled = np.ones(X0.shape[0])/np.ones(X0.shape[0]).sum() * len(X1)
+    no_weights_scaled = np.ones(X0.shape[0])/np.ones(X0.shape[0]).sum() * len(X1) #sjiggins
+    print("no_weights_scaled:  {}".format(no_weights_scaled))
     fpr_t,tpr_t,roc_auc_t = resampled_discriminator_and_roc(X0, X1, no_weights_scaled)
     plt.plot(fpr_t, tpr_t, label=r"no weight, AUC=%.3f" % roc_auc_t)
     fpr_tC,tpr_tC,roc_auc_tC = resampled_discriminator_and_roc(X0, X1, weights)

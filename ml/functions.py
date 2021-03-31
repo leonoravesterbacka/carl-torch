@@ -33,7 +33,8 @@ def get_loss(method, alpha, w = 1):
         loss_labels = ["xe"]
     else:
         raise NotImplementedError("Unknown method {}".format(method))
-        return loss_functions, loss_labels, loss_weights #sjiggins
+
+    return loss_functions, loss_labels, loss_weights #sjiggins
         
 
 def get_optimizer(optimizer, nesterov_momentum):
@@ -59,8 +60,8 @@ def ratio_xe(s_hat, y_true, w):
     # New weighted loss functions - sjiggins
     if w is None:
         w = torch.ones(y_true.shape[0])
-    assert w.dim() == 1, "Weights must be a rank 1 tensor"
-    loss = (BCEWithLogitLoss(reduction='none')(s_hat, y_true) * w / w.sum()).sum()
+    #assert w.dim() == 1, "Weights must be a rank 1 tensor"
+    loss = (BCEWithLogitsLoss(reduction='none')(s_hat, y_true) * w / w.sum()).sum()
     return loss
 
 @contextmanager
