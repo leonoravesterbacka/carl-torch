@@ -134,18 +134,20 @@ class Loader():
                 x1 = x1[x1_mask]
                 
                 # To filter weights one needs a mask
-                print("MASK: {}".format( x0_mask))
-                print("MASK END")
+                #print("MASK: {}".format( x0_mask))
+                #print("MASK END")
                 w0 = w0[x0_mask]
                 w1 = w1[x1_mask]
                 #print(len(x0))
                 #print(len(x1))
             x0 = x0.round(decimals=2)
             x1 = x1.round(decimals=2)
-            print(len(x0))
-            print(len(x1))
+            #print(len(x0))
+            #print(len(x1))
             logger.info(" Filtered x0 outliers in percent: %.2f", (x00-len(x0))/len(x0)*100)
             logger.info(" Filtered x1 outliers in percent: %.2f", (x10-len(x1))/len(x1)*100)
+            print("weight vector (0): {}".format(w0))
+            print("weight vector (1): {}".format(w1))
         
 
         if correlation:
@@ -180,6 +182,9 @@ class Loader():
         # Convert weights to numpy
         w0 = w0.to_numpy()
         w1 = w1.to_numpy()
+        # Temporary  -#sjiggins
+        #w0 = w0 / (w0.sum())
+        #w1 = w1 / (w1.sum())
         
         # combine
         y0 = np.zeros(x0.shape[0])
@@ -288,7 +293,7 @@ class Loader():
         metaDataFile = open(metaData, 'rb')
         metaDataDict = pickle.load(metaDataFile) 
         metaDataFile.close()
-        weights = weights / weights.sum() * len(X1)
+        #weights = weights / weights.sum() * len(X1)
 
         # Calculate the maximum of each column and minimum and then allocate bins
         print("<loading.py::load_result>::   Calculating min/max range for plots & binning")

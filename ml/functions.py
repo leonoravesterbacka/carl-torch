@@ -61,7 +61,11 @@ def ratio_xe(s_hat, y_true, w):
     if w is None:
         w = torch.ones(y_true.shape[0])
     #assert w.dim() == 1, "Weights must be a rank 1 tensor"
-    loss = (BCEWithLogitsLoss(reduction='none')(s_hat, y_true) * w / w.sum()).sum()
+    #loss = (BCEWithLogitsLoss(reduction='none')(s_hat, y_true) * w / w.sum()).sum()  # First test
+    #loss = (BCEWithLogitsLoss()(s_hat, y_true) * w / w.sum()).sum()
+    #loss = (BCELoss(reduction='none')(s_hat, y_true) * w / w.sum()).sum()
+    #loss = (BCELoss(weight=w)(s_hat, y_true) * w / w.sum()).sum()
+    loss = BCELoss(weight=w)(s_hat, y_true)
     return loss
 
 @contextmanager

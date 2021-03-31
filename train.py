@@ -92,7 +92,7 @@ else:
 #######################################
 # Estimate the likelihood ratio
 estimator = RatioEstimator(
-    n_hidden=(10,10,10),
+    n_hidden=(60,60,60),
     activation="relu"
 )
 estimator.train(
