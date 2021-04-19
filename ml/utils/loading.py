@@ -34,7 +34,7 @@ class Loader():
         plot=False,
         global_name="Test",
         features=[],
-        weightFeature="",
+        weightFeature="DummyEvtWeight",
         TreeName = "Tree",
         x0 = None,
         x1 = None,
@@ -100,7 +100,7 @@ class Loader():
         # Pre-process for outliers
         logger.info(" Starting filtering")
         if preprocessing:
-            factor = 5 # 5sigma deviation
+            factor = 5 # 5 sigma deviation
             x00 = len(x0)
             x10 = len(x1)
             for column in x0.columns:
@@ -125,16 +125,29 @@ class Loader():
                 print("Column: {},  std1 = {}".format(column, x1[column].std ()))
                 print("Column: {},  lower limit = {}".format(column,lower_lim))
                 print("Column: {},  upper limit = {}".format(column,upper_lim))
-                x0 = x0[(x0[column] < upper_lim) & (x0[column] > lower_lim)]
-                x1 = x1[(x1[column] < upper_lim) & (x1[column] > lower_lim)]
+                x0_mask = (x0[column] < upper_lim) & (x0[column] > lower_lim)
+                x1_mask = (x1[column] < upper_lim) & (x1[column] > lower_lim)
+                
+                #x0 = x0[(x0[column] < upper_lim) & (x0[column] > lower_lim)]
+                x0 = x0[x0_mask]
+                #x1 = x1[(x1[column] < upper_lim) & (x1[column] > lower_lim)]
+                x1 = x1[x1_mask]
+                
+                # To filter weights one needs a mask
+                #print("MASK: {}".format( x0_mask))
+                #print("MASK END")
+                w0 = w0[x0_mask]
+                w1 = w1[x1_mask]
                 #print(len(x0))
                 #print(len(x1))
             x0 = x0.round(decimals=2)
             x1 = x1.round(decimals=2)
-            print(len(x0))
-            print(len(x1))
+            #print(len(x0))
+            #print(len(x1))
             logger.info(" Filtered x0 outliers in percent: %.2f", (x00-len(x0))/len(x0)*100)
             logger.info(" Filtered x1 outliers in percent: %.2f", (x10-len(x1))/len(x1)*100)
+            print("weight vector (0): {}".format(w0))
+            print("weight vector (1): {}".format(w1))
         
 
         if correlation:
@@ -165,31 +178,47 @@ class Loader():
         metaData = {v : {x0[v].min(), x0[v].max() } for v in  x0.columns }
         X0 = x0.to_numpy()
         X1 = x1.to_numpy()
+
+        # Convert weights to numpy
+        w0 = w0.to_numpy()
+        w1 = w1.to_numpy()
+        # Temporary  -#sjiggins
+        #w0 = w0 / (w0.sum())
+        #w1 = w1 / (w1.sum())
         
         # combine
         y0 = np.zeros(x0.shape[0])
         y1 = np.ones(x1.shape[0])
         
-        X0_train, X0_test, y0_train, y0_test = train_test_split(X0, y0, test_size=0.40, random_state=42)
-        X1_train, X1_test, y1_train, y1_test = train_test_split(X1, y1, test_size=0.40, random_state=42)
-        X0_train, X0_val,  y0_train, y0_val =  train_test_split(X0_train, y0_train, test_size=0.50, random_state=42)
-        X1_train, X1_val,  y1_train, y1_val =  train_test_split(X1_train, y1_train, test_size=0.50, random_state=42)
+        X0_train, X0_test, y0_train, y0_test, w0_train, w0_test = train_test_split(X0, y0, w0, test_size=0.40, random_state=42)
+        X1_train, X1_test, y1_train, y1_test, w1_train, w1_test = train_test_split(X1, y1, w1, test_size=0.40, random_state=42)
+        X0_train, X0_val,  y0_train, y0_val, w0_train, w0_val =  train_test_split(X0_train, y0_train, w0_train, test_size=0.50, random_state=42)
+        X1_train, X1_val,  y1_train, y1_val, w1_train, w1_val =  train_test_split(X1_train, y1_train, w1_train, test_size=0.50, random_state=42)
         X_train = np.vstack([X0_train, X1_train])
         y_train = np.concatenate((y0_train, y1_train), axis=None)
+        w_train = np.concatenate( (w0_train, w1_train), axis=None)
         X_val   = np.vstack([X0_val, X1_val])
         y_val = np.concatenate((y0_val, y1_val), axis=None)
+        w_val = np.concatenate( (w0_val, w1_val), axis=None)
         X = np.vstack([X0, X1])
         y = np.concatenate((y0, y1), axis=None)
+        w = np.concatenate( (w0,w1), axis=None)
         # save data
         if folder is not None and save:
             np.save(folder + global_name + "/X_train_" +str(nentries)+".npy", X_train)
             np.save(folder + global_name + "/y_train_" +str(nentries)+".npy", y_train)
+            np.save(folder + global_name + "/w_train_" +str(nentries)+".npy", w_train)
             np.save(folder + global_name + "/X_val_"   +str(nentries)+".npy", X_val)
             np.save(folder + global_name + "/y_val_"   +str(nentries)+".npy", y_val)
+            np.save(folder + global_name + "/w_val_"   +str(nentries)+".npy", w_val)
             np.save(folder + global_name + "/X0_val_"  +str(nentries)+".npy", X0_val)
             np.save(folder + global_name + "/X1_val_"  +str(nentries)+".npy", X1_val)
+            np.save(folder + global_name + "/w0_val_"  +str(nentries)+".npy", w0_val)            
+            np.save(folder + global_name + "/w1_val_"  +str(nentries)+".npy", w1_val)            
             np.save(folder + global_name + "/X0_train_"+str(nentries)+".npy", X0_train)
             np.save(folder + global_name + "/X1_train_"+str(nentries)+".npy", X1_train)
+            np.save(folder + global_name + "/w0_train_"  +str(nentries)+".npy", w0_train)
+            np.save(folder + global_name + "/w1_train_"  +str(nentries)+".npy", w1_train)
             f = open(folder + global_name + "/metaData_"+str(nentries)+".pkl", "wb")
             pickle.dump(metaData, f)
             f.close()
@@ -203,15 +232,19 @@ class Loader():
                              folder + global_name + "/y_val_"   +str(nentries)+".npy",
                              folder + global_name + "/X0_val_"  +str(nentries)+".npy",
                              folder + global_name + "/X1_val_"  +str(nentries)+".npy",
+                             folder + global_name + "/w0_val_"  +str(nentries)+".npy",
+                             folder + global_name + "/w1_val_"  +str(nentries)+".npy",
                              folder + global_name + "/X0_train_"+str(nentries)+".npy",
-                             folder + global_name + "/X1_train_"+str(nentries)+".npy"]:
+                             folder + global_name + "/X1_train_"+str(nentries)+".npy",
+                             folder + global_name + "/w0_train_"  +str(nentries)+".npy",
+                             folder + global_name + "/w1_train_"  +str(nentries)+".npy"]:
                     tar.add(name)
                     f = open(folder + global_name + "/metaData_"+str(nentries)+".pkl", "wb")
                     pickle.dump(metaData, f)
                     f.close()
                 tar.close()
         
-        return X_train, y_train, X0_train, X1_train, metaData
+        return X_train, y_train, X0_train, X1_train, w_train, w0_train, w1_train, metaData
 
 
 
@@ -219,16 +252,18 @@ class Loader():
         self,
         x0,
         x1,
+        w0,
+        w1,
         metaData,
         weights = None,
         label = None,
         features=[],
-        weightFeature="",    
+#        weightFeature="DummyEvtWeight",    
         plot = False,
         nentries = 0,
-        TreeName = "Tree",
-        pathA = '',
-        pathB = '',
+#        TreeName = "Tree",
+#        pathA = '',
+#        pathB = '',
         global_name="Test"
     ):
         """
@@ -253,10 +288,12 @@ class Loader():
         # load samples
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
         X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)
+        W0 = load_and_check(w0, memmap_files_larger_than_gb=1.0)
+        W1 = load_and_check(w1, memmap_files_larger_than_gb=1.0)
         metaDataFile = open(metaData, 'rb')
         metaDataDict = pickle.load(metaDataFile) 
         metaDataFile.close()
-        weights = weights / weights.sum() * len(X1)
+        #weights = weights / weights.sum() * len(X1)
 
         # Calculate the maximum of each column and minimum and then allocate bins
         print("<loading.py::load_result>::   Calculating min/max range for plots & binning")
@@ -291,11 +328,11 @@ class Loader():
         #if int(nentries) > 5000: 
         # plot ROC curves 
         print("<loading.py::load_result>::   Printing ROC")
-        draw_ROC(X0, X1, weights, label, global_name, nentries, plot)
+        draw_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
         
         print("<loading.py::load_result>::   Printing weighted distributions")
         # plot reweighted distributions     
-        draw_weighted_distributions(X0, X1, 
+        draw_weighted_distributions(X0, X1, W0, W1,
                                     weights, 
                                     metaDataDict.keys(),#x0df.columns, 
                                     binning, 

@@ -19,7 +19,7 @@ initialized = False
 def HarmonisedLoading(fA="",
                       fB="",
                       features=[],
-                      weightFeature="",
+                      weightFeature="DummyEvtWeight",
                       nentries=0,
                       TreeName="Tree"        
                   ):
@@ -103,7 +103,7 @@ def CoherentFlattening(df0, df1):
 def load(
     f="",
     features=[],
-    weightFeature="",
+    weightFeature="DummyEvtWeight",
     n=0,
     t="Tree"        
 ):
@@ -126,10 +126,13 @@ def load(
     df = X_tree.pandas.df(features, flatten=False)
 
     # Extract the weights from the Tree if specificed 
-    if weightFeature == "":
-        weights = len(df.index)
+    if weightFeature == "DummyEvtWeight":
+        #weights = len(df.index)
+        dweights = np.ones(len(df.index))
+        weights = pd.DataFrame(data=dweights, index=range(len(df.index)), columns=[weightFeature])
     else:
-        weights = X_tree[weightFeature]
+        #weights = X_tree[weightFeature]
+        weights = X_tree.pandas.df(weightFeature)
         
     # For the moment one should siply use the features
     labels  = features
