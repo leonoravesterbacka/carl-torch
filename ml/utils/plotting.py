@@ -21,38 +21,38 @@ logger = logging.getLogger(__name__)
 hist_settings0 = {'alpha': 0.3}
 hist_settings1 = {'histtype':'step', 'color':'black', 'linewidth':1, 'linestyle':'--'}
 
-def draw_unweighted_distributions(x0, x1, 
-                                  weights, 
+def draw_unweighted_distributions(x0, x1,
+                                  weights,
                                   variables,
-                                  vlabels, 
-                                  binning, 
-                                  legend, 
-                                  n, 
+                                  vlabels,
+                                  binning,
+                                  legend,
+                                  n,
                                   save = False):
     plt.figure(figsize=(14, 10))
     columns = range(len(variables))
     for id, column in enumerate(columns, 1):
-        if save: plt.figure(figsize=(5, 4.2)) 
+        if save: plt.figure(figsize=(5, 4.2))
         else: plt.subplot(3,4, id)
         plt.yscale('log')
         plt.hist(x0[:,column], bins = binning[id-1], weights=weights, label = "nominal", **hist_settings0)
         plt.hist(x1[:,column], bins = binning[id-1], label = legend, **hist_settings1)
-        plt.xlabel('%s'%(vlabels[id-1]), horizontalalignment='right',x=1) 
+        plt.xlabel('%s'%(vlabels[id-1]), horizontalalignment='right',x=1)
         plt.legend(frameon=False)
         axes = plt.gca()
-        axes.set_ylim([len(x0)*0.001,len(x0)*2])                  
+        axes.set_ylim([len(x0)*0.001,len(x0)*2])
         if save:
-            create_missing_folders(["plots"])                                                              
-            plt.savefig("plots/%s_nominalVs%s_%s.png"%(variables[id-1],legend, n))                                                                
+            create_missing_folders(["plots"])
+            plt.savefig("plots/%s_nominalVs%s_%s.png"%(variables[id-1],legend, n))
             plt.clf()
             plt.close()
 
 def draw_weighted_distributions(x0, x1, w0, w1,
-                                weights, 
-                                variables, 
-                                binning, label, 
-                                legend, 
-                                n, 
+                                weights,
+                                variables,
+                                binning, label,
+                                legend,
+                                n,
                                 save = False):
     plt.figure(figsize=(14, 10))
     #columns = range(len(variables))
@@ -60,25 +60,43 @@ def draw_weighted_distributions(x0, x1, w0, w1,
     for id, column in enumerate(variables):
         print("<plotting.py::draw_weighted_distribution()>::   id: {},   column: {}".format(id,column))
         print("<plotting.py::draw_weighted_distribution()>::     binning: {}".format(binning[id]))
-        if save: plt.figure(figsize=(5, 4)) 
+        if save: plt.figure(figsize=(5, 4))
         else: plt.subplot(3,4, id)
         plt.yscale('log')
         #plt.hist(x0[:,id], bins = binning[column], label = "nominal", **hist_settings0)
         #plt.hist(x0[:,id], bins = binning[column], weights=weights, label = 'nominal*CARL', **hist_settings0)
         #plt.hist(x1[:,id], bins = binning[column], label = legend, **hist_settings1)
-
+        w0 = w0.flatten()
+        w1 = w1.flatten()
+        w_carl = w0*weights
         plt.hist(x0[:,id], bins = binning[id], weights = w0, label = "nominal", **hist_settings0)
-        plt.hist(x0[:,id], bins = binning[id], weights = np.multiply(w0.flatten(),weights)
-                 , label = 'nominal*CARL', **hist_settings0)
+        plt.hist(x0[:,id], bins = binning[id], weights = w_carl, label = 'nominal*CARL', **hist_settings0)
         plt.hist(x1[:,id], bins = binning[id], weights = w1, label = legend, **hist_settings1)
-        plt.xlabel('%s'%(column), horizontalalignment='right',x=1) 
+        plt.xlabel('%s'%(column), horizontalalignment='right',x=1)
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()
         #axes.set_ylim([len(x0)*0.001,len(x0)*2]) #sjiggins
-        axes.set_ylim([w0.sum()*0.001,w0.sum()*2]) #sjiggins
+        #axes.set_ylim([w0.sum()*0.001,w0.sum()*2]) #sjiggins
         if save:
-            create_missing_folders(["plots"])                                                              
-            plt.savefig("plots/w_%s_nominalVs%s_%s_%s.png"%(column, legend,label, n)) 
+            create_missing_folders([f"plots/{legend}"])
+            output_name = f"plots/{legend}/w_{column}_nominalVs{legend}_{label}_{n}"
+            plt.savefig(f"{output_name}.png")
+            plt.clf()
+            plt.close()
+            # ratio plot
+            x0_hist, edge = np.histogram(x0[:,id], bins = binning[id], weights = w0)
+            x1_hist, edge = np.histogram(x1[:,id], bins = binning[id], weights = w1)
+            carl_hist, edge = np.histogram(x0[:,id], bins = binning[id], weights = w_carl)
+            x1_ratio = x1_hist/x0_hist
+            carl_ratio = carl_hist/x0_hist
+            plt.step(edge[:-1], x1_ratio, where="post", label=legend, **hist_settings0)
+            plt.step(edge[:-1], carl_ratio, where="post", label = 'nominal*CARL', **hist_settings1_step)
+            plt.xlabel('%s'%(column), horizontalalignment='right',x=1)
+            plt.legend(frameon=False,title = '%s sample'%(label) )
+            axes = plt.gca()
+            axes.set_ylim([0.5, 1.6])
+            plt.yticks(np.arange(0.5,1.6,0.1))
+            plt.savefig(f"{output_name}_ratio.png")
             plt.clf()
             plt.close()
 
@@ -99,11 +117,11 @@ def resampled_discriminator_and_roc(original, target, weights):
     (data, labels) = weight_data(original,target,weights)
     W = np.concatenate([weights / weights.sum() * len(target), [1] * len(target)])
 
-    Xtr, Xts, Ytr, Yts, Wtr, Wts = train_test_split(data, labels, W, random_state=42, train_size=0.51, test_size=0.49)    
-    
-    discriminator = MLPRegressor(tol=1e-05, activation="logistic", 
-               hidden_layer_sizes=(10, 10), learning_rate_init=1e-07, 
-               learning_rate="constant", solver="lbfgs", random_state=1, 
+    Xtr, Xts, Ytr, Yts, Wtr, Wts = train_test_split(data, labels, W, random_state=42, train_size=0.51, test_size=0.49)
+
+    discriminator = MLPRegressor(tol=1e-05, activation="logistic",
+               hidden_layer_sizes=(10, 10), learning_rate_init=1e-07,
+               learning_rate="constant", solver="lbfgs", random_state=1,
                max_iter=75)
 
     discriminator.fit(Xtr,Ytr)
@@ -111,7 +129,7 @@ def resampled_discriminator_and_roc(original, target, weights):
     fpr, tpr, _  = roc_curve(Yts,predicted.ravel())
     roc_auc = auc(fpr, tpr)
     return fpr,tpr,roc_auc
- 
+
 def draw_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True):
     plt.figure(figsize=(4, 3))
     no_weights_scaled = np.ones(X0.shape[0])/np.ones(X0.shape[0]).sum() * len(X1) #sjiggins
@@ -121,7 +139,7 @@ def draw_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True):
     fpr_tC,tpr_tC,roc_auc_tC = resampled_discriminator_and_roc(X0, X1, weights)
     plt.plot(fpr_tC, tpr_tC, label=r"CARL weight, AUC=%.3f" % roc_auc_tC)
     plt.plot([0, 1], [0, 1], 'k--')
-    plt.xlim([0.0, 1.0]) 
+    plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.05])
     plt.title('Resampled proportional to weights')
     plt.xlabel('False Positive Rate')
@@ -129,8 +147,8 @@ def draw_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True):
     plt.legend(loc="lower right", title = label)
     plt.tight_layout()
     if plot:
-        plt.savefig('plots/roc_nominalVs%s_%s_%s.png'%(legend,label, n)) 
-        plt.clf()    
+        plt.savefig('plots/roc_nominalVs%s_%s_%s.png'%(legend,label, n))
+        plt.clf()
     logger.info("CARL weighted %s AUC is %.3f"%(label,roc_auc_tC))
     logger.info("Unweighted %s AUC is %.3f"%(label,roc_auc_t))
     logger.info("Saving ROC plots to /plots")
@@ -139,7 +157,7 @@ def plot_calibration_curve(y, probs_raw, probs_cal, do, var, save = False):
     ax1 = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
     ax2 = plt.subplot2grid((3, 1), (2, 0))
     ax1.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")
-    
+
     frac_of_pos_raw, mean_pred_value_raw = calibration_curve(y, probs_raw, n_bins=50)
     frac_of_pos_cal, mean_pred_value_cal = calibration_curve(y, probs_cal, n_bins=50)
 
@@ -149,14 +167,14 @@ def plot_calibration_curve(y, probs_raw, probs_cal, do, var, save = False):
     ax1.set_ylim([-0.05, 1.05])
     ax1.legend(loc="lower right")
     ax1.set_title(f'Calibration plot')
-    
+
     ax2.hist(probs_raw, range=(0, 1), bins=50, label='uncalibrated', lw=2, **hist_settings0)
     ax2.hist(probs_cal, range=(0, 1), bins=50, label='calibrated', lw=2, **hist_settings0)
     ax2.set_xlabel("Mean predicted value")
-    ax2.set_ylabel("Count") 
+    ax2.set_ylabel("Count")
     if save:
         plt.savefig('plots/calibration_'+do+'_'+var+'.png')
-        plt.clf() 
+        plt.clf()
     logger.info("Saving calibration curves to /plots")
 
 def draw_weights(weightCT, weightCA, legend, do, n, save = False):
