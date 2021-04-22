@@ -20,6 +20,7 @@ from .tools import create_missing_folders
 logger = logging.getLogger(__name__)
 hist_settings0 = {'alpha': 0.3}
 hist_settings1 = {'histtype':'step', 'color':'black', 'linewidth':1, 'linestyle':'--'}
+hist_settings1_step = {"color": "black", "linewidth": 3, "linestyle": "--"}
 
 def draw_unweighted_distributions(x0, x1,
                                   weights,
