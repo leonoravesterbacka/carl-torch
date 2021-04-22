@@ -91,10 +91,10 @@ class Loader():
                                nentries = int(nentries), TreeName = TreeName)
         
         # Run if requested debugging by user
-        print("<loading.py::load()>::   Data sets for training (pandas dataframe)")
-        print("<loading.py::load()>::      X0:")
+        print("<loading.py::Loader()>::   Data sets for training (pandas dataframe)")
+        print("<loading.py::Loader()>::      X0:")
         print(x0)
-        print("<loading.py::load()>::      X1:")
+        print("<loading.py::Loader()>::      X1:")
         print(x1)
 
         # Pre-process for outliers
@@ -183,8 +183,8 @@ class Loader():
         w0 = w0.to_numpy()
         w1 = w1.to_numpy()
         # Temporary  -#sjiggins
-        #w0 = w0 / (w0.sum())
-        #w1 = w1 / (w1.sum())
+        w0 = (w0 *10000) / (w0.sum())
+        w1 = (w1 *10000) / (w1.sum())
         
         # combine
         y0 = np.zeros(x0.shape[0])
@@ -321,7 +321,7 @@ class Loader():
             factor = 5
             minmax[idx] = [mean-(5*std), mean+(5*std)]
             binning[idx] = np.linspace(mean-(5*std), mean+(5*std), divisions)
-            print("<loading.py::load_result>::   Column {}:  min  =  {},  max  =  {}".format(key,mean,std))
+            print("<loading.py::load_result>::   Column {}:  min  =  {},  max  =  {}".format(key,mean-5*std,mean+5*std))
             print(binning[idx])
 
         # no point in plotting distributions with too few events, they only look bad 

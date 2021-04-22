@@ -62,7 +62,7 @@ def draw_weighted_distributions(x0, x1, w0, w1,
         print("<plotting.py::draw_weighted_distribution()>::     binning: {}".format(binning[id]))
         if save: plt.figure(figsize=(5, 4)) 
         else: plt.subplot(3,4, id)
-        plt.yscale('log')
+        #plt.yscale('log')
         #plt.hist(x0[:,id], bins = binning[column], label = "nominal", **hist_settings0)
         #plt.hist(x0[:,id], bins = binning[column], weights=weights, label = 'nominal*CARL', **hist_settings0)
         #plt.hist(x1[:,id], bins = binning[column], label = legend, **hist_settings1)
@@ -75,7 +75,7 @@ def draw_weighted_distributions(x0, x1, w0, w1,
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()
         #axes.set_ylim([len(x0)*0.001,len(x0)*2]) #sjiggins
-        axes.set_ylim([w0.sum()*0.001,w0.sum()*2]) #sjiggins
+        #axes.set_ylim([w0.sum()*0.001,w0.sum()*2]) #sjiggins
         if save:
             create_missing_folders(["plots"])                                                              
             plt.savefig("plots/w_%s_nominalVs%s_%s_%s.png"%(column, legend,label, n)) 
