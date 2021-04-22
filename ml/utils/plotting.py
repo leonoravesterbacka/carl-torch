@@ -62,7 +62,7 @@ def draw_weighted_distributions(x0, x1, w0, w1,
         print("<plotting.py::draw_weighted_distribution()>::     binning: {}".format(binning[id]))
         if save: plt.figure(figsize=(5, 4))
         else: plt.subplot(3,4, id)
-        plt.yscale('log')
+        #plt.yscale('log')
         #plt.hist(x0[:,id], bins = binning[column], label = "nominal", **hist_settings0)
         #plt.hist(x0[:,id], bins = binning[column], weights=weights, label = 'nominal*CARL', **hist_settings0)
         #plt.hist(x1[:,id], bins = binning[column], label = legend, **hist_settings1)
