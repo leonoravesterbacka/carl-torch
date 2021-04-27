@@ -25,6 +25,7 @@ hist_settings_CARL = {'histtype':'step', 'color':'black', 'linewidth':1, 'linest
 hist_settings_CARL_ratio = {'color':'black', 'linewidth':1, 'linestyle':'--'}
 #hist_settings1_step = {'color':'black', 'linewidth':1, 'linestyle':'--'}
 
+
 def draw_unweighted_distributions(x0, x1,
                                   weights,
                                   variables,
