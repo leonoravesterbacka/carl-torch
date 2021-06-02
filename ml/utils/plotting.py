@@ -202,6 +202,8 @@ def resampled_discriminator_and_roc(original, target, weights):
 
     discriminator.fit(Xtr,Ytr)
     predicted = discriminator.predict(Xts)
+    print("Predicted:  {}".format(predicted))
+    print("Xts:  {}".format(Xts))
     fpr, tpr, _  = roc_curve(Yts,predicted.ravel())
     roc_auc = auc(fpr, tpr)
     return fpr,tpr,roc_auc
