@@ -176,23 +176,27 @@ def draw_weighted_distributions(x0, x1, w0, w1,
             plt.clf()
             plt.close()
 
-def weight_data(x0,x1,weights, max_weight=10000.):
-    x1_len = x1.shape[0]
+def weight_data(x0, x1, w0, w1, max_weight=10000.):
     x0_len = x0.shape[0]
-    weights[weights>max_weight]=max_weight
-    weights = weights / weights.sum()
-    weighted_data = np.random.choice(range(x0_len), x0_len, p = weights)
-    w_x0 = x0.copy()[weighted_data]
-    y = np.zeros(x1_len + x0_len)
-    x_all = np.vstack((w_x0,x1))
-    y_all = np.zeros(x1_len +x0_len)
+    w0 = w0 / w0.sum()
+    weighted_data0 = np.random.choice(range(x0_len), x0_len, p = w0)
+    w_x0 = x0.copy()[weighted_data0]
+
+    x1_len = x1.shape[0]
+    w1 = w1 / w1.sum()
+    weighted_data1 = np.random.choice(range(x1_len), x1_len, p = w1)
+    w_x1 = x1.copy()[weighted_data1]
+
+    x_all = np.vstack((w_x0,w_x1))
+    y_all = np.zeros(x0_len+x1_len)
     y_all[x0_len:] = 1
     return (x_all,y_all)
 
-def resampled_discriminator_and_roc(original, target, weights):
-    (data, labels) = weight_data(original,target,weights)
-    W = np.concatenate([weights / weights.sum() * len(target), [1] * len(target)])
-
+def resampled_discriminator_and_roc(original, target, w0, w1):
+    w0 = abs(w0)
+    w1 = abs(w1)
+    (data, labels) = weight_data(original, target, w0, w1)
+    W = np.concatenate([w0 / w0.sum(), w1 / w1.sum()])
     Xtr, Xts, Ytr, Yts, Wtr, Wts = train_test_split(data, labels, W, random_state=42, train_size=0.51, test_size=0.49)
 
     discriminator = MLPRegressor(tol=1e-05, activation="logistic",
@@ -210,11 +214,11 @@ def resampled_discriminator_and_roc(original, target, weights):
 
 def draw_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True):
     plt.figure(figsize=(4, 3))
-    no_weights_scaled = np.ones(X0.shape[0])/np.ones(X0.shape[0]).sum() * len(X1) #sjiggins
-    print("no_weights_scaled:  {}".format(no_weights_scaled))
-    fpr_t,tpr_t,roc_auc_t = resampled_discriminator_and_roc(X0, X1, no_weights_scaled)
+    W0 = W0.flatten()
+    W1 = W1.flatten()
+    fpr_t,tpr_t,roc_auc_t = resampled_discriminator_and_roc(X0, X1, W0, W1)
+    fpr_tC,tpr_tC,roc_auc_tC = resampled_discriminator_and_roc(X0, X1, W0*weights, W1)
     plt.plot(fpr_t, tpr_t, label=r"no weight, AUC=%.3f" % roc_auc_t)
-    fpr_tC,tpr_tC,roc_auc_tC = resampled_discriminator_and_roc(X0, X1, weights)
     plt.plot(fpr_tC, tpr_tC, label=r"CARL weight, AUC=%.3f" % roc_auc_tC)
     plt.plot([0, 1], [0, 1], 'k--')
     plt.xlim([0.0, 1.0])
