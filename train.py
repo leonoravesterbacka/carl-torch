@@ -81,7 +81,7 @@ else:
         randomize=False,
         save=True,
         correlation=True,
-        preprocessing=True,
+        preprocessing=False,
         nentries=n,
         pathA=p+nominal+".root",
         pathB=p+variation+".root",
@@ -92,13 +92,14 @@ else:
 #######################################
 # Estimate the likelihood ratio
 estimator = RatioEstimator(
-    n_hidden=(60,60,60),
+    n_hidden=(50,50,50),
     activation="relu"
 )
 estimator.train(
     method='carl',
-    batch_size=1024,
-    n_epochs=100,
+    batch_size=50000,
+    n_epochs=500,
+    early_stopping=False,
     x=x,
     y=y,
     w=w,
