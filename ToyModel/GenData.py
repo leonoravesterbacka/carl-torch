@@ -3,8 +3,8 @@ import numpy as np
 
 # Helper function to create an example tree
 def make_data(nevts = 500000):
-    root_file = ROOT.TFile("Nominal.root", "RECREATE")
-    #root_file = ROOT.TFile("Alt.root", "RECREATE")
+    #root_file = ROOT.TFile("Nominal.root", "RECREATE")
+    root_file = ROOT.TFile("Alt.root", "RECREATE")
     tree = ROOT.TTree("ThreeDGauss", "ThreeDGauss")
     
     # Input features
@@ -29,44 +29,47 @@ def make_data(nevts = 500000):
     for i in range(nevts):
  
         ## Negative weight version
-        ##w[0] = (np.ceil( np.random.random()  - 0.1 ) * 2) - 1
-        #w[0] = 1.0
-        #xmu, xsigma = 0.0, 1.0 if w[0] > 0 else  0.3
-        #ymu, ysigma = 0.0, 1.0 if w[0] > 0 else  0.3
-        #zmu, zsigma = 0.0, 1.0 if w[0] > 0 else  0.3
+        ##w[0] = (np.ceil( np.random.random()  - 0.1 ) * 4) - 2  # Alt
+        #w[0] = 2.0    # Nom 
+        #xmu, xsigma = 0.0, 1.5 if w[0] > 0 else  0.25
+        #ymu, ysigma = 0.0, 1.5 if w[0] > 0 else  0.25
+        #zmu, zsigma = 0.0, 1.5 if w[0] > 0 else  0.25
         #
         #x[0] = np.random.normal(xmu, xsigma, 1)
         #y[0] = np.random.normal(ymu, ysigma, 1)
         #z[0] = np.random.normal(zmu, zsigma, 1)
 
 
-        # Composite positive weight version - gaussian mixture model
+        ## Composite positive weight version - gaussian mixture model
         t0[0] = 0.0 # Nom
-        #t0[0] = np.ceil( np.random.random()  - 0.1 ) # Alt
+        #t0[0] = np.ceil( np.random.random()  - 0.3 ) # Alt
         t1[0] = np.ceil( np.random.random()  - 0.5 )
         #print(" -------")
         #print("t0:   {}".format(t0))
         #print("t1:   {}".format(t1))
         # Weight
-        w[0] = 1.0 # Nom
+        #w[0] = 1.0 # Nom
         #w[0] = 1.0 if t0[0] > 0 else 0.5 # Alt
+        w[0] = ( ( np.random.random() ) * 2) # Alt + Nominal = uniform sampling with mean = 1.0
+        
         
         # x-axis parameters
-        xmu, xsigma = 0.0, 1.0 
-        xmu_dis = 2.0
-        xmu_neg, xsigma_neg = 0.0, 2.0
+        xmu, xsigma = 0.0, 0.6  # 0.0, 0.5 Alt # Nom 0.0, 1.0
+        xmu_dis = 0.9 # 1.0 Atl # Nom 0.0
+        xmu_neg, xsigma_neg = 0.0, 0.5
         # y-axis parameters
-        ymu, ysigma = 0.0, 1.0 
-        ymu_dis = 2.0
-        ymu_neg, ysigma_neg = 0.0, 2.0
+        ymu, ysigma = 0.0, 0.6 # 0.0, 0.5 Alt # Nom 0.0, 1.0
+        ymu_dis = 0.9 # 1.0 Atl # Nom 0.0
+        ymu_neg, ysigma_neg = 0.0, 0.5
         # z-axis paramters
-        zmu, zsigma = 0.0, 1.0 
-        zmu_dis = 2.0
-        zmu_neg, zsigma_neg = 0.0, 2.0
+        zmu, zsigma = 0.0, 0.6 # 0.0, 0.5 Alt # Nom 0.0, 1.0
+        zmu_dis = 0.9 # 1.0 Atl # Nom 0.0
+        zmu_neg, zsigma_neg = 0.0, 0.5
 
-        x[0] = t0[0]*t1[0]*np.random.normal(xmu-xmu_dis, xsigma, 1) + t0[0]*(1-t1[0])*np.random.normal(xmu+xmu_dis, xsigma, 1) + (1-t0[0])*np.random.normal(xmu_neg, xsigma_neg, 1)
-        y[0] = t0[0]*t1[0]*np.random.normal(ymu-ymu_dis, ysigma, 1) + t0[0]*(1-t1[0])*np.random.normal(ymu+ymu_dis, ysigma, 1) + (1-t0[0])*np.random.normal(ymu_neg, ysigma_neg, 1)
-        z[0] = t0[0]*t1[0]*np.random.normal(zmu-zmu_dis, zsigma, 1) + t0[0]*(1-t1[0])*np.random.normal(zmu+zmu_dis, zsigma, 1) + (1-t0[0])*np.random.normal(zmu_neg, zsigma_neg, 1)
+        #x[0] = t0[0]*t1[0]*np.random.normal(xmu-xmu_dis, xsigma, 1) + t0[0]*(1-t1[0])*np.random.normal(xmu+xmu_dis, xsigma, 1) #+ (1-t0[0])*np.random.normal(xmu_neg, xsigma_neg, 1)
+        x[0] = t1[0]*np.random.normal(xmu-xmu_dis, xsigma, 1) + (1-t1[0])*np.random.normal(xmu+xmu_dis, xsigma, 1) #+ (1-t0[0])*np.random.normal(xmu_neg, xsigma_neg, 1)
+        y[0] = t1[0]*np.random.normal(ymu-ymu_dis, ysigma, 1) + (1-t1[0])*np.random.normal(ymu+ymu_dis, ysigma, 1) #+ (1-t0[0])*np.random.normal(ymu_neg, ysigma_neg, 1)
+        z[0] = t1[0]*np.random.normal(zmu-zmu_dis, zsigma, 1) + (1-t1[0])*np.random.normal(zmu+zmu_dis, zsigma, 1) #+ (1-t0[0])*np.random.normal(zmu_neg, zsigma_neg, 1)
 
 
 
