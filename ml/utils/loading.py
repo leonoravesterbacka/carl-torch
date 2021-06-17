@@ -46,7 +46,8 @@ class Loader():
         pathA = '',
         pathB = '',
         normalise = False,
-        debug = False
+        debug = False,
+        noTar = True,
     ):
         """
         Parameters
@@ -220,7 +221,7 @@ class Loader():
             pickle.dump(metaData, f)
             f.close()
             #Tar data files if training is done on GPU
-            if torch.cuda.is_available():
+            if torch.cuda.is_available() and not noTar:
                 plot = False #don't plot on GPU...
                 tar = tarfile.open("data_out.tar.gz", "w:gz")
                 for name in [folder + global_name + "/X_train_" +str(nentries)+".npy",
