@@ -266,7 +266,7 @@ class Loader():
         global_name="Test",
         ext_binning = None,
         ext_plot_path=None,
-        verbose=True,
+        verbose=False,
         do_ROC=False,
     ):
         """
@@ -316,6 +316,16 @@ class Loader():
 
         #for idx,column in enumerate(x0df.columns):
         for idx,(key,pair) in enumerate(metaDataDict.items()):
+
+            # check to see if variable is in the yaml file.
+            # if not, proceed to automatic binning
+            if ext_binning is not None:
+                try:
+                    binning[idx] = np.arange(*ext_binning["binning"][key])
+                    continue
+                except KeyError:
+                    pass
+
             #max = x0df[column].max()
             #min = x0df[column].min()
             #minmax[column] = [min,max]
