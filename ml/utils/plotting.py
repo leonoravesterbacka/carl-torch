@@ -66,7 +66,7 @@ def draw_weighted_distributions(x0, x1, w0, w1,
     for id, column in enumerate(variables):
         print("<plotting.py::draw_weighted_distribution()>::   id: {},   column: {}".format(id,column))
         print("<plotting.py::draw_weighted_distribution()>::     binning: {}".format(binning[id]))
-        if save: plt.figure(figsize=(5, 4))
+        if save: plt.figure(figsize=(10, 8))
         else: plt.subplot(3,4, id)
         #plt.yscale('log')
         #plt.hist(x0[:,id], bins = binning[column], label = "nominal", **hist_settings0)
@@ -85,6 +85,8 @@ def draw_weighted_distributions(x0, x1, w0, w1,
         plt.xlabel('%s'%(column), horizontalalignment='right',x=1)
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()
+        plt.xticks(fontsize=14)
+        plt.yticks(fontsize=14)
         #axes.set_ylim([len(x0)*0.001,len(x0)*2]) #sjiggins
         #axes.set_ylim([w0.sum()*0.001,w0.sum()*2]) #sjiggins
         if save:
@@ -96,7 +98,6 @@ def draw_weighted_distributions(x0, x1, w0, w1,
                 create_missing_folders([f"plots/{legend}"])
                 output_name = f"plots/{legend}/w_{column}_nominalVs{legend}_{label}_{n}"
 
-            output_name = f"plots/{legend}/w_{column}_nominalVs{legend}_{label}_{n}"
             plt.savefig(f"{output_name}.png")
             plt.clf()
             plt.close()
