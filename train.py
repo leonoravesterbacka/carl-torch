@@ -1,7 +1,7 @@
 import os
 import sys
 import logging
-import optparse
+import argparse
 import torch
 import tarfile
 import pickle
@@ -11,16 +11,20 @@ from ml import Loader
 
 #################################################
 # Arugment parsing
-parser = optparse.OptionParser(usage="usage: %prog [opts]", version="%prog 1.0")
-parser.add_option('-n', '--nominal',   action='store', type=str, dest='nominal',   default='', help='Nominal sample name (root file name excluding the .root extension)')
-parser.add_option('-v', '--variation', action='store', type=str, dest='variation', default='', help='Variation sample name (root file name excluding the .root extension)')
-parser.add_option('-e', '--nentries',  action='store', type=str, dest='nentries',  default=1000, help='specify the number of events to do the training on, None means full sample')
-parser.add_option('-p', '--datapath',  action='store', type=str, dest='datapath',  default='./Inputs/', help='path to where the data is stored')
-parser.add_option('-g', '--global_name',  action='store', type=str, dest='global_name',  default='Test', help='Global name for identifying this run - used in folder naming and output naming')
-parser.add_option('-f', '--features',  action='store', type=str, dest='features',  default='', help='Comma separated list of features within tree')
-parser.add_option('-w', '--weightFeature',  action='store', type=str, dest='weightFeature',  default='DummyEvtWeight', help='Name of event weights feature in TTree')
-parser.add_option('-t', '--TreeName',  action='store', type=str, dest='treename',  default='Tree', help='Name of TTree name inside root files')
-(opts, args) = parser.parse_args()
+parser = argparse.ArgumentParser(usage="usage: %prog [opts]")
+parser.add_argument('--version', action='version', version='%prog 1.0')
+parser.add_argument('-n', '--nominal',   action='store', type=str, dest='nominal',   default='', help='Nominal sample name (root file name excluding the .root extension)')
+parser.add_argument('-v', '--variation', action='store', type=str, dest='variation', default='', help='Variation sample name (root file name excluding the .root extension)')
+parser.add_argument('-e', '--nentries',  action='store', type=int, dest='nentries',  default=1000, help='specify the number of events to do the training on, None means full sample')
+parser.add_argument('-p', '--datapath',  action='store', type=str, dest='datapath',  default='./Inputs/', help='path to where the data is stored')
+parser.add_argument('-g', '--global_name',  action='store', type=str, dest='global_name',  default='Test', help='Global name for identifying this run - used in folder naming and output naming')
+parser.add_argument('-f', '--features',  action='store', type=str, dest='features',  default='', help='Comma separated list of features within tree')
+parser.add_argument('-w', '--weightFeature',  action='store', type=str, dest='weightFeature',  default='DummyEvtWeight', help='Name of event weights feature in TTree')
+parser.add_argument('-t', '--TreeName',  action='store', type=str, dest='treename',  default='Tree', help='Name of TTree name inside root files')
+parser.add_argument('-b', '--binning',  action='store', type=str, dest='binning',  default=None, help='path to binning yaml file.')
+parser.add_argument('-l', '--layers', action='store', type=int, dest='layers', nargs='*', default=(11,11,11), help='number of nodes for each layer')
+parser.add_argument('--batch',  action='store', type=int, dest='batch_size',  default=4096, help='batch size')
+opts = parser.parse_args()
 nominal  = opts.nominal
 variation = opts.variation
 n = opts.nentries
@@ -29,6 +33,9 @@ global_name = opts.global_name
 features = opts.features.split(",")
 weightFeature = opts.weightFeature
 treename = opts.treename
+binning = opts.binning
+n_hidden = tuple(opts.layers)
+batch_size = opts.batch_size
 #################################################
 
 #################################################
@@ -51,9 +58,9 @@ else:
     logger.info(" This file or directory does not exist.")
     sys.exit()
 
-if os.path.exists("data_out.tar.gz"):
+if os.path.exists(f"data/{global_name}/data_out.tar.gz"):
 #    tar = tarfile.open("data_out.tar.gz", "r:gz")
-    tar = tarfile.open("data_out.tar.gz")
+    tar = tarfile.open(f"data/{global_name}/data_out.tar.gz")
     tar.extractall()
     tar.close()
 
@@ -69,10 +76,10 @@ if os.path.exists('data/'+global_name+'/X_train_'+str(n)+'.npy'):
     w1='data/'+global_name+'/w1_train_'+str(n)+'.npy'
     f = open('data/'+global_name+'/metaData_'+str(n)+".pkl","rb")
     metaData = pickle.load(f)
-    f.close()   
+    f.close()
 else:
     x, y, x0, x1, w, w0, w1, metaData = loading.loading(
-        folder='./data/',
+        folder=f"{pathlib.Path('./data/').resolve()}/",
         plot=True,
         global_name=global_name,
         features=features,
@@ -85,8 +92,7 @@ else:
         nentries=n,
         pathA=p+nominal+".root",
         pathB=p+variation+".root",
-        normalise=True,
-        debug=False,
+        noTar=True,
     )
     logger.info(" Loaded new datasets ")
 #######################################
@@ -94,21 +100,66 @@ else:
 #######################################
 # Estimate the likelihood ratio
 estimator = RatioEstimator(
-    n_hidden=(11,11,11,11),
-    activation="relu"
+    n_hidden=n_hidden,
+    activation="relu",
 )
-estimator.train(
+plot_dict = {
+    "x0":x0,
+    "x1":x1,
+    "w0":w0,
+    "w1":w1,
+    "metaData":metaData,
+    "features":features,
+    "label":"train",
+    "plot":True,
+    "nentries":n,
+    "global_name":global_name,
+    "ext_binning":binning,
+    "verbose" : False,
+}
+vali_dict = {
+    "x0":'data/'+global_name+'/X0_val_'+str(n)+'.npy',
+    "x1":'data/'+global_name+'/X1_val_'+str(n)+'.npy',
+    "w0":'data/'+global_name+'/w0_val_'+str(n)+'.npy',
+    "w1":'data/'+global_name+'/w1_val_'+str(n)+'.npy',
+    "metaData":metaData,
+    "features":features,
+    "label":"train",
+    "plot":True,
+    "nentries":n,
+    "global_name":global_name,
+    "ext_binning":binning,
+    "verbose" : False,
+}
+intermediate_plot = (
+    (estimator.evaluate, {"train":x0, "val":'data/'+global_name+'/X0_val_'+str(n)+'.npy'}),
+    (loading.load_result, {"train":plot_dict, "val":vali_dict}),
+)
+intermediate_save_args = {
+    "filename" : f"{global_name}_carl_{n}",
+    "x" : x,
+    "metaData" : metaData,
+    "save_model" : True,
+    "export_model" : True,
+}
+intermediate_save = (
+    estimator.save, intermediate_save_args
+)
+train_loss, val_loss = estimator.train(
     method='carl',
-    batch_size=1024,
+    batch_size=batch_size,
     n_epochs=500,
-    early_stopping=False,
-    validation_split=0.25,
     x=x,
     y=y,
     w=w,
-    x0=x0, 
+    x0=x0,
     x1=x1,
     scale_inputs=True,
+    early_stopping=False,
+    intermediate_train_plot = intermediate_plot,
+    intermediate_save = intermediate_save,
 )
-estimator.save('models/'+ global_name +'_carl_'+str(n), x, metaData, export_model = True)
+np.save(f"loss_train_{global_name}.npy", train_loss)
+np.save(f"loss_val_{global_name}.npy", val_loss)
+estimator.save('models/'+ global_name +'_carl_'+str(n), x, metaData, export_model = True, noTar=True)
 ########################################
