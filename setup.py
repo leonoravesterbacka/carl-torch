@@ -32,7 +32,7 @@ REQUIRED = [
     "matplotlib>=2.0.0",
     "pytest",
     "recommonmark",
-    "pyymal"
+    "pyyaml",
 ]
 
 # What packages are optional?
