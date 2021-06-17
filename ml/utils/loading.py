@@ -18,6 +18,7 @@ from collections import defaultdict
 from .tools import create_missing_folders, load, load_and_check, HarmonisedLoading
 from .plotting import draw_weighted_distributions, draw_unweighted_distributions, draw_ROC, resampled_discriminator_and_roc, plot_calibration_curve, draw_weights, draw_scatter
 from sklearn.model_selection import train_test_split
+import yaml
 logger = logging.getLogger(__name__)
 
 
