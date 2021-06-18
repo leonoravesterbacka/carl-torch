@@ -55,23 +55,10 @@ def get_optimizer(optimizer, nesterov_momentum):
 
 
 def ratio_xe(s_hat, y_true, w):
-    # Original loss
-    #loss = BCEWithLogitsLoss()(s_hat, y_true) #sjiggins
-    
-    #wabs = np.absolute(w) # sjiggins make all weights positive
-    #wabs.to(self.device, self.dtype, non_blocking=True)
-
     # New weighted loss functions - sjiggins
     if w is None:
         w = torch.ones(y_true.shape[0])
-    #assert w.dim() == 1, "Weights must be a rank 1 tensor"
-    #loss = (BCEWithLogitsLoss(reduction='none')(s_hat, y_true) * w / w.sum()).sum()  # First test
-    #loss = (BCEWithLogitsLoss()(s_hat, y_true) * w / w.sum()).sum()
-    #loss = (BCELoss(reduction='none')(s_hat, y_true) * w / w.sum()).sum()
-    #loss = (BCELoss(weight=w)(s_hat, y_true) * w / w.sum()).sum()
-    
     loss = BCELoss(weight=w)(s_hat, y_true)
-    #loss = BCEWithLogitsLoss(weight=w)(s_hat, y_true)
     return loss
 
 @contextmanager

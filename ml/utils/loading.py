@@ -325,7 +325,7 @@ class Loader():
         #if int(nentries) > 5000: 
         # plot ROC curves 
         print("<loading.py::load_result>::   Printing ROC")
-        #draw_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
+        draw_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
         draw_Obs_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
         
         print("<loading.py::load_result>::   Printing weighted distributions")
