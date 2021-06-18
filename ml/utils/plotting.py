@@ -224,21 +224,21 @@ def obs_roc_curve(x, y_true):
     for idx,edge in enumerate(ClassBoundaries):
         tpr[idx] = 0.0
         fpr[idx] = 0.0
-        continue
-        print("       -> Edge:  {}".format(idx))
+        #print("       -> Edge:  {}".format(idx))
         y_pred =  x < edge
         tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
         tpr[idx] = tp/(tp+fn) 
         fpr[idx] = fp/(tn+fp)
-        print("       -> tpr:  {}".format(tpr))
-        print("       -> fpr:  {}".format(fpr))
+        #print("       -> tpr:  {}".format(tpr))
+        #print("       -> fpr:  {}".format(fpr))
         
     return fpr, tpr
 
 def resampled_obs_and_roc(original, target, w0, w1):
     (data, labels) = weight_obs_data(original, target, w0, w1)
     fpr, tpr  = obs_roc_curve(data, labels)
-    roc_auc = auc(fpr, tpr)
+    #roc_auc = auc(fpr, tpr)
+    roc_auc = np.trapz(tpr, x=fpr)
     return fpr,tpr,roc_auc,data,labels
 
 def draw_Obs_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True):
@@ -299,15 +299,19 @@ def weight_data(x0, x1, w0, w1, max_weight=10000.):
 
     x0_len = x0.shape[0]
     w0 = w0 / w0.sum()
-    #weighted_data0 = np.random.choice(range(x0_len), x0_len, p = w0)
-    w_x0 = np.random.choice(x0, size=minEvts, p = w0)
-    #w_x0 = x0.copy()[weighted_data0]
+    weighted_data0 = np.random.choice(range(x0_len), x0_len, p = w0)
+    w_x0 = x0.copy()[weighted_data0]
+    #w_x0 = np.random.choice(x0, size=minEvts, p = w0)
 
     x1_len = x1.shape[0]
     w1 = w1 / w1.sum()
-    #weighted_data1 = np.random.choice(range(x1_len), x1_len, p = w1)
-    #w_x1 = x1.copy()[weighted_data1]
-    w_x1 = np.random.choice(x1, size=minEvts, p = w1)
+    weighted_data1 = np.random.choice(range(x1_len), x1_len, p = w1)
+    w_x1 = x1.copy()[weighted_data1]
+    #w_x1 = np.random.choice(x1, size=minEvts, p = w1)
+
+    # Cap the two to equal size
+    w_x0 = w_x0[ 0:minEvts, :]
+    w_x1 = w_x1[ 0:minEvts, :]
 
     x_all = np.vstack((w_x0,w_x1))
     #y_all = np.zeros(x0_len+x1_len)
@@ -323,8 +327,9 @@ def resampled_discriminator_and_roc(original, target, w0, w1):
     Xtr, Xts, Ytr, Yts, Wtr, Wts = train_test_split(data, labels, W, random_state=42, train_size=0.51, test_size=0.49)
 
     discriminator = MLPRegressor(tol=1e-05, activation="logistic",
-                                 hidden_layer_sizes=(original.shape[1],original.shape[1], x0.shape[1]), learning_rate_init=1e-07,
-                                 learning_rate="constant", solver="lbfgs", random_state=1,
+                                 hidden_layer_sizes=(original.shape[1],original.shape[1], original.shape[1]), 
+                                 learning_rate_init=1e-07, learning_rate="constant", 
+                                 solver="lbfgs", random_state=1,
                                  max_iter=200)
 
     discriminator.fit(Xtr,Ytr)
