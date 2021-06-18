@@ -85,7 +85,7 @@ else:
         nentries=n,
         pathA=p+nominal+".root",
         pathB=p+variation+".root",
-        normalise=True,
+        normalise=False,
         debug=False,
     )
     logger.info(" Loaded new datasets ")
@@ -94,13 +94,13 @@ else:
 #######################################
 # Estimate the likelihood ratio
 estimator = RatioEstimator(
-    n_hidden=(11,11,11,11),
+    n_hidden=(30,30,30,30,30),
     activation="relu"
 )
 estimator.train(
     method='carl',
-    batch_size=1024,
-    n_epochs=500,
+    batch_size=5000,
+    n_epochs=300,
     early_stopping=False,
     validation_split=0.25,
     x=x,

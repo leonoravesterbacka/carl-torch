@@ -518,6 +518,7 @@ class RatioTrainer(Trainer):
         self._timer(start="fwd: move data")
         x = batch_data["x"].to(self.device, self.dtype, non_blocking=True)
         y = batch_data["y"].to(self.device, self.dtype, non_blocking=True)
+        #w = np.absolute(batch_data["w"]).to(self.device, self.dtype, non_blocking=True) #sjiggins
         w = batch_data["w"].to(self.device, self.dtype, non_blocking=True) #sjiggins
         
         self._timer(stop="fwd: move data", start="fwd: check for nans")

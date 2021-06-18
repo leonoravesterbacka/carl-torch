@@ -7,6 +7,7 @@ import torch
 from torch.nn import functional as F
 from torch import optim
 from torch.nn import BCELoss, BCEWithLogitsLoss, MSELoss
+#import numpy as np
 
 from contextlib import contextmanager
 
@@ -57,6 +58,9 @@ def ratio_xe(s_hat, y_true, w):
     # Original loss
     #loss = BCEWithLogitsLoss()(s_hat, y_true) #sjiggins
     
+    #wabs = np.absolute(w) # sjiggins make all weights positive
+    #wabs.to(self.device, self.dtype, non_blocking=True)
+
     # New weighted loss functions - sjiggins
     if w is None:
         w = torch.ones(y_true.shape[0])
@@ -65,7 +69,9 @@ def ratio_xe(s_hat, y_true, w):
     #loss = (BCEWithLogitsLoss()(s_hat, y_true) * w / w.sum()).sum()
     #loss = (BCELoss(reduction='none')(s_hat, y_true) * w / w.sum()).sum()
     #loss = (BCELoss(weight=w)(s_hat, y_true) * w / w.sum()).sum()
+    
     loss = BCELoss(weight=w)(s_hat, y_true)
+    #loss = BCEWithLogitsLoss(weight=w)(s_hat, y_true)
     return loss
 
 @contextmanager
