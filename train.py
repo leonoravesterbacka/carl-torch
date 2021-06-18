@@ -92,9 +92,13 @@ else:
 #######################################
 
 #######################################
-# Estimate the likelihood ratio
+# Estimate the likelihood ratio using a NN model
+#   -> Calculate number of input variables as rudimentary guess
+n_inputs = x.shape[1]
+structure = np.repeat(n_inputs, 5)
+# Use the number of inputs as input to the hidden layer structure
 estimator = RatioEstimator(
-    n_hidden=(30,30,30,30,30),
+    n_hidden=(structure),
     activation="relu"
 )
 estimator.train(
