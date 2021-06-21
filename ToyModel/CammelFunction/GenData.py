@@ -19,11 +19,11 @@ def make_data(nevts = 500000):
 
     # Add features and weights to tree
     tree.Branch("x", x, "x/F")
-    tree.Branch("y", y, "y/F")
-    tree.Branch("z", z, "y/F")
-    tree.Branch("w", w, "y/F")
-    tree.Branch("t0", t0, "y/F")
-    tree.Branch("t1", t1, "y/F")
+    tree.Branch("y", y, "/F")
+    tree.Branch("z", z, "z/F")
+    tree.Branch("w", w, "w/F")
+    tree.Branch("t0", t0, "t0/F")
+    tree.Branch("t1", t1, "t1/F")
  
     # Random generate features and weights
     for i in range(nevts):
