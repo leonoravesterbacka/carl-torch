@@ -7,6 +7,7 @@ import tarfile
 import pickle
 from ml import RatioEstimator
 from ml import Loader
+import numpy as np
 
 
 #################################################
