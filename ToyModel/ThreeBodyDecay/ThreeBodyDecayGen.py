@@ -118,7 +118,14 @@ def PhaseSpaceSample(Events, Weights,
     mass      = ROOT.std.vector('float')()
     #width  = np.empty((3), dtype='float64')
     width      = ROOT.std.vector('float')()
-    w      = np.empty((1), dtype='float64')
+    # Weights
+    w          = np.empty((1), dtype='float64')
+    # Spectators
+    #   m12, m13, m23, m123
+    m12_spec   = np.empty((1), dtype='float64')
+    m13_spec   = np.empty((1), dtype='float64')
+    m23_spec   = np.empty((1), dtype='float64')
+    m123       = np.empty((1), dtype='float64')
     tree = ROOT.TTree(treeName, treeName)
     tree.Branch("E",     E)
     tree.Branch("Theta", theta)
@@ -127,6 +134,10 @@ def PhaseSpaceSample(Events, Weights,
     tree.Branch("mass",  mass)#, "vector<float>")
     tree.Branch("width", width)#, "vector<float>")
     tree.Branch('w',     w, "w/D")
+    tree.Branch('m12',      m12_spec,  "m12/D")
+    tree.Branch('m13',      m13_spec,  "m13/D")
+    tree.Branch('m23',      m23_spec,  "m23/D")
+    tree.Branch('m213',     m123,      "m123/D")
 
     # Form numpy array of elements
     #   Numpy array shape:
@@ -290,6 +301,9 @@ def PhaseSpaceSample(Events, Weights,
         Events[n,2,:] = vec3
         # Now allocate a weight
         Weights[n] = np.random.uniform( 0.0, 2.0 , 1) # Mean of 1
+        # Check for negative weight contribution
+        if m12 > 50 and ROOTfile == "ConditionalSet":
+            Weights[n] -= (m12/80 - 0.625)
         
         # Now fill the tree
         #E = np.array( [E1, E2, E3] )
@@ -324,6 +338,12 @@ def PhaseSpaceSample(Events, Weights,
         
         # Weights
         w[0] = Weights[n]
+
+        # Spectators
+        m12_spec[0] = m12
+        m13_spec[0] = m13
+        m23_spec[0] = m23
+        m123[0] = math.sqrt(  (E1+E2+E3)**2 - (momP1+momP2+momP3)**2 )
         
         tree.Fill()
 
@@ -348,17 +368,17 @@ def PhaseSpaceSample(Events, Weights,
     print ("PhaseSpaceSampling:: Event Sampling done")
     print ("PhaseSpaceSampling:: Plotting")
     plt.hist2d(m12_array, m23_array, bins = 100, weights=Weights, norm=mpl.colors.LogNorm())
-    plt.savefig('CARLDataSet/Dalitz-PFN_{}_{}_{}_{}.pdf'.format(POI,m1,m2,m3),format='pdf')
+    plt.savefig('CARLDataSet-neg/Dalitz-PFN_{}_{}_{}_{}.pdf'.format(POI,m1,m2,m3),format='pdf')
     plt.clf()
     plt.close()
     
     plt.hist2d(m13_array, m23_array, bins = 100, weights=Weights, norm=mpl.colors.LogNorm())
-    plt.savefig('CARLDataSet/Dalitz-12-23-PFN_{}_{}_{}_{}.pdf'.format(POI,m1,m2,m3),format='pdf')
+    plt.savefig('CARLDataSet-neg/Dalitz-12-23-PFN_{}_{}_{}_{}.pdf'.format(POI,m1,m2,m3),format='pdf')
     plt.clf()
     plt.close()
     
     plt.hist2d(m12_array, m13_array, bins = 100, weights=Weights, norm=mpl.colors.LogNorm())
-    plt.savefig('CARLDataSet/Dalitz-12-13-PFN_{}_{}_{}_{}.pdf'.format(POI,m1,m2,m3),format='pdf')
+    plt.savefig('CARLDataSet-neg/Dalitz-12-13-PFN_{}_{}_{}_{}.pdf'.format(POI,m1,m2,m3),format='pdf')
     plt.clf()
     plt.close()
     
@@ -465,7 +485,7 @@ obs = ['E', 'Theta', 'momP', 'PDGID', 'Mass', 'width']
 
 #n_data_points = 75000 #The ONE!!!
 #n_data_points = 25000 # Attempt 1
-n_data_points = 100000 # Attempt 2
+n_data_points = 300000 # Attempt 2
 #n_data_points = 1000 # Attempt 2
 
 # Parameter defaults
@@ -621,7 +641,7 @@ h1 = ax2.hist(ConditionalSet[:,1,3], bins = 50, alpha = 0.5, weights=Default_wei
 h1 = ax2.hist(ConditionalSet[:,2,3], bins = 50, alpha = 0.5, weights=Default_weights, label = r'$Cond.  :  POI={}, m1={}, m2={}, m3={}$'.format(POI,"N/A","N/A","N/A"))
 ax1.legend(loc='upper right', frameon=False, prop={"size":8})
 ax2.legend(loc='upper right', frameon=False, prop={"size":8})
-plt.savefig('CARLDataSet/PFN_POISummary.pdf',format='pdf')
+plt.savefig('CARLDataSet-neg/PFN_POISummary.pdf',format='pdf')
 plt.clf()
 plt.close()
 
@@ -637,7 +657,7 @@ h1 = ax2.hist(ConditionalSet[:,1,0], bins = bins, alpha = 0.5, weights=Condition
 h1 = ax2.hist(ConditionalSet[:,2,0], bins = bins, alpha = 0.5, weights=ConditionalSet_weights, label = r'$Cond.  P3:  POI={}, m1={}, m2={}, m3={}$'.format(POI,"N/A","N/A","N/A"))
 ax1.legend(loc='upper right', frameon=False, prop={"size":8})
 ax2.legend(loc='upper right', frameon=False, prop={"size":8})
-plt.savefig('CARLDataSet/PFN_E-Summary.pdf',format='pdf')
+plt.savefig('CARLDataSet-neg/PFN_E-Summary.pdf',format='pdf')
 plt.clf()
 plt.close()
 
@@ -652,7 +672,7 @@ h1 = ax2.hist(ConditionalSet[:,1,1], bins = bins, alpha = 0.5,  weights=Conditio
 #h1 = ax2.hist(ConditionalSet[:,2,1], bins = bins, alpha = 0.5, weights=ConditionalSet_weights, label = r'$Cond.  P3:  POI={}, m1={}, m2={}, m3={}$'.format(POI,"N/A","N/A","N/A"))
 ax1.legend(loc='upper right', frameon=False, prop={"size":8})
 ax2.legend(loc='upper right', frameon=False, prop={"size":8})
-plt.savefig('CARLDataSet/PFN_Theta-Summary.pdf',format='pdf')
+plt.savefig('CARLDataSet-neg/PFN_Theta-Summary.pdf',format='pdf')
 plt.clf()
 plt.close()
 
@@ -667,7 +687,7 @@ h1 = ax2.hist(ConditionalSet[:,1,2], bins = bins, alpha = 0.5, weights=Condition
 h1 = ax2.hist(ConditionalSet[:,2,2], bins = bins, alpha = 0.5, weights=ConditionalSet_weights, label = r'$Cond.  P3:  POI={}, m1={}, m2={}, m3={}$'.format(POI,"N/A","N/A","N/A"))
 ax1.legend(loc='upper right', frameon=False, prop={"size":8})
 ax2.legend(loc='upper right', frameon=False, prop={"size":8})
-plt.savefig('CARLDataSet/PFN_Pz-Summary.pdf',format='pdf')
+plt.savefig('CARLDataSet-neg/PFN_Pz-Summary.pdf',format='pdf')
 plt.clf()
 plt.close()
 
