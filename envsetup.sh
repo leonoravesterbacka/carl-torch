@@ -27,4 +27,4 @@ else
     python -m pip install -U pip setuptools wheel
     echo 'Now run `python -m pip install -e .'
 fi
-export PYTHONPATH=$(pwd)/CARL/lib/python3.7/site-packages:$OLD_PYTHONPATH
+export PYTHONPATH=$(pwd)/CARL-Torch/lib/python3.8/site-packages:$OLD_PYTHONPATH
