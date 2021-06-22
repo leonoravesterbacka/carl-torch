@@ -8,6 +8,7 @@ import pickle
 import pathlib
 from ml import RatioEstimator
 from ml import Loader
+import numpy as np
 
 
 #################################################
@@ -149,7 +150,7 @@ intermediate_save = (
 train_loss, val_loss = estimator.train(
     method='carl',
     batch_size=batch_size,
-    n_epochs=500,
+    n_epochs=200,
     x=x,
     y=y,
     w=w,
@@ -157,8 +158,10 @@ train_loss, val_loss = estimator.train(
     x1=x1,
     scale_inputs=True,
     early_stopping=False,
-    intermediate_train_plot = intermediate_plot,
-    intermediate_save = intermediate_save,
+    #intermediate_train_plot = intermediate_plot,
+    #intermediate_save = intermediate_save,
+    intermediate_train_plot = None,
+    intermediate_save = None,
 )
 np.save(f"loss_train_{global_name}.npy", train_loss)
 np.save(f"loss_val_{global_name}.npy", val_loss)
