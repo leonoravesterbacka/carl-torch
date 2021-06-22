@@ -222,6 +222,10 @@ class Trainer(object):
                     save_args.update({"filename":new_fname})
                     saver(**save_args)
                     save_args.update({"filename":m_filename})
+                    np.save(f"{new_fname}_loss_train.py", np.array(losses_train))
+                    np.save(f"{new_fname}_loss_val.py", np.array(losses_val))
+                    np.save(f"{new_fname}_accu_train.py", np.array(accuracy_train))
+                    np.save(f"{new_fname}_accu_val.py", np.array(accuracy_val))
                     self._timer(stop="intermediate save")
 
         self._timer(start="early stopping")

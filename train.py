@@ -10,6 +10,8 @@ import numpy as np
 from ml import RatioEstimator
 from ml import Loader
 
+logger = logging.getLogger(__name__)
+
 
 #################################################
 # Arugment parsing
@@ -26,7 +28,8 @@ parser.add_argument('-t', '--TreeName',  action='store', type=str, dest='treenam
 parser.add_argument('-b', '--binning',  action='store', type=str, dest='binning',  default=None, help='path to binning yaml file.')
 parser.add_argument('-l', '--layers', action='store', type=int, dest='layers', nargs='*', default=(11,11,11), help='number of nodes for each layer')
 parser.add_argument('--batch',  action='store', type=int, dest='batch_size',  default=4096, help='batch size')
-parser.add_argument('--per-epoch', action='store_true', dest='per_epoch', default=False, help='plotting and saving train result per epoch.')
+parser.add_argument('--per-epoch-plot', action='store_true', dest='per_epoch_plot', default=False, help='plotting train/validation result per epoch.')
+parser.add_argument('--per-epoch-save', action='store_true', dest='per_epoch_save', default=False, help='saving trained model per epoch.')
 opts = parser.parse_args()
 nominal  = opts.nominal
 variation = opts.variation
@@ -39,13 +42,14 @@ treename = opts.treename
 binning = opts.binning
 n_hidden = tuple(opts.layers)
 batch_size = opts.batch_size
-per_epoch = opts.per_epoch
+per_epoch_plot = opts.per_epoch_plot
+per_epoch_save = opts.per_epoch_save
+
 #################################################
 
 #################################################
 # Loading of data from root of numpy arrays
 loading = Loader()
-logger = logging.getLogger(__name__)
 
 # Exception handling for input files - .root
 if os.path.exists(p+nominal+'.root') or os.path.exists('data/'+global_name+'/X_train_'+str(n)+'.npy'):
@@ -109,7 +113,9 @@ estimator = RatioEstimator(
 )
 
 # per epoch plotting
-if per_epoch:
+intermediate_train_plot = None
+intermediate_save = None
+if per_epoch_plot:
     # arguments for training and validation sets for loading.load_result
     train_args = {
         "x0":x0,
@@ -143,6 +149,7 @@ if per_epoch:
         (estimator.evaluate, {"train":x0, "val":f'data/{global_name}/X0_val_{n}.npy'}),
         (loading.load_result, {"train":train_args, "val":vali_args}),
     )
+if per_epoch_save:
     intermediate_save_args = {
         "filename" : f"{global_name}_carl_{n}",
         "x" : x,
@@ -153,9 +160,6 @@ if per_epoch:
     intermediate_save = (
         estimator.save, intermediate_save_args
     )
-else:
-    intermediate_train_plot = None
-    intermediate_save = None
 
 # perform training
 train_loss, val_loss, accuracy_train, accuracy_val = estimator.train(
