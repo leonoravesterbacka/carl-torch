@@ -102,6 +102,7 @@ def draw_weighted_distributions(x0, x1, w0, w1,
             plt.savefig(f"{output_name}.png")
             plt.clf()
             plt.close()
+            plt.figure(figsize=(10, 8)) # this line is needed to keep same canvas size
 
             # ratio plot
             x0_hist, edge0 = np.histogram(x0[:,id], bins = binning[id], weights = w0)
