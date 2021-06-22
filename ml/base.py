@@ -54,7 +54,7 @@ class Estimator(object):
     def evaluate(self, *args, **kwargs):
         raise NotImplementedError
 
-    def save(self, filename, x, metaData, save_model=False, export_model=False):
+    def save(self, filename, x, metaData, save_model=False, export_model=False, noTar=True):
 
         """
         Saves the trained model to four files: a JSON file with the settings, a pickled pyTorch state dict
@@ -189,7 +189,8 @@ class Estimator(object):
 
 
         # Tar model if training is done on GPU
-        if torch.cuda.is_available():
+        # tarfile in python is slow, so if noTar==True, skip this.
+        if torch.cuda.is_available() and not noTar:
             tar = tarfile.open("models_out.tar.gz", "w:gz")
             for name in [filename+".onnx", filename + "_x_stds.npy", filename + "_x_means.npy",  filename + "_x_mins.npy",  filename + "_x_maxs.npy", filename + "_settings.json",  filename + "_state_dict.pt"]:
                 tar.add(name)
