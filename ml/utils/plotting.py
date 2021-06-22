@@ -60,7 +60,7 @@ def draw_weighted_distributions(x0, x1, w0, w1,
                                 n,
                                 save = False,
                                 ext_plot_path=None,
-                                normalise=False):
+                                normalise=True):
     plt.figure(figsize=(14, 10))
     #columns = range(len(variables))
 
