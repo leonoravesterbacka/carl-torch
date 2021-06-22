@@ -263,7 +263,7 @@ class Estimator(object):
             self.x_scaling_mins = np.zeros(n_parameters)
             self.x_scaling_maxs = np.ones(n_parameters)
 
-    def _transform_inputs(self, x, scaling = "standard"):
+    def _transform_inputs(self, x, scaling = "minmax"):
         if scaling == "standard":
             print("<base.py::_transform_inputs()>::   Doing Standard Scaling")
             #Check for standard deviation = 0 and none values
