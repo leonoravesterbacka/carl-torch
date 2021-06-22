@@ -13,8 +13,8 @@ from ml import Loader
 
 #################################################
 # Arugment parsing
-parser = argparse.ArgumentParser(usage="usage: %prog [opts]")
-parser.add_argument('--version', action='version', version='%prog 1.0')
+parser = argparse.ArgumentParser(usage="usage: %(prog)s [opts]")
+parser.add_argument('--version', action='version', version='%(prog)s 1.0')
 parser.add_argument('-n', '--nominal',   action='store', type=str, dest='nominal',   default='', help='Nominal sample name (root file name excluding the .root extension)')
 parser.add_argument('-v', '--variation', action='store', type=str, dest='variation', default='', help='Variation sample name (root file name excluding the .root extension)')
 parser.add_argument('-e', '--nentries',  action='store', type=int, dest='nentries',  default=1000, help='specify the number of events to do the training on, None means full sample')
@@ -141,7 +141,7 @@ if per_epoch:
     }
     intermediate_train_plot = (
         (estimator.evaluate, {"train":x0, "val":f'data/{global_name}/X0_val_{n}.npy'}),
-        (loading.load_result, {"train":plot_dict, "val":vali_dict}),
+        (loading.load_result, {"train":train_args, "val":vali_args}),
     )
     intermediate_save_args = {
         "filename" : f"{global_name}_carl_{n}",
