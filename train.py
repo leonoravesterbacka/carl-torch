@@ -6,6 +6,7 @@ import torch
 import tarfile
 import pickle
 import pathlib
+import numpy as np
 from ml import RatioEstimator
 from ml import Loader
 
@@ -25,6 +26,7 @@ parser.add_argument('-t', '--TreeName',  action='store', type=str, dest='treenam
 parser.add_argument('-b', '--binning',  action='store', type=str, dest='binning',  default=None, help='path to binning yaml file.')
 parser.add_argument('-l', '--layers', action='store', type=int, dest='layers', nargs='*', default=(11,11,11), help='number of nodes for each layer')
 parser.add_argument('--batch',  action='store', type=int, dest='batch_size',  default=4096, help='batch size')
+parser.add_argument('--per-epoch', action='store_true', dest='per_epoch', default=False, help='plotting and saving train result per epoch.')
 opts = parser.parse_args()
 nominal  = opts.nominal
 variation = opts.variation
@@ -37,6 +39,7 @@ treename = opts.treename
 binning = opts.binning
 n_hidden = tuple(opts.layers)
 batch_size = opts.batch_size
+per_epoch = opts.per_epoch
 #################################################
 
 #################################################
@@ -104,48 +107,57 @@ estimator = RatioEstimator(
     n_hidden=n_hidden,
     activation="relu",
 )
-plot_dict = {
-    "x0":x0,
-    "x1":x1,
-    "w0":w0,
-    "w1":w1,
-    "metaData":metaData,
-    "features":features,
-    "label":"train",
-    "plot":True,
-    "nentries":n,
-    "global_name":global_name,
-    "ext_binning":binning,
-    "verbose" : False,
-}
-vali_dict = {
-    "x0":'data/'+global_name+'/X0_val_'+str(n)+'.npy',
-    "x1":'data/'+global_name+'/X1_val_'+str(n)+'.npy',
-    "w0":'data/'+global_name+'/w0_val_'+str(n)+'.npy',
-    "w1":'data/'+global_name+'/w1_val_'+str(n)+'.npy',
-    "metaData":metaData,
-    "features":features,
-    "label":"train",
-    "plot":True,
-    "nentries":n,
-    "global_name":global_name,
-    "ext_binning":binning,
-    "verbose" : False,
-}
-intermediate_plot = (
-    (estimator.evaluate, {"train":x0, "val":'data/'+global_name+'/X0_val_'+str(n)+'.npy'}),
-    (loading.load_result, {"train":plot_dict, "val":vali_dict}),
-)
-intermediate_save_args = {
-    "filename" : f"{global_name}_carl_{n}",
-    "x" : x,
-    "metaData" : metaData,
-    "save_model" : True,
-    "export_model" : True,
-}
-intermediate_save = (
-    estimator.save, intermediate_save_args
-)
+
+# per epoch plotting
+if per_epoch:
+    # arguments for training and validation sets for loading.load_result
+    train_args = {
+        "x0":x0,
+        "x1":x1,
+        "w0":w0,
+        "w1":w1,
+        "metaData":metaData,
+        "features":features,
+        "label":"train",
+        "plot":True,
+        "nentries":n,
+        "global_name":global_name,
+        "ext_binning":binning,
+        "verbose" : False,
+    }
+    vali_args = {
+        "x0":f'data/{global_name}/X0_val_{n}.npy',
+        "x1":f'data/{global_name}/X1_val_{n}.npy',
+        "w0":f'data/{global_name}/w0_val_{n}.npy',
+        "w1":f'data/{global_name}/w1_val_{n}.npy',
+        "metaData":metaData,
+        "features":features,
+        "label":"train",
+        "plot":True,
+        "nentries":n,
+        "global_name":global_name,
+        "ext_binning":binning,
+        "verbose" : False,
+    }
+    intermediate_train_plot = (
+        (estimator.evaluate, {"train":x0, "val":f'data/{global_name}/X0_val_{n}.npy'}),
+        (loading.load_result, {"train":plot_dict, "val":vali_dict}),
+    )
+    intermediate_save_args = {
+        "filename" : f"{global_name}_carl_{n}",
+        "x" : x,
+        "metaData" : metaData,
+        "save_model" : True,
+        "export_model" : True,
+    }
+    intermediate_save = (
+        estimator.save, intermediate_save_args
+    )
+else:
+    intermediate_train_plot = None
+    intermediate_save = None
+
+# perform training
 train_loss, val_loss = estimator.train(
     method='carl',
     batch_size=batch_size,
@@ -157,9 +169,11 @@ train_loss, val_loss = estimator.train(
     x1=x1,
     scale_inputs=True,
     early_stopping=False,
-    intermediate_train_plot = intermediate_plot,
+    intermediate_train_plot = intermediate_train_plot,
     intermediate_save = intermediate_save,
 )
+
+# saving loss values and final trained models
 np.save(f"loss_train_{global_name}.npy", train_loss)
 np.save(f"loss_val_{global_name}.npy", val_loss)
 estimator.save('models/'+ global_name +'_carl_'+str(n), x, metaData, export_model = True, noTar=True)
