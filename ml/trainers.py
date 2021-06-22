@@ -147,7 +147,7 @@ class Trainer(object):
         logger.debug("Will print training progress every %s epochs", n_epochs_verbose)
 
         logger.debug("Beginning main training loop")
-        losses_train, losses_val = [], []
+        losses_train, losses_val, accuracy_train, accuracy_val = [], [], [], []
         self._timer(stop="initialize training")
 
         # Loop over epochs
@@ -166,6 +166,8 @@ class Trainer(object):
                 )
                 losses_train.append(loss_train)
                 losses_val.append(loss_val)
+                accuracy_train.append(accu_train)
+                accuracy_val.append(accu_val)
             except NanException:
                 logger.info("Ending training during epoch %s because NaNs appeared", i_epoch + 1)
                 break
@@ -232,7 +234,7 @@ class Trainer(object):
         self._timer(stop="ALL")
         self._report_timer()
 
-        return np.array(losses_train), np.array(losses_val)
+        return np.array(losses_train), np.array(losses_val), np.array(accuracy_train), np.array(accuracy_val)
 
     @staticmethod
     def report_data(data):

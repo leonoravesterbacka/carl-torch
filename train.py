@@ -158,7 +158,7 @@ else:
     intermediate_save = None
 
 # perform training
-train_loss, val_loss = estimator.train(
+train_loss, val_loss, accuracy_train, accuracy_val = estimator.train(
     method='carl',
     batch_size=batch_size,
     n_epochs=500,
@@ -176,5 +176,7 @@ train_loss, val_loss = estimator.train(
 # saving loss values and final trained models
 np.save(f"loss_train_{global_name}.npy", train_loss)
 np.save(f"loss_val_{global_name}.npy", val_loss)
+np.save(f"accuracy_train_{global_name}.npy", accuracy_train)
+np.save(f"accuracy_val_{global_name}.npy", accuracy_val)
 estimator.save('models/'+ global_name +'_carl_'+str(n), x, metaData, export_model = True, noTar=True)
 ########################################
