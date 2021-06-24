@@ -30,6 +30,8 @@ parser.add_argument('-l', '--layers', action='store', type=int, dest='layers', n
 parser.add_argument('--batch',  action='store', type=int, dest='batch_size',  default=4096, help='batch size')
 parser.add_argument('--per-epoch-plot', action='store_true', dest='per_epoch_plot', default=False, help='plotting train/validation result per epoch.')
 parser.add_argument('--per-epoch-save', action='store_true', dest='per_epoch_save', default=False, help='saving trained model per epoch.')
+parser.add_argument('--nepoch', action='store', dest='nepoch', type=int, default=500, help='Total number of epoch for training.')
+parser.add_argument('--scale-method', action='store', dest='scale_method', type=str, default=None, help='scaling method for input data. e.g minmax, standard.')
 opts = parser.parse_args()
 nominal  = opts.nominal
 variation = opts.variation
@@ -44,7 +46,8 @@ n_hidden = tuple(opts.layers)
 batch_size = opts.batch_size
 per_epoch_plot = opts.per_epoch_plot
 per_epoch_save = opts.per_epoch_save
-
+nepoch = opts.nepoch
+scale_method = opts.scale_method
 #################################################
 
 #################################################
@@ -111,6 +114,7 @@ estimator = RatioEstimator(
     n_hidden=n_hidden,
     activation="relu",
 )
+estimator.scaling_method = scale_method
 
 # per epoch plotting
 intermediate_train_plot = None
@@ -165,7 +169,7 @@ if per_epoch_save:
 train_loss, val_loss, accuracy_train, accuracy_val = estimator.train(
     method='carl',
     batch_size=batch_size,
-    n_epochs=500,
+    n_epochs=nepoch,
     x=x,
     y=y,
     w=w,

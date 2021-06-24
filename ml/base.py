@@ -39,6 +39,7 @@ class Estimator(object):
         self.n_parameters = None
         self.x_scaling_means = None
         self.x_scaling_stds = None
+        self.scaling_method = None
 
     def train(self, *args, **kwargs):
         raise NotImplementedError
@@ -265,10 +266,13 @@ class Estimator(object):
             self.x_scaling_maxs = np.ones(n_parameters)
 
     def _transform_inputs(self, x, scaling = "minmax"):
+        # use the self.scaling method to overwritten the scaling arugmuent
+        # i.e if self.scaling_method = None, scaling will be used.
+        scaling  = self.scaling_method or scaling
         if scaling == "standard":
-            print("<base.py::_transform_inputs()>::   Doing Standard Scaling")
             #Check for standard deviation = 0 and none values
             if self.x_scaling_means is not None and self.x_scaling_stds is not None:
+                print("<base.py::_transform_inputs()>::   Doing Standard Scaling")
                 if isinstance(x, torch.Tensor):
                     x_scaled = x - torch.tensor(self.x_scaling_means, dtype=x.dtype, device=x.device)
                     x_scaled = x_scaled / torch.tensor(self.x_scaling_stds, dtype=x.dtype, device=x.device)
@@ -276,11 +280,12 @@ class Estimator(object):
                     x_scaled = x - self.x_scaling_means
                     x_scaled /= self.x_scaling_stds
             else:
+                print("<base.py::_transform_inputs()>::   unable to do standard scaling")
                 x_scaled = x
         else:
-            print("<base.py::_transform_inputs()>::   Doing min-max scaling")
             # Check for none and 0 values
             if self.x_scaling_mins is not None and self.x_scaling_maxs is not None:
+                print("<base.py::_transform_inputs()>::   Doing min-max scaling")
                 if isinstance(x, torch.Tensor):
                     x_scaled = (x-torch.tensor(self.x_scaling_mins, dtype=x.dtype, device=x.device))
                     x_scaled = x_scaled/(torch.tensor(self.x_scaling_maxs, dtype=x.dtype, device=x.device) - torch.tensor(self.x_scaling_mins, dtype=x.dtype, device=x.device))
@@ -290,6 +295,7 @@ class Estimator(object):
                     diff = (self.x_scaling_maxs - self.x_scaling_mins)
                     x_scaled = np.divide(x_scaled, diff, out=np.zeros_like(x_scaled), where=diff!=0)
             else:
+                print("<base.py::_transform_inputs()>::   unable to do min-max scaling")
                 x_scaled = x
         return x_scaled
 
