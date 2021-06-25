@@ -1,11 +1,11 @@
 import ROOT
 import numpy as np
+import argparse
 
 # Helper function to create an example tree
 def make_data(nevts = 500000, DataType="neg", MC="Nominal"):
 
-    root_file = ROOT.TFile("Nominal.root", "RECREATE")
-    root_file = ROOT.TFile("Alt.root", "RECREATE")
+    root_file = ROOT.TFile(MC+".root", "RECREATE")
     tree = ROOT.TTree("ThreeDGauss", "ThreeDGauss")
     
     # Input features
@@ -39,7 +39,7 @@ def make_data(nevts = 500000, DataType="neg", MC="Nominal"):
             x[0] = np.random.normal(xmu, xsigma, 1)
             y[0] = np.random.normal(ymu, ysigma, 1)
             z[0] = np.random.normal(zmu, zsigma, 1)
-        else if (DataType == "pos"):
+        elif (DataType == "pos"):
             ## Composite positive weight version - gaussian mixture model
             t0[0] = 0.0 if MC=="Nominal" else np.ceil( np.random.random()  - 0.3 )
             t1[0] = 0.0 if MC=="Nominal" else np.ceil( np.random.random()  - 0.5 )
@@ -76,12 +76,13 @@ def make_data(nevts = 500000, DataType="neg", MC="Nominal"):
 def main():
     # Argument parser
     parser = argparse.ArgumentParser(description="Specify the type if data you want: [positive definite, negative weigthed]")
-    parser.add_argument("--CammelType", type=str, default = "neg" help="Positive defintite or negative weighted - [pos,neg]")
+    parser.add_argument("--CammelType", type=str, default = "neg", help="Positive definite or negative weighted - [pos,neg]")
+    parser.add_argument("--MC", type=str, default = "Nominal", help="Choose between nominal or alternative MC - [Nominal, Alt]")
     parser.add_argument("--nEvents", type=int, default = 500000, help="Number of events")
     args = parser.parse_args()
     
     # Data creation
-    _, tree = make_data(nevts=args.nEvents, DataType=args.CammelType)
+    _, tree = make_data(nevts=args.nEvents, DataType=args.CammelType, MC=args.MC)
     
 if __name__ == "__main__":
     main()
