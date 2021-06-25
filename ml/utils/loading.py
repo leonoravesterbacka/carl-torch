@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from functools import partial
 from collections import defaultdict
 from .tools import create_missing_folders, load, load_and_check, HarmonisedLoading
-from .plotting import draw_weighted_distributions, draw_unweighted_distributions, draw_ROC, resampled_discriminator_and_roc, plot_calibration_curve, draw_weights, draw_scatter
+from .plotting import draw_weighted_distributions, draw_unweighted_distributions, draw_ROC, draw_Obs_ROC, resampled_obs_and_roc, plot_calibration_curve, draw_weights, draw_scatter
 from sklearn.model_selection import train_test_split
 logger = logging.getLogger(__name__)
 
@@ -319,13 +319,14 @@ class Loader():
             minmax[idx] = [mean-(5*std), mean+(5*std)]
             binning[idx] = np.linspace(mean-(5*std), mean+(5*std), divisions)
             print("<loading.py::load_result>::   Column {}:  min  =  {},  max  =  {}".format(key,mean-5*std,mean+5*std))
-            print(binning[idx])
+            #print(binning[idx])
 
         # no point in plotting distributions with too few events, they only look bad 
         #if int(nentries) > 5000: 
         # plot ROC curves 
         print("<loading.py::load_result>::   Printing ROC")
         draw_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
+        draw_Obs_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
         
         print("<loading.py::load_result>::   Printing weighted distributions")
         # plot reweighted distributions     

@@ -7,6 +7,7 @@ import tarfile
 import pickle
 from ml import RatioEstimator
 from ml import Loader
+import numpy as np
 
 
 #################################################
@@ -85,22 +86,26 @@ else:
         nentries=n,
         pathA=p+nominal+".root",
         pathB=p+variation+".root",
-        normalise=True,
+        normalise=False,
         debug=False,
     )
     logger.info(" Loaded new datasets ")
 #######################################
 
 #######################################
-# Estimate the likelihood ratio
+# Estimate the likelihood ratio using a NN model
+#   -> Calculate number of input variables as rudimentary guess
+n_inputs = x.shape[1]
+structure = np.repeat(n_inputs, 5)
+# Use the number of inputs as input to the hidden layer structure
 estimator = RatioEstimator(
-    n_hidden=(11,11,11,11),
+    n_hidden=(structure),
     activation="relu"
 )
 estimator.train(
     method='carl',
-    batch_size=1024,
-    n_epochs=500,
+    batch_size=5000,
+    n_epochs=300,
     early_stopping=False,
     validation_split=0.25,
     x=x,
