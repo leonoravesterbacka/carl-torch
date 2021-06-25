@@ -60,13 +60,6 @@ def ValidResonance(mab,width,mr):
     # Now generate a random number from a uniform
     uni = np.random.uniform(0,sp.stats.cauchy.pdf(mr,loc=mr,scale=width),1)
 
-    #print ("Cauchy Max = {}".format(sp.stats.cauchy.pdf(mr,loc=mr,scale=width)))
-    #print ("uni = {}".format(uni))
-    #print ("prob = {}".format(prob))
-    #print ("   x     = {}".format(mab))
-    #print ("   loc   = {}".format(mr))
-    #print ("   scale = {}".format(width))
-        
     # Check if successful otherwise veto
     if uni > prob:
         return -1
@@ -186,8 +179,6 @@ def PhaseSpaceSample(Events, Weights,
         
         #print ("=====================")
         #print ("=====================")
-        #m12 = np.random.uniform( m1+m2, M - m3 , 1)
-        #m23 = np.random.uniform( m2+m3, M - m1 , 1)
         m12=-1
         if np.random.uniform(0,1,1) > BkgRate:
             m12 = np.random.uniform( (m1+m2)**2, (M - m3)**2 , 1)
@@ -199,9 +190,6 @@ def PhaseSpaceSample(Events, Weights,
             continue
         m23 = np.random.uniform( (m2+m3)**2, (M - m1)**2 , 1)
         m23 = math.sqrt(m23[0])
-        #SampleTheta23 = np.random.uniform(0, math.pi, 1)
-        #m23 = np.random.uniform( ((m2+m3)**2)*((1+math.cos(SampleTheta23))/2), ((M-m1)**2)*((1-math.cos(SampleTheta23))/2), 1)
-        #m23 = math.sqrt(m23)
 
         #if ValidResonance(m12,2,tempPOI) == 1:
         #    if m12 < (m1+m2) or m12 > (M - m3):
@@ -221,47 +209,23 @@ def PhaseSpaceSample(Events, Weights,
         # Energy/mom of particle 3
         #print ("m12:  {}".format(m12))
         E3 = (M**2 + m3**2 - m12**2) / (2*M)
-        #if E3 < m3:
-        #    continue
-        ##print ("  E3:  {}".format(E3[0]))
         momP3 = math.sqrt(E3**2 - m3**2)
-        #if (E3**2 - momP3**2 < (m3**2)*1.01) or (E3**2 - momP3**2 > (m3**2)*0.99) :
-        #    continue
-        #print ("    E3:  {}".format(E3))
-        #print ("    P3:  {}".format(momP3))
-        ##print ("    M3:  {}".format(Mass(vec3)))
-        
-        
+               
         # Energy/mom of particle 1
-        #print ("m23:  {}".format(m23))
         E1 = (M**2 + m1**2 - m23**2) / (2*M)
-        #if E1 < m1:
-        #    continue
         momP1 = math.sqrt(E1**2 - m1**2)
-        #if E1**2 - momP1**2 < 1.01*m1**2 or E1**2 - momP1**2 > 0.99*m1**2 :
-        #    continue
-        #print ("    E1:  {}".format(E1))
-        #print ("    P1:  {}".format(momP1))
-        #print ("    M1:  {}".format(Mass(vec1)))
 
         # Energy/mom of particle 2
-        #print ("m13:  {}".format(m13))
         momP2 = math.sqrt(E2**2 - m2**2)
-        #print ("    E2:  {}".format(E2))
-        #print ("    momP2:  {}".format(momP2))
 
         ## Calculate the 3 angles
         theta12 = Angle(E1,momP1,m1,E2,momP2,m2,m12)
-        #print ("    Theta12: {}".format(theta12))
         theta13 = Angle(E1,momP1,m1,E3,momP3,m3,m13)
-        #print ("    Theta13: {}".format(theta13))
         theta23 = Angle(E2,momP2,m2,E3,momP3,m3,m23)
-        #print ("    Theta23: {}".format(theta23))
         
         if theta12 + theta23 + theta13 > 2*math.pi*1.001 :
             continue
 
-        ### TURNED OFF NOT ON GIT HOWEVER
         # Energy conservation and on-shell requirements
         if (E1 + E2 + E3)**2 > (M**2)*1.01 or (E1**2 + E2**2 + E3**2)**2 < (M**2)*0.99 or E1 < m1 or E2 < m2 or E3 < m3:
             continue
@@ -280,17 +244,10 @@ def PhaseSpaceSample(Events, Weights,
 
         # Expand vectors with parameter of interest
         if randomise:
-            #tempPOI = float((np.random.randint(25., 55., 2))[0])
-            #tempPOI = float((np.random.uniform(5., 30., 1))[0])
-            #tempPOI = random.choice([5.,10.,15.,20.,25.,30.])
-            #tempPOI = random.choice([25.,30.,35.,40.,45.,50.,55.,60.,65.]) # The ONE !!!!
             tempPOI = [random.choice([25.,30.,40.,50.,55.,65.]), random.choice([2.,4,6.,8.,10,12])]
             
         if not SubSet:
             tempPOI = [POI[1],POI[3]]
-        #vec1 = np.array( [E1, theta23, momP1, tempPOI] )
-        #vec2 = np.array( [E2, theta13, momP2, tempPOI] )
-        #vec3 = np.array( [E3, theta12, momP3, tempPOI] )
         vec1 = np.array( [E1, theta13, momP1, 1] + tempPOI ) # 1 = PDG ID
         vec2 = np.array( [E2, theta23, momP2, 2] + tempPOI ) # 2 = PDG ID
         vec3 = np.array( [E3, 0,       momP3, 3] + tempPOI ) # 3 = PDG ID
@@ -306,7 +263,6 @@ def PhaseSpaceSample(Events, Weights,
             Weights[n] -= (m12/80 - 0.625)
         
         # Now fill the tree
-        #E = np.array( [E1, E2, E3] )
         E.push_back(E1)
         E.push_back(E2)
         E.push_back(E3)
@@ -466,27 +422,7 @@ inputDims=6
 
 ## Generate ROOT TTree
 obs = ['E', 'Theta', 'momP', 'PDGID', 'Mass', 'width']
-## Add branches
-#Default_E      = np.empty((3), dtype='float64')
-#Default_theta  = np.empty((3), dtype='float64')
-#Default_momP   = np.empty((3), dtype='float64')
-#Default_PDGID  = np.empty((3), dtype='float64')
-#Default_mass   = np.empty((3), dtype='float64')
-#Default_width  = np.empty((3), dtype='float64')
-#Default_w      = np.empty((1), dtype='float64')
-#
-#ConditionalSet_E      = np.empty((3), dtype='float64')
-#ConditionalSet_theta  = np.empty((3), dtype='float64')
-#ConditionalSet_momP   = np.empty((3), dtype='float64')
-#ConditionalSet_PDGID  = np.empty((3), dtype='float64')
-#ConditionalSet_mass   = np.empty((3), dtype='float64')
-#ConditionalSet_width  = np.empty((3), dtype='float64')
-#ConditionalSet_w      = np.empty((1), dtype='float64')
-
-#n_data_points = 75000 #The ONE!!!
-#n_data_points = 25000 # Attempt 1
-n_data_points = 300000 # Attempt 2
-#n_data_points = 1000 # Attempt 2
+n_data_points = 300000 
 
 # Parameter defaults
 POI = [40.,40.,6.,6.]
@@ -500,10 +436,6 @@ m3 = 10.
 #GridPoints_m1 = [25.,30.,40.,50.,55.,65.] # Attempt 1
 #GridPoints_width1 = [2.,4.,6.,8.,10.,12] # Attempt 1
 
-#GridSize = 2 # Attempt 2
-#GridPoints_m1 = [30.,50.] # Attempt 2
-#GridPoints_width1 = [6.] # Attempt 2
-
 GridSize = 1 # Attempt 3
 GridPoints_m1 = [50.] # Attempt 3
 GridPoints_width1 = [6.] # Attempt 3
@@ -512,24 +444,10 @@ GridPoints_width1 = [6.] # Attempt 3
 # Data set
 ConditionalSet = np.zeros((1,3,inputDims))
 ConditionalSet_weights = np.zeros((1))
-#ConditionalSet = None
 
 # Default
 Default =  np.zeros((n_data_points*GridSize,3,inputDims))
 Default_weights = np.zeros((n_data_points*GridSize))
-#Default_file = ROOT.TFile("DefaultSet.root", "RECREATE")
-#Default_TTree = ROOT.TTree("Default_M50_6", "Default_M50_6")
-#Default_TTree.SetDirectory(0)
-#Default_TTree.Branch(obs[0], Default_E, "E[3]/D")
-#Default_TTree.Branch(obs[1], Default_theta, "Theta[3]/D")
-#Default_TTree.Branch(obs[2], Default_momP, "momP[3]/D")
-#Default_TTree.Branch(obs[3], Default_PDGID, "PDGID[3]/D")
-#Default_TTree.Branch(obs[4], Default_mass, "Mass[3]/D")
-#Default_TTree.Branch(obs[5], Default_width, "Width[3]/D")
-#Default_TTree.Branch('w', Default_w, "w/D")
-#Default_w[0] =1
-#Default_TTree.Fill()
-#Default_TTree.Write()
 if LoadData:
     Default = np.load("ThreeBody_Default_CARL.npz")
     Default_weights = np.load("ThreeBody_Default_CARL_weights.npz")
@@ -540,21 +458,10 @@ else:
                      n_data_points*GridSize, True, POI, True, 0.5)
     np.save("ThreeBody_Default_CARL", Default)
     np.save("ThreeBody_Default_CARL_weights", Default_weights)
-    #Default_TTree.Write()
-    #Default_file.Close()
+
 
 
 # Generate the Grid points
-#ConditionalSet_file = ROOT.TFile("ConditionalSet.root", "RECREATE")
-#ConditionalSet_TTree.SetDirectory(0)
-#ConditionalSet_TTree = ROOT.TTree("ConditionalSet_M50_6", "ConditionalSet_M50_6")
-#ConditionalSet_TTree.Branch(obs[0], ConditionalSet_E, "E[3]/D")
-#ConditionalSet_TTree.Branch(obs[1], ConditionalSet_theta, "Theta[3]/D")
-#ConditionalSet_TTree.Branch(obs[2], ConditionalSet_momP, "momP[3]/D")
-#ConditionalSet_TTree.Branch(obs[3], ConditionalSet_PDGID, "PDGID[3]/D")
-#ConditionalSet_TTree.Branch(obs[4], ConditionalSet_mass, "Mass[3]/D")
-#ConditionalSet_TTree.Branch(obs[5], ConditionalSet_width, "Width[3]/D")
-#ConditionalSet_TTree.Branch('w', ConditionalSet_w, "w/D")
 if LoadData:
     ConditionalSet = np.load("ThreeBody_Cond_CARL.npz")
     ConditionalSet_weights = np.load("ThreeBody_Cond_CARL_weights.npz")
@@ -567,59 +474,14 @@ else:
                               "ConditionalSet", "M50_6",
                               M, m1, m2, m3, 
                               n_data_points, False, [p_m,p_m,p_w,p_w],True, 0.5)
-            #normalise(Events)
-            #Events = PhaseSpaceSample( M, p_m1, m2, m3, 1, False, p_m1)
-            #Events = np.delete(Events, (0), axis=0)
-            #print("Events shape: {}".format(Events.shape))
-            #ConditionalSet = np.concatenate( (ConditionalSet,Events), axis = 0)
             ConditionalSet = np.vstack( (ConditionalSet,Events) )
             ConditionalSet_weights = np.append( ConditionalSet_weights, Weights, axis=0 )
-            #ConditionalSet = np.append( ConditionalSet, Events, axis = 0)
-
+            
     ConditionalSet = np.delete(ConditionalSet, (0), axis=0)
     ConditionalSet_weights = np.delete(ConditionalSet_weights, (0), axis=0)
     np.save("ThreeBody_Cond_CARL", ConditionalSet)
     np.save("ThreeBody_Cond_CARL_weights", ConditionalSet_weights)
-    #ConditionalSet_TTree.Write()
-    #ConditionalSet_file.Close()
 
-## Generate ROOT TTree
-#obs = ['E', 'Theta', 'momP', 'PDG ID', 'Mass', 'width']
-#Default_TTree = ROOT.TTree("ThreeDGauss", "ThreeDGauss")
-#ConditionalSet_TTree = ROOT.TTree("ThreeDGauss", "ThreeDGauss")
-#for idx,obs in enumerate(obs):
-#    temp = np.array( Default[:,:,idx], dtype = [(str(obs), np.float64)])
-#    print(temp)
-#    print(temp.shape)
-#    #tempTree = array2tree(temp)
-#    Default_TTree = array2tree( temp, tree=Default_TTree ) ## Unfold the data
-#
-#for idx,obs in enumerate(obs):
-#    temp = np.array( ConditionalSet[:,:,idx], dtype = [(str(obs), np.float64)])
-#    #tempTree = array2tree(temp)
-#    ConditionalSet_TTree = array2tree( temp, tree=ConditionalSet_TTree ) ## Unfold the data
-#
-## Append the weights to the TTree
-#weights = np.array(Default_weights, dtype = [('w', np.float64)])
-#array2tree( weights, tree=Default_TTree)
-#
-#weights = np.array(ConditionalSet_weights, dtype = [('w', np.float64)])
-#array2tree( weights, tree=ConditionalSet_TTree)
-#
-## Create a TFile to save the Tree to:
-#Default_file = ROOT.TFile("Default.root", "RECREATE")
-#ConditionalSet_file = ROOT.TFile("ConditionalSet.root", "RECREATE")
-## Save TTree to files
-#Default_file.cd()
-#Default_TTree.Write()
-#ConditionalSet_file.cd()
-#ConditionalSet_TTree.Write()
-
-
-#np.random.shuffle(ConditionalSet)
-# Standard Scale all data
-#normalise(Default)
-#normalise(ConditionalSet)
 
 # Print shape of conditional and default sets
 print ("=== Default ===")
