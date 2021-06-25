@@ -182,29 +182,49 @@ def draw_weighted_distributions(x0, x1, w0, w1,
 def weight_obs_data(x0, x1, w0, w1, max_weight=10000.): # Max weight redundant here because of large weight Sherpa!
 
     # Remove negative probabilities - maintains proportionality still by abs()
-    w0 = abs(w0)
-    w1 = abs(w1)
+    w0_abs = abs(w0)
+    w1_abs = abs(w1)
 
     # Calculate the minimum size so as to ensure we have equal number of events in each class
     x0_len = x0.shape[0]
     x1_len = x1.shape[0]
     minEvts = x0_len if x0_len < x1_len else x1_len
 
+    w0 = w0[ 0:minEvts ]
+    w1 = w1[ 0:minEvts ]
+    w0_abs = w0_abs[ 0:minEvts ]
+    w1_abs = w1_abs[ 0:minEvts ]
+
     # Dataset 0 probability proportionality sub-sampling
-    w0 = w0 / w0.sum()
-    w_x0 = np.random.choice(x0, size=minEvts, p = w0)
-    
+    w0_abs = w0_abs / w0_abs.sum()
+    # w_x0 = np.random.choice(x0, size=minEvts, p = w0_abs)
+    weighted_data0 = np.random.choice(range(minEvts), minEvts, p = w0_abs)
+    w_x0 = x0.copy()[weighted_data0]
+
+    # set of +-1 weights, depending on the sign of the original weight
+    w0_ones = np.ones(minEvts)
+    w0_ones[w0<0] = -1
+    w_w0 = w0_ones.copy()[weighted_data0]
+
     # Dataset 1 probability proportionality sub-sampling
-    w1 = w1 / w1.sum()
-    w_x1 = np.random.choice(x1, size=minEvts, p = w1)
-    
+    w1_abs = w1_abs / w1_abs.sum()
+    # w_x1 = np.random.choice(x1, size=minEvts, p = w1_abs)
+    weighted_data1 = np.random.choice(range(minEvts), minEvts, p = w1_abs)
+    w_x1 = x1.copy()[weighted_data1]
+
+    # set of +-1 weights, depending on the sign of the original weight
+    w1_ones = np.ones(minEvts)
+    w1_ones[w1<0] = -1
+    w_w1 = w1_ones.copy()[weighted_data1]
+
     # Concatenate all data
     x_all = np.append(w_x0,w_x1)
     y_all = np.zeros(minEvts*2)
     y_all[minEvts:] = 1
-    return (x_all,y_all)
+    w_all = np.concatenate([w_w0, w_w1])
+    return (x_all,y_all,w_all)
 
-def obs_roc_curve(x, y_true):
+def obs_roc_curve(x, y_true, weights):
 
     # Determine the maximum range
     #maxRange = np.amax(x)
@@ -226,7 +246,7 @@ def obs_roc_curve(x, y_true):
         fpr[idx] = 0.0
         #print("       -> Edge:  {}".format(idx))
         y_pred =  x < edge
-        tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+        tn, fp, fn, tp = confusion_matrix(y_true, y_pred, sample_weight=weights).ravel()
         tpr[idx] = tp/(tp+fn) 
         fpr[idx] = fp/(tn+fp)
         #print("       -> tpr:  {}".format(tpr))
@@ -235,8 +255,8 @@ def obs_roc_curve(x, y_true):
     return fpr, tpr
 
 def resampled_obs_and_roc(original, target, w0, w1):
-    (data, labels) = weight_obs_data(original, target, w0, w1)
-    fpr, tpr  = obs_roc_curve(data, labels)
+    (data, labels, weights) = weight_obs_data(original, target, w0, w1)
+    fpr, tpr  = obs_roc_curve(data, labels, weights)
     #roc_auc = auc(fpr, tpr)
     roc_auc = np.trapz(tpr, x=fpr)
     return fpr,tpr,roc_auc,data,labels
