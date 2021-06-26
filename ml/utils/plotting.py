@@ -259,7 +259,7 @@ def resampled_obs_and_roc(original, target, w0, w1):
     fpr, tpr  = obs_roc_curve(data, labels, weights)
     #roc_auc = auc(fpr, tpr)
     roc_auc = np.trapz(tpr, x=fpr)
-    return fpr,tpr,roc_auc,data,labels
+    return fpr,tpr,roc_auc,data,labels,weights
 
 def draw_Obs_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True):
     plt.figure(figsize=(8, 6))
@@ -272,8 +272,8 @@ def draw_Obs_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True):
         x1 = X1[:,idx]
 
         # Form the resampled data based on probability of each event 
-        fpr_t,tpr_t,roc_auc_t,data_t,labels_t = resampled_obs_and_roc(x0, x1, W0, W1)
-        fpr_tC,tpr_tC,roc_auc_tC,data_tr,labels_tr = resampled_obs_and_roc(x0, x1, W0*weights, W1)
+        fpr_t,tpr_t,roc_auc_t,data_t,labels_t,weights_t = resampled_obs_and_roc(x0, x1, W0, W1)
+        fpr_tC,tpr_tC,roc_auc_tC,data_tr,labels_tr,weights_tr = resampled_obs_and_roc(x0, x1, W0*weights, W1)
         plt.plot(fpr_t, tpr_t, label=r"no weight, AUC=%.3f" % roc_auc_t)
         plt.plot(fpr_tC, tpr_tC, label=r"CARL weight, AUC=%.3f" % roc_auc_tC)
         plt.plot([0, 1], [0, 1], 'k--')
@@ -294,9 +294,9 @@ def draw_Obs_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True):
 
         # Plot variables used in ROC calculation
         bins = np.linspace(np.amin(x0), np.amax(x0) ,50)
-        plt.hist(data_t[labels_t==0], bins=bins, label=r"Nominal", **hist_settings_nom)
-        plt.hist(data_tr[labels_tr==0], bins=bins, label=r"Nominal * CARL", **hist_settings_CARL)
-        plt.hist(data_tr[labels_tr==1], bins=bins, label=r"Alternative", **hist_settings_alt)
+        plt.hist(data_t[labels_t==0], bins=bins, weights=weights_t[labels_t==0], label=r"Nominal", **hist_settings_nom)
+        plt.hist(data_tr[labels_tr==0], bins=bins, weights=weights_tr[labels_tr==0], label=r"Nominal * CARL", **hist_settings_CARL)
+        plt.hist(data_tr[labels_tr==1], bins=bins, weights=weights_tr[labels_tr==1], label=r"Alternative", **hist_settings_alt)
         plt.title('Resampled proportional to weights (obs: {})'.format(idx))
         plt.xlabel('Obseravble {}'.format(idx))
         plt.ylabel('Events')
