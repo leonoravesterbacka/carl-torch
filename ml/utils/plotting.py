@@ -59,13 +59,14 @@ def draw_weighted_distributions(x0, x1, w0, w1,
                                 legend,
                                 n,
                                 save = False,
-                                ext_plot_path=None):
+                                ext_plot_path=None,
+                                normalise=True):
     plt.figure(figsize=(14, 10))
     #columns = range(len(variables))
 
     for id, column in enumerate(variables):
-        print("<plotting.py::draw_weighted_distribution()>::   id: {},   column: {}".format(id,column))
-        print("<plotting.py::draw_weighted_distribution()>::     binning: {}".format(binning[id]))
+        logger.debug("<plotting.py::draw_weighted_distribution()>::   id: {},   column: {}".format(id,column))
+        logger.debug("<plotting.py::draw_weighted_distribution()>::     binning: {}".format(binning[id]))
         if save: plt.figure(figsize=(10, 8))
         else: plt.subplot(3,4, id)
         #plt.yscale('log')
@@ -75,10 +76,10 @@ def draw_weighted_distributions(x0, x1, w0, w1,
         w0 = w0.flatten()
         w1 = w1.flatten()
         w_carl = w0*weights
-        # make sure normalized
-        w0 = w0/w0.sum()
-        w1 = w1/w1.sum()
-        w_carl = w_carl/w_carl.sum()
+        if normalise:
+            w0 = w0/w0.sum()
+            w1 = w1/w1.sum()
+            w_carl = w_carl/w_carl.sum()
         plt.hist(x0[:,id], bins = binning[id], weights = w0, label = "nominal", **hist_settings_nom)
         plt.hist(x0[:,id], bins = binning[id], weights = w_carl, label = 'nominal*CARL', **hist_settings_CARL)
         plt.hist(x1[:,id], bins = binning[id], weights = w1, label = legend, **hist_settings_alt)
@@ -101,6 +102,7 @@ def draw_weighted_distributions(x0, x1, w0, w1,
             plt.savefig(f"{output_name}.png")
             plt.clf()
             plt.close()
+            plt.figure(figsize=(10, 8)) # this line is needed to keep same canvas size
 
             # ratio plot
             x0_hist, edge0 = np.histogram(x0[:,id], bins = binning[id], weights = w0)
@@ -157,11 +159,11 @@ def draw_weighted_distributions(x0, x1, w0, w1,
             yref_error = np.ones(len(edge1))
             yref_error_up = 2* np.sqrt( np.power(x1_error,2) + np.power(x0_error, 2)) # height from bottom
             yref_error_down = yref_error - np.sqrt(np.power(x1_error, 2) + np.power(x0_error,2))
-            print("edg1e:    {}".format(edge1))
-            print("yref_error:    {}".format(yref_error))
-            print("x0_error:    {}".format(x0_error))
-            print("x1_error:    {}".format(x1_error))
-            print("width:       {}".format(np.diff(edge1)))
+            logger.debug("edg1e:    {}".format(edge1))
+            logger.debug("yref_error:    {}".format(yref_error))
+            logger.debug("x0_error:    {}".format(x0_error))
+            logger.debug("x1_error:    {}".format(x1_error))
+            logger.debug("width:       {}".format(np.diff(edge1)))
             #plt.bar( x=edge1, height=yref_error+x1_error, bottom = yref_error-x1_error, width=np.diff(edge1), align='edge', linewidth=0, color='red', alpha=0.25, zorder=-1, label='uncertainty band')
             plt.bar( x=edge1[:-1],
                      height=yref_error_up[:-1], bottom = yref_error_down[:-1],
