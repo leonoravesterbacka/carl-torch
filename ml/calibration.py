@@ -176,8 +176,8 @@ class HistogramCalibrator():
         self.calibrator1 = Histogram(bins=bins, range=range,
                                      interpolation=self.interpolation,
                                      variable_width=self.variable_width)
-        self.calibrator0.fit(t0.reshape(-1, 1), sample_weight=w0.reshape(-1, 1), output=self.global_name+"_y0_calibDist")
-        self.calibrator1.fit(t1.reshape(-1, 1), sample_weight=w1.reshape(-1, 1), output=self.global_name+"_y1_calibDist")
+        self.calibrator0.fit(t0.reshape(-1, 1), sample_weight=w0.reshape(-1, 1), global_name=self.global_name, output=self.global_name+"_y0_calibDist")
+        self.calibrator1.fit(t1.reshape(-1, 1), sample_weight=w1.reshape(-1, 1), global_name=self.global_name, output=self.global_name+"_y1_calibDist")
         
         return self
 
