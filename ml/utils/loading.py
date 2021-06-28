@@ -362,14 +362,23 @@ class Loader():
         draw_scatter(weightCT, weightCA, var, do, n)
 
     def load_calibration(
+        #self,
+        #y_true,
+        #p1_raw = None,
+        #p1_cal = None,
+        #label = None,
+        #do = 'dilepton',
+        #var = 'QSFUP',
+        #plot = False
         self,
-        y_true,
-        p1_raw = None,
-        p1_cal = None,
+        y_true, 
+        p1_raw,
+        p1_cal,
         label = None,
-        do = 'dilepton',
-        var = 'QSFUP',
-        plot = False
+        features=[],
+        plot = False,
+        global_name="Test"
+
     ):
         """
         Parameters
@@ -386,4 +395,4 @@ class Loader():
 
         # load samples
         y_true  = load_and_check(y_true,  memmap_files_larger_than_gb=1.0)
-        plot_calibration_curve(y_true, p1_raw, p1_cal, do, var, plot)                                                                                                                                                                                                                                                                   
+        plot_calibration_curve(y_true, p1_raw, p1_cal, global_name, plot)

@@ -68,9 +68,6 @@ def draw_weighted_distributions(x0, x1, w0, w1,
         if save: plt.figure(figsize=(14, 10))
         else: plt.subplot(3,4, id)
         #plt.yscale('log')
-        #plt.hist(x0[:,id], bins = binning[column], label = "nominal", **hist_settings0)
-        #plt.hist(x0[:,id], bins = binning[column], weights=weights, label = 'nominal*CARL', **hist_settings0)
-        #plt.hist(x1[:,id], bins = binning[column], label = legend, **hist_settings1)
         w0 = w0.flatten()
         w1 = w1.flatten()
         w_carl = w0*weights
@@ -361,7 +358,7 @@ def draw_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True):
     logger.info("Unweighted %s AUC is %.3f"%(label,roc_auc_t))
     logger.info("Saving ROC plots to /plots")
 
-def plot_calibration_curve(y, probs_raw, probs_cal, do, var, save = False):
+def plot_calibration_curve(y, probs_raw, probs_cal, global_name, save = False):
     ax1 = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
     ax2 = plt.subplot2grid((3, 1), (2, 0))
     ax1.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")
@@ -369,26 +366,26 @@ def plot_calibration_curve(y, probs_raw, probs_cal, do, var, save = False):
     frac_of_pos_raw, mean_pred_value_raw = calibration_curve(y, probs_raw, n_bins=50)
     frac_of_pos_cal, mean_pred_value_cal = calibration_curve(y, probs_cal, n_bins=50)
 
-    ax1.plot(mean_pred_value_raw, frac_of_pos_raw, "s-", label='uncalibrated', **hist_settings0)
-    ax1.plot(mean_pred_value_cal, frac_of_pos_cal, "s-", label='calibrated', **hist_settings0)
+    ax1.plot(mean_pred_value_raw, frac_of_pos_raw, "s-", label='uncalibrated', **hist_settings_nom)
+    ax1.plot(mean_pred_value_cal, frac_of_pos_cal, "s-", label='calibrated', **hist_settings_alt)
     ax1.set_ylabel("Fraction of positives")
     ax1.set_ylim([-0.05, 1.05])
     ax1.legend(loc="lower right")
     ax1.set_title(f'Calibration plot')
 
-    ax2.hist(probs_raw, range=(0, 1), bins=50, label='uncalibrated', lw=2, **hist_settings0)
-    ax2.hist(probs_cal, range=(0, 1), bins=50, label='calibrated', lw=2, **hist_settings0)
+    ax2.hist(probs_raw, range=(0, 1), bins=50, label='uncalibrated', lw=2, **hist_settings_nom)
+    ax2.hist(probs_cal, range=(0, 1), bins=50, label='calibrated', lw=2, **hist_settings_alt)
     ax2.set_xlabel("Mean predicted value")
     ax2.set_ylabel("Count")
     if save:
-        plt.savefig('plots/calibration_'+do+'_'+var+'.png')
+        plt.savefig('plots/calibration_'+global_name+'.png')
         plt.clf()
     logger.info("Saving calibration curves to /plots")
 
 def draw_weights(weightCT, weightCA, legend, do, n, save = False):
     plt.yscale('log')
-    plt.hist(weightCT, bins = np.exp(np.linspace(-0.5,1.1,50)), label = 'carl-torch', **hist_settings0)
-    plt.hist(weightCA, bins = np.exp(np.linspace(-0.5,1.1,50)), label = 'carlAthena', **hist_settings0)
+    plt.hist(weightCT, bins = np.exp(np.linspace(-0.5,1.1,50)), label = 'carl-torch', **hist_settings_nom)
+    plt.hist(weightCA, bins = np.exp(np.linspace(-0.5,1.1,50)), label = 'carlAthena', **hist_settings_nom)
     plt.xlabel('weights', horizontalalignment='right',x=1)
     plt.legend(frameon=False)
     plt.savefig("plots/weights_%s_%s_%s.png"%(do, legend, n))
