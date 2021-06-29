@@ -257,17 +257,14 @@ class Loader():
         weights = None,
         label = None,
         features=[],
-#        weightFeature="DummyEvtWeight",
         plot = False,
         nentries = 0,
-#        TreeName = "Tree",
-#        pathA = '',
-#        pathB = '',
         global_name="Test",
+        plot_ROC = True,
+        plot_obs_ROC = True,
         ext_binning = None,
         ext_plot_path=None,
         verbose=False,
-        do_ROC=False,
     ):
         """
         Parameters
@@ -349,13 +346,15 @@ class Loader():
                 print("<loading.py::load_result>::   Column {}:  min  =  {},  max  =  {}".format(key,mean-5*std,mean+5*std))
                 print(binning[idx])
 
-        # no point in plotting distributions with too few events, they only look bad
-        #if int(nentries) > 5000:
-        # plot ROC curves
-        if do_ROC:
-            print("<loading.py::load_result>::   Printing ROC")
+        # no point in plotting distributions with too few events, they only look bad 
+        #if int(nentries) > 5000: 
+        # plot ROC curves 
+        print("<loading.py::load_result>::   Printing ROC")
+        if plot_ROC:
             draw_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
-
+        if plot_obs_ROC:
+            draw_Obs_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
+        
         if verbose:
             print("<loading.py::load_result>::   Printing weighted distributions")
         # plot reweighted distributions
@@ -391,14 +390,23 @@ class Loader():
         draw_scatter(weightCT, weightCA, var, do, n)
 
     def load_calibration(
+        #self,
+        #y_true,
+        #p1_raw = None,
+        #p1_cal = None,
+        #label = None,
+        #do = 'dilepton',
+        #var = 'QSFUP',
+        #plot = False
         self,
-        y_true,
-        p1_raw = None,
-        p1_cal = None,
+        y_true, 
+        p1_raw,
+        p1_cal,
         label = None,
-        do = 'dilepton',
-        var = 'QSFUP',
-        plot = False
+        features=[],
+        plot = False,
+        global_name="Test"
+
     ):
         """
         Parameters
@@ -415,4 +423,4 @@ class Loader():
 
         # load samples
         y_true  = load_and_check(y_true,  memmap_files_larger_than_gb=1.0)
-        plot_calibration_curve(y_true, p1_raw, p1_cal, do, var, plot)
+        plot_calibration_curve(y_true, p1_raw, p1_cal, global_name, plot)
