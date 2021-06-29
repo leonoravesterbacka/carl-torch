@@ -107,15 +107,21 @@ else:
         pathA=p+nominal+".root",
         pathB=p+variation+".root",
         noTar=True,
+        normalise=False,
+        debug=False,
     )
     logger.info(" Loaded new datasets ")
 #######################################
 
 #######################################
-# Estimate the likelihood ratio
+# Estimate the likelihood ratio using a NN model
+#   -> Calculate number of input variables as rudimentary guess
+n_inputs = x.shape[1]
+structure = np.repeat(n_inputs, 5)
+# Use the number of inputs as input to the hidden layer structure
 estimator = RatioEstimator(
-    n_hidden=n_hidden,
-    activation="relu",
+    n_hidden=(structure),
+    activation="relu"
 )
 estimator.scaling_method = scale_method
 
@@ -173,6 +179,7 @@ train_loss, val_loss, accuracy_train, accuracy_val = estimator.train(
     method='carl',
     batch_size=batch_size,
     n_epochs=nepoch,
+    validation_split=0.25,
     x=x,
     y=y,
     w=w,
