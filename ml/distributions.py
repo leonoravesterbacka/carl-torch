@@ -88,8 +88,8 @@ class Histogram():
         plt.plot(pltx,h)
         plt.xlabel('Prob(y=1 | X)')
         plt.ylabel('Entries')
-        plt.savefig(kwargs["output"]+'.png')
-
+        plt.savefig("plots/"+kwargs["global_name"]+"/"+kwargs["output"]+'.png')
+        plt.clf()
 
         # Add empty bins for out of bound samples
         for j in range(X.shape[1]):

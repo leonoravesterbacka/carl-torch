@@ -255,13 +255,11 @@ class Loader():
         weights = None,
         label = None,
         features=[],
-#        weightFeature="DummyEvtWeight",    
         plot = False,
         nentries = 0,
-#        TreeName = "Tree",
-#        pathA = '',
-#        pathB = '',
-        global_name="Test"
+        global_name="Test",
+        plot_ROC = True,
+        plot_obs_ROC = True,
     ):
         """
         Parameters
@@ -325,8 +323,10 @@ class Loader():
         #if int(nentries) > 5000: 
         # plot ROC curves 
         print("<loading.py::load_result>::   Printing ROC")
-        draw_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
-        draw_Obs_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
+        if plot_ROC:
+            draw_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
+        if plot_obs_ROC:
+            draw_Obs_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
         
         print("<loading.py::load_result>::   Printing weighted distributions")
         # plot reweighted distributions     

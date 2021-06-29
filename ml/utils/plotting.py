@@ -176,7 +176,7 @@ def draw_weighted_distributions(x0, x1, w0, w1,
             plt.clf()
             plt.close()
 
-def weight_obs_data(x0, x1, w0, w1, max_weight=10000.): # Max weight redundant here because of large weight Sherpa!
+def weight_obs_data(x0, x1, w0, w1, max_evts=100000):
 
     # Remove negative probabilities - maintains proportionality still by abs()
     w0 = abs(w0)
@@ -186,6 +186,7 @@ def weight_obs_data(x0, x1, w0, w1, max_weight=10000.): # Max weight redundant h
     x0_len = x0.shape[0]
     x1_len = x1.shape[0]
     minEvts = x0_len if x0_len < x1_len else x1_len
+    minEvts = minEvts if minEvts < max_evts else max_evts
 
     # Dataset 0 probability proportionality sub-sampling
     w0 = w0 / w0.sum()
@@ -283,7 +284,7 @@ def draw_Obs_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True):
             plt.savefig('plots/roc_inputs_nominalVs%s_%s_%s_%s.png'%(legend,label,idx,n))
             plt.clf()
 
-def weight_data(x0, x1, w0, w1, max_weight=10000.):
+def weight_data(x0, x1, w0, w1, max_evts=100000):
 
     # Remove negative probabilities - maintains proportionality still by abs()
     w0 = abs(w0)
@@ -293,34 +294,40 @@ def weight_data(x0, x1, w0, w1, max_weight=10000.):
     x0_len = x0.shape[0]
     x1_len = x1.shape[0]
     minEvts = x0_len if x0_len < x1_len else x1_len
+    minEvts = minEvts if minEvts < max_evts else max_evts
 
     x0_len = x0.shape[0]
     w0 = w0 / w0.sum()
     weighted_data0 = np.random.choice(range(x0_len), x0_len, p = w0)
     w_x0 = x0.copy()[weighted_data0]
+    w0   = w0.copy()[weighted_data0]
     #w_x0 = np.random.choice(x0, size=minEvts, p = w0)
 
     x1_len = x1.shape[0]
     w1 = w1 / w1.sum()
     weighted_data1 = np.random.choice(range(x1_len), x1_len, p = w1)
     w_x1 = x1.copy()[weighted_data1]
+    w1   = w1.copy()[weighted_data1]
     #w_x1 = np.random.choice(x1, size=minEvts, p = w1)
 
     # Cap the two to equal size
     w_x0 = w_x0[ 0:minEvts, :]
     w_x1 = w_x1[ 0:minEvts, :]
+    w0   = w0[0:minEvts]
+    w1   = w1[0:minEvts]
 
     x_all = np.vstack((w_x0,w_x1))
     #y_all = np.zeros(x0_len+x1_len)
     y_all = np.zeros(minEvts*2)
     y_all[minEvts:] = 1
-    return (x_all,y_all)
+    w_all = np.append( w0, w1)
+    return (x_all,y_all,w_all)
 
 def resampled_discriminator_and_roc(original, target, w0, w1):
-    w0 = abs(w0)
-    w1 = abs(w1)
-    (data, labels) = weight_data(original, target, w0, w1)
-    W = np.concatenate([w0 / w0.sum(), w1 / w1.sum()])
+    #w0 = abs(w0) # Done in function below 'weight_data'
+    #w1 = abs(w1)
+    (data, labels, W) = weight_data(original, target, w0, w1)
+    #W = np.concatenate([w0 / w0.sum(), w1 / w1.sum()])
     Xtr, Xts, Ytr, Yts, Wtr, Wts = train_test_split(data, labels, W, random_state=42, train_size=0.51, test_size=0.49)
 
     discriminator = MLPRegressor(tol=1e-05, activation="logistic",
@@ -362,6 +369,22 @@ def plot_calibration_curve(y, probs_raw, probs_cal, global_name, save = False):
     ax1 = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
     ax2 = plt.subplot2grid((3, 1), (2, 0))
     ax1.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")
+
+    # Masking -ve probabilities
+    mask = np.logical_and( (probs_raw > 0), (probs_cal > 0))
+    y = y[mask]
+    probs_raw = probs_raw[mask]
+    probs_cal = probs_cal[mask]
+    #for idx,(i,j) in enumerate(zip(probs_raw, probs_cal)):
+    #    if i < 0:
+    #        probs_raw[idx] = y[idx]
+    #    if j < 0:
+    #        probs_cal[idx] = y[idx]
+    #    #if j < 0 or i < 0:
+    #        #print("probs_raw:   {}".format(i))
+    #        #print("probs_cal:   {}".format(j))
+            
+
 
     frac_of_pos_raw, mean_pred_value_raw = calibration_curve(y, probs_raw, n_bins=50)
     frac_of_pos_cal, mean_pred_value_cal = calibration_curve(y, probs_cal, n_bins=50)
