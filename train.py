@@ -142,6 +142,8 @@ if per_epoch_plot:
         "global_name":global_name,
         "ext_binning":binning,
         "verbose" : False,
+        "plot_ROC" : False,
+        "plot_obs_ROC" : False,
     }
     vali_args = {
         "x0":f'data/{global_name}/X0_val_{n}.npy',
@@ -156,6 +158,8 @@ if per_epoch_plot:
         "global_name":global_name,
         "ext_binning":binning,
         "verbose" : False,
+        "plot_ROC" : False,
+        "plot_obs_ROC" : False,
     }
     intermediate_train_plot = (
         (estimator.evaluate, {"train":x0, "val":f'data/{global_name}/X0_val_{n}.npy'}),

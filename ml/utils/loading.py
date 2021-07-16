@@ -265,6 +265,8 @@ class Loader():
         ext_binning = None,
         ext_plot_path=None,
         verbose=False,
+        ext_binning = None,
+        normalise = False,
     ):
         """
         Parameters
@@ -346,24 +348,27 @@ class Loader():
                 print("<loading.py::load_result>::   Column {}:  min  =  {},  max  =  {}".format(key,mean-5*std,mean+5*std))
                 print(binning[idx])
 
-        # no point in plotting distributions with too few events, they only look bad 
-        #if int(nentries) > 5000: 
-        # plot ROC curves 
+        # no point in plotting distributions with too few events, they only look bad
+        #if int(nentries) > 5000:
+        # plot ROC curves
         print("<loading.py::load_result>::   Printing ROC")
         if plot_ROC:
             draw_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
         if plot_obs_ROC:
             draw_Obs_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
-        
+
         if verbose:
             print("<loading.py::load_result>::   Printing weighted distributions")
         # plot reweighted distributions
-        draw_weighted_distributions(X0, X1, W0, W1,
-                                    weights,
-                                    metaDataDict.keys(),#x0df.columns,
-                                    binning,
-                                    label,
-                                    global_name, nentries, plot, ext_plot_path)
+        draw_weighted_distributions(
+            X0, X1, W0, W1,
+            weights,
+            metaDataDict.keys(),#x0df.columns,
+            binning,
+            label,
+            global_name, nentries, plot, ext_plot_path,
+            normalise,
+        )
 
     def validate_result(
         self,
@@ -399,7 +404,7 @@ class Loader():
         #var = 'QSFUP',
         #plot = False
         self,
-        y_true, 
+        y_true,
         p1_raw,
         p1_cal,
         label = None,

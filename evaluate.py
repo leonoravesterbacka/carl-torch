@@ -19,6 +19,8 @@ parser.add_option('-t', '--TreeName',  action='store', type=str, dest='treename'
 parser.add_option('--PlotROC',  action="store_true", dest='plot_ROC',  help='Flag to determine if one should plot ROC')
 parser.add_option('--PlotObsROC',  action="store_true", dest='plot_obs_ROC',  help='Flag to determine if one should plot observable ROCs')
 parser.add_option('-m', '--model', action='store', type=str, dest='model', default=None, help='path to the model.')
+parser.add_option('-b', '--binning',  action='store', type=str, dest='binning',  default=None, help='path to binning yaml file.')
+parser.add_option('--normalise', action='store_true', dest='normalise', default=False, help='enforce normalization when plotting')
 (opts, args) = parser.parse_args()
 nominal  = opts.nominal
 variation = opts.variation
@@ -29,6 +31,8 @@ features = opts.features.split(",")
 weightFeature = opts.weightFeature
 treename = opts.treename
 model = opts.model
+binning = opts.binning
+normalise = opts.normalise
 #################################################
 
 
@@ -72,6 +76,8 @@ for i in evaluate:
                         global_name=global_name,
                         plot_ROC=opts.plot_ROC,
                         plot_obs_ROC=opts.plot_obs_ROC,
+                        ext_binning = binning,
+                        normalise = normalise,
                     )
 # Evaluate performance
 carl.evaluate_performance(x='data/'+global_name+'/X_val_'+str(n)+'.npy',
