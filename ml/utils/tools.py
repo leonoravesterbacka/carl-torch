@@ -16,42 +16,86 @@ logger = logging.getLogger(__name__)
 
 initialized = False
 
-def HarmonisedLoading(fA="",
-                      fB="",
-                      features=[],
-                      weightFeature="DummyEvtWeight",
-                      nentries=0,
-                      TreeName="Tree"        
-                  ):
-    
+def AddInvertWeight(
+    x,
+    w,
+    frac=0.05,
+):
+    """
+    Take fraction of the event ramdomly, frac_x and frac_w, append them into
+    the original x and w data. Inverted the sign of frac_w to get inv_frac_w,
+    and then append them into the orignal data set as well. The final distribution
+    shouldn't change since the frac_w and inv_frac_w cancel each other.
 
-    x0, w0, vlabels0 = load(f = fA, 
-                            features=features, weightFeature=weightFeature, 
-                            n = int(nentries), t = TreeName)
-    x1, w1, vlabels1 = load(f = fB, 
+    Args:
+        x : panda.DataFrame
+            dataframe that contains the features for training.
+
+        w : panda.DataFrame
+            dataframe that contains the MC event weight.
+
+        frac : float, optional
+            fraction of samples to be re-sample from the original dataframe
+
+    """
+    frac_x = x.sample(frac=frac, random_state = 42)
+    frac_w = w[w.iloc(frac_x.index)]
+
+    # appending this into the original data frame
+    x = x.append(frac_x)
+    w = x.append(frac_w)
+
+    # inverting the sign of weight, and adding it to the data frame
+    w *= -1
+    if "polarity" in frac_x:
+        frac_x["polarity"] *= -1
+    x = x.append(frac_x)
+    w = x.append(frac_w)
+
+    return x, w
+
+
+def HarmonisedLoading(
+    fA="",
+    fB="",
+    features=[],
+    weightFeature="DummyEvtWeight",
+    nentries=0,
+    TreeName="Tree",
+):
+
+
+    x0, w0, vlabels0 = load(f = fA,
                             features=features, weightFeature=weightFeature,
                             n = int(nentries), t = TreeName)
-    
+    x1, w1, vlabels1 = load(f = fB,
+                            features=features, weightFeature=weightFeature,
+                            n = int(nentries), t = TreeName)
+
     x0, x1 = CoherentFlattening(x0,x1)
 
-    return x0, w0, vlabels0, x1, w1, vlabels1
-    
+    # hard-coding the event weight inverting here for the moment
+    # TODO: make this optional
+    x0, w0 = AddInvertWeight(x0, w0)
 
-    
+    return x0, w0, vlabels0, x1, w1, vlabels1
+
+
+
 def CoherentFlattening(df0, df1):
-    
+
     # Find the lowest common denominator for object lengths
     df0_objects = df0.select_dtypes(object)
     df1_objects = df1.select_dtypes(object)
     minObjectLen = defaultdict()
     for column in df0_objects:
-        elemLen0 = df0[column].apply(lambda x: len(x)).max() 
-        elemLen1 = df1[column].apply(lambda x: len(x)).max() 
-    
+        elemLen0 = df0[column].apply(lambda x: len(x)).max()
+        elemLen1 = df1[column].apply(lambda x: len(x)).max()
+
         # Warn user
         if elemLen0 != elemLen1:
             print("<tools.py::CoherentFlattening()>::   The two datasets do not have the same length for features '{}', please be warned that we choose zero-padding using lowest dimensionatlity".format(column))
-    
+
         minObjectLen[column] = elemLen0 if elemLen0 < elemLen1 else elemLen1
         print("<tools.py::CoherentFlattening()>::   Variable: {}({}),   min size = {}".format( column, df0[column].dtypes, minObjectLen))
         print("<tools.py::CoherentFlattening()>::      Element Length 0 = {}".format( elemLen0))
@@ -60,14 +104,14 @@ def CoherentFlattening(df0, df1):
     # Find the columns that are not scalars and get all object type columns
     #maxListLength = df.select_dtypes(object).apply(lambda x: x.list.len()).max(axis=1)
     for column in df0_objects:
-        elemLen0 = df0[column].apply(lambda x: len(x)).max() 
-        elemLen1 = df1[column].apply(lambda x: len(x)).max() 
+        elemLen0 = df0[column].apply(lambda x: len(x)).max()
+        elemLen1 = df1[column].apply(lambda x: len(x)).max()
 
 
         # Now break up each column into elements of max size 'macObjectLen'
         df0_flattened = pd.DataFrame(df0[column].to_list(), columns=[column+str(idx) for idx in range(elemLen0)])
         df0_flattened = df0_flattened.fillna(0)
-        
+
         # Delete extra dimensions if needed due to non-matching dimensionality of df0 & df1
         if elemLen0 > minObjectLen[column]:
             delColumns0 = [column+str(idx) for idx in range(minObjectLen[column], elemLen0)]
@@ -105,28 +149,58 @@ def load(
     features=[],
     weightFeature="DummyEvtWeight",
     n=0,
-    t="Tree"        
+    t="Tree",
+    weight_polarity=True,
 ):
+    """
+    Function for preparing feastures for training.
+
+    Args:
+        f : str
+            Path to the ROOT N tuples.
+
+        features : [], optional
+            List of observables/features name inside the ROOT file TTree.
+            If no feature is provided, all branches from the TTree will be used.
+
+        weightFeature : str, optional
+            Name of the branch that contains the MC event weight.
+            If no weightFeasure is provided, weight of 1 will be used.
+
+        n : int, optional
+            Total number of input events.
+
+        weight_polarity : boolean, optional
+            introduce a polarity feature for training. The value of the polarity
+            will be determined by the sign of the event weight. 1 will be assigned
+            to positive (>=0) event weight, and -1 will be assigned to negative (< 0)
+            event weight.
+
+    Return:
+        ( pandas.DataFrame, pandas.DataFrame, list(str) ) :
+
+            DataFrame of feasures, event weight, and labels
+    """
     # grab our data and iterate over chunks of it with uproot
     print("Uproot open file")
     file = uproot.open(f)
-    
+
     # Now get the Tree
     print("Getting TTree from file")
     X_tree = file[t]
 
-    # Check that features were set by user, if not then will use all features 
+    # Check that features were set by user, if not then will use all features
     #   -  may double up on weight feature but will warn user
     if not features:
         # Set the features to all keys in tree - warn user!!!
         print("<tools.py::load()>::   Attempting extract features however user did not define values. Using all keys inside TTree as features.")
         features = X_Tree.keys()
-        
+
     # Extract the pandas dataframe - warning about jagged arrays
     #df = X_tree.pandas.df(features, flatten=False)
     df = pd.DataFrame(X_tree.arrays(features, library="np", entry_stop=n))
 
-    # Extract the weights from the Tree if specificed 
+    # Extract the weights from the Tree if specificed
     if weightFeature == "DummyEvtWeight":
         #weights = len(df.index)
         dweights = np.ones(len(df.index))
@@ -138,7 +212,12 @@ def load(
         #weights[weightFeature] = weights[weightFeature].abs() #sjiggins
 
     # For the moment one should siply use the features
-    labels  = features
+    if weight_polarity:
+        polarity_name = "polarity"
+        df[polarity_name] = df[weightFeature].apply(lambda x: 1 if x >= 0 else -1)
+        labels  = features + [polarity_name]
+    else:
+        labels = features
 
     return (df, weights, labels)
 
