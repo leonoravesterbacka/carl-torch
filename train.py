@@ -2,14 +2,12 @@ import os
 import sys
 import logging
 import argparse
-import torch
 import tarfile
 import pickle
 import pathlib
 import numpy as np
 from ml import RatioEstimator
 from ml import Loader
-import numpy as np
 from itertools import repeat
 
 
@@ -73,7 +71,7 @@ else:
     sys.exit()
 
 if os.path.exists(f"data/{global_name}/data_out.tar.gz"):
-#    tar = tarfile.open("data_out.tar.gz", "r:gz")
+    # tar = tarfile.open("data_out.tar.gz", "r:gz")
     tar = tarfile.open(f"data/{global_name}/data_out.tar.gz")
     tar.extractall()
     tar.close()

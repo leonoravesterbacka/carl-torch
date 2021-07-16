@@ -265,7 +265,6 @@ class Loader():
         ext_binning = None,
         ext_plot_path=None,
         verbose=False,
-        ext_binning = None,
         normalise = False,
     ):
         """
