@@ -39,18 +39,18 @@ def AddInvertWeight(
 
     """
     frac_x = x.sample(frac=frac, random_state = 42)
-    frac_w = w[w.iloc(frac_x.index)]
+    frac_w = w.iloc[frac_x.index]
 
     # appending this into the original data frame
     x = x.append(frac_x)
-    w = x.append(frac_w)
+    w = w.append(frac_w)
 
     # inverting the sign of weight, and adding it to the data frame
-    w *= -1
+    frac_w *= -1
     if "polarity" in frac_x:
         frac_x["polarity"] *= -1
     x = x.append(frac_x)
-    w = x.append(frac_w)
+    w = w.append(frac_w)
 
     return x, w
 
