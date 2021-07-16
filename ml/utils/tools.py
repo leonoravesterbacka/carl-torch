@@ -214,7 +214,7 @@ def load(
     # For the moment one should siply use the features
     if weight_polarity:
         polarity_name = "polarity"
-        df[polarity_name] = df[weightFeature].apply(lambda x: 1 if x >= 0 else -1)
+        df[polarity_name] = weights[weightFeature].apply(lambda x: 1 if x >= 0 else -1)
         labels  = features + [polarity_name]
     else:
         labels = features
