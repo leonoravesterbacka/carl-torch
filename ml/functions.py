@@ -36,7 +36,7 @@ def get_loss(method, alpha, w = 1):
         raise NotImplementedError("Unknown method {}".format(method))
 
     return loss_functions, loss_labels, loss_weights #sjiggins
-        
+
 
 def get_optimizer(optimizer, nesterov_momentum):
     opt_kwargs = None
@@ -58,7 +58,7 @@ def ratio_xe(s_hat, y_true, w):
     # New weighted loss functions - sjiggins
     if w is None:
         w = torch.ones(y_true.shape[0])
-    loss = BCELoss(weight=w)(s_hat, y_true)
+    loss = BCELoss(weight=torch.abs(w))(s_hat, y_true)
     return loss
 
 @contextmanager
@@ -75,4 +75,4 @@ def less_logging():
         logging.disable(logging.INFO)
         yield
     finally:
-        logging.disable(logging.DEBUG)                                                       
+        logging.disable(logging.DEBUG)
