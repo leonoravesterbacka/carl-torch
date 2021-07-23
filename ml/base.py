@@ -40,6 +40,11 @@ class Estimator(object):
         self.x_scaling_means = None
         self.x_scaling_stds = None
         self.scaling_method = None
+        self.scaling_clamp = True
+        self.clamp_min = None
+        self.clamp_max = None
+        self.x_scaling_quantile_up = None
+        self.x_scaling_quantile_down = None
 
     def train(self, *args, **kwargs):
         raise NotImplementedError
@@ -256,6 +261,8 @@ class Estimator(object):
             self.x_scaling_stds = np.maximum(np.std(x, axis=0), 1.0e-6)
             self.x_scaling_mins = np.min(x, axis=0)
             self.x_scaling_maxs = np.max(x, axis=0)
+            self.x_scaling_quantile_down = np.quantile(x, 0.25, axis=0)
+            self.x_scaling_quantile_up = np.quantile(x, 0.75, axis=0)
         else:
             logger.info("Disabling input rescaling")
             n_parameters = x.shape[0]
@@ -264,6 +271,40 @@ class Estimator(object):
             self.x_scaling_stds = np.ones(n_parameters)
             self.x_scaling_mins = np.zeros(n_parameters)
             self.x_scaling_maxs = np.ones(n_parameters)
+            self.x_scaling_quantile_down = np.zeros(n_parameters)
+            self.x_scaling_quantile_up = np.ones(n_parameters)
+
+    def _clamp_inputs(self, x):
+        print("<base.py::_transform_inputs()>::   Doing Clamping for inputs")
+        # clamp value by 25% to 75% quntile
+        if isinstance(x, torch.Tensor):
+            _torch_min = torch.tensor(self.x_scaling_mins, dtype=x.dtype, device=x.device)
+            _torch_max = torch.tensor(self.x_scaling_maxs, dtype=x.dtype, device=x.device)
+            _quantile_up = torch.tensor(self.x_scaling_quantile_up, dtype=x.dtype, device=x.device)
+            _quantile_down = torch.tensor(self.x_scaling_quantile_down, dtype=x.dtype, device=x.device)
+            diff = _torch_max - _torch_min
+            # compute clamp range if not provided
+            if self.clamp_max is None or self.clamp_min is None:
+                clamp_max = (_quantile_up - _torch_min) / diff
+                clamp_min = (_quantile_down - _torch_min) / diff
+            else:
+                clamp_max = torch.tesnor(self.clamp_max, dtype=x.dtype, device=x.device)
+                clamp_min = torch.tensor(self.clamp_min, dtype=x.dtype, device=x.device)
+            return torch.clamp(x, min=clamp_min, max=clamp_max)
+        else:
+            _quantile_up = (self.x_scaling_quantile_up - self.x_scaling_mins)
+            _quantile_down = (self.x_scaling_quantile_down - self.x_scaling_mins)
+            diff = (self.x_scaling_maxs - self.x_scaling_mins)
+            if self.clamp_max is None or self.clamp_min is None:
+                clamp_max = np.divide(_quantile_up, diff, out=np.zeros_like(_quantile_up), where=diff!=0)
+                clamp_min = np.divide(_quantile_down, diff, out=np.zeros_like(_quantile_up), where=diff!=0)
+            else:
+                clamp_max = self.clamp_max
+                clamp_min = self.clamp_min
+            return np.clip(x, clamp_min, clamp_max)
+
+
+
 
     def _transform_inputs(self, x, scaling = "minmax"):
         # use the self.scaling method to overwritten the scaling arugmuent
@@ -294,6 +335,8 @@ class Estimator(object):
                     #x_scaled = x_scaled/(self.x_scaling_maxs - self.x_scaling_mins)
                     diff = (self.x_scaling_maxs - self.x_scaling_mins)
                     x_scaled = np.divide(x_scaled, diff, out=np.zeros_like(x_scaled), where=diff!=0)
+                if self.scaling_clamp:
+                    x_scaled = self._clamp_inputs(x_scaled)
             else:
                 print("<base.py::_transform_inputs()>::   unable to do min-max scaling")
                 x_scaled = x
