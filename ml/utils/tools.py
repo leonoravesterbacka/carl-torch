@@ -11,6 +11,7 @@ import torch
 from torch.nn import functional as F
 from collections import defaultdict
 from contextlib import contextmanager
+import pickle
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,11 @@ def AddInvertWeight(
         frac_x["polarity"] *= -1
     x = x.append(frac_x)
     w = w.append(frac_w)
+
+    with open("addInvSample.pkl", "wb") as f:
+        frac_x = frac_x[sorted(frac_x.columns)]
+        addInvSample = (frac_x, frac_w)
+        pickle.dump(addInvSample, f)
 
     return x, w
 

@@ -25,6 +25,18 @@ hist_settings_CARL = {'histtype':'step', 'color':'black', 'linewidth':1, 'linest
 hist_settings_CARL_ratio = {'color':'black', 'linewidth':1, 'linestyle':'--'}
 #hist_settings1_step = {'color':'black', 'linewidth':1, 'linestyle':'--'}
 
+do_dbug_plot = False
+if do_dbug_plot:
+    try:
+        import pickle
+        with open("addInvSample.pkl", "rb") as f:
+            addInvSample = pickle.load(f)
+    except Exception as e:
+        print(e)
+        addInvSample = None
+else:
+    addInvSample = None
+
 
 def draw_unweighted_distributions(x0, x1,
                                   weights,
@@ -80,6 +92,21 @@ def draw_weighted_distributions(x0, x1, w0, w1,
         plt.hist(x0[:,id], bins = binning[id], weights = w0, label = "nominal", **hist_settings_nom)
         plt.hist(x0[:,id], bins = binning[id], weights = w_carl, label = 'nominal*CARL', **hist_settings_CARL)
         plt.hist(x1[:,id], bins = binning[id], weights = w1, label = legend, **hist_settings_alt)
+        if addInvSample:
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            _setting = {'histtype':'step', 'linewidth':2, 'color':'red'}
+            _x0 = addInvSample[0].to_numpy()
+            _w0 = addInvSample[1].to_numpy().flatten()
+            plt.hist(_x0[:,id], bins = binning[id], weights = _w0, label = "Non-splited nominal Inverted fraction", **_setting)
+
+            _inv_setting = {'histtype':'step', 'linewidth':3, 'color':'pink'}
+            if column == "polarity":
+                mul_scale = -1
+            else:
+                mul_scale = 1
+            _w0= (addInvSample[1]*-1).to_numpy().flatten()
+            plt.hist(_x0[:,id]*mul_scale, bins = binning[id], weights = _w0, label = "Non-splited nominal fraction", **_inv_setting)
+
         plt.xlabel('%s'%(column), horizontalalignment='right',x=1)
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()
@@ -203,11 +230,11 @@ def weight_obs_data(x0, x1, w0, w1, max_evts=100000):
     # Dataset 0 probability proportionality sub-sampling
     w0 = w0 / w0.sum()
     w_x0 = np.random.choice(x0, size=minEvts, p = w0)
-    
+
     # Dataset 1 probability proportionality sub-sampling
     w1 = w1 / w1.sum()
     w_x1 = np.random.choice(x1, size=minEvts, p = w1)
-    
+
     # Concatenate all data
     x_all = np.append(w_x0,w_x1)
     y_all = np.zeros(minEvts*2)
@@ -222,10 +249,10 @@ def obs_roc_curve(x, y_true):
     #minRange = np.amin(x)
     minRange = np.amin(x, 0)
     print("       -> Range:  {},{}".format(maxRange,minRange))
-    
+
     # Now determine the boundaries for classification
     ClassBoundaries = np.linspace(minRange, maxRange, 20)
-    
+
     # Default ROC curve info
     fpr = np.zeros(len(ClassBoundaries))
     tpr = np.zeros(len(ClassBoundaries))
@@ -237,11 +264,11 @@ def obs_roc_curve(x, y_true):
         #print("       -> Edge:  {}".format(idx))
         y_pred =  x < edge
         tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
-        tpr[idx] = tp/(tp+fn) 
+        tpr[idx] = tp/(tp+fn)
         fpr[idx] = fp/(tn+fp)
         #print("       -> tpr:  {}".format(tpr))
         #print("       -> fpr:  {}".format(fpr))
-        
+
     return fpr, tpr
 
 def resampled_obs_and_roc(original, target, w0, w1):
@@ -261,7 +288,7 @@ def draw_Obs_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True):
         x0 = X0[:,idx]
         x1 = X1[:,idx]
 
-        # Form the resampled data based on probability of each event 
+        # Form the resampled data based on probability of each event
         fpr_t,tpr_t,roc_auc_t,data_t,labels_t = resampled_obs_and_roc(x0, x1, W0, W1)
         fpr_tC,tpr_tC,roc_auc_tC,data_tr,labels_tr = resampled_obs_and_roc(x0, x1, W0*weights, W1)
         plt.plot(fpr_t, tpr_t, label=r"no weight, AUC=%.3f" % roc_auc_t)
@@ -343,8 +370,8 @@ def resampled_discriminator_and_roc(original, target, w0, w1):
     Xtr, Xts, Ytr, Yts, Wtr, Wts = train_test_split(data, labels, W, random_state=42, train_size=0.51, test_size=0.49)
 
     discriminator = MLPRegressor(tol=1e-05, activation="logistic",
-                                 hidden_layer_sizes=(original.shape[1],original.shape[1], original.shape[1]), 
-                                 learning_rate_init=1e-07, learning_rate="constant", 
+                                 hidden_layer_sizes=(original.shape[1],original.shape[1], original.shape[1]),
+                                 learning_rate_init=1e-07, learning_rate="constant",
                                  solver="lbfgs", random_state=1,
                                  max_iter=200)
 
@@ -395,7 +422,7 @@ def plot_calibration_curve(y, probs_raw, probs_cal, global_name, save = False):
     #    #if j < 0 or i < 0:
     #        #print("probs_raw:   {}".format(i))
     #        #print("probs_cal:   {}".format(j))
-            
+
 
 
     frac_of_pos_raw, mean_pred_value_raw = calibration_curve(y, probs_raw, n_bins=50)
