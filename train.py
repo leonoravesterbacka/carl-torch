@@ -117,7 +117,7 @@ else:
 structure = ( (len(features)*3, ) * 5)
 # Use the number of inputs as input to the hidden layer structure
 estimator = RatioEstimator(
-    n_hidden=(structure),
+    n_hidden=n_hidden,
     activation="relu"
 )
 estimator.scaling_method = scale_method
@@ -142,6 +142,7 @@ if per_epoch_plot:
         "verbose" : False,
         "plot_ROC" : False,
         "plot_obs_ROC" : False,
+        "normalise" : True, # plotting
     }
     vali_args = {
         "x0":f'data/{global_name}/X0_val_{n}.npy',
@@ -158,6 +159,7 @@ if per_epoch_plot:
         "verbose" : False,
         "plot_ROC" : False,
         "plot_obs_ROC" : False,
+        "normalise" : True,  # plotting 
     }
     intermediate_train_plot = (
         (estimator.evaluate, {"train":x0, "val":f'data/{global_name}/X0_val_{n}.npy'}),
