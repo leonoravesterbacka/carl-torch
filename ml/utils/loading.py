@@ -28,6 +28,7 @@ class Loader():
     """
     def __init__(self):
         super(Loader, self).__init__()
+        self.Filter=None
 
     def loading(
         self,
@@ -49,6 +50,7 @@ class Loader():
         normalise = False,
         debug = False,
         noTar = True,
+        scaling="minmax",
     ):
         """
         Parameters
@@ -92,7 +94,7 @@ class Loader():
             x1, w1, vlabels1
         )  = HarmonisedLoading(fA = pathA, fB = pathB,
                                features=features, weightFeature=weightFeature,
-                               nentries = int(nentries), TreeName = TreeName)
+                               nentries = int(nentries), TreeName = TreeName, Filter=self.Filter)
 
         # Run if requested debugging by user
         if debug:
@@ -148,6 +150,25 @@ class Loader():
                 logger.info("weight vector (1): {}".format(w1))
 
 
+        # Hack for removing rediculous large weights
+        threshold = 10000000
+        w0_threshold_pos = w0[weightFeature].mean() + threshold*w0[weightFeature].std()
+        w0_threshold_neg = w0[weightFeature].mean() - threshold*w0[weightFeature].std()
+        w0_mask = (w0[weightFeature] < w0_threshold_pos) & (w0[weightFeature] > w0_threshold_neg) 
+        print("Number of changed events (1): {}".format(np.count_nonzero(w0_mask == False)))
+        w0 = w0.where(w0_mask, other=w0[weightFeature].mean())
+        print("loading::   w0_threshold_pos = {}".format(w0_threshold_pos))
+        print("loading::   w0 mean = {}".format(w0[weightFeature].mean()))
+        print("loading::   w0_threshold_neg = {}".format(w0_threshold_neg))
+        w1_threshold_pos = w1[weightFeature].mean() + threshold*w1[weightFeature].std()
+        w1_threshold_neg = w1[weightFeature].mean() - threshold*w1[weightFeature].std()
+        w1_mask =   (w1 < w1_threshold_pos) & (w1 > w1_threshold_neg) 
+        print("Number of changed events (1): {}".format(np.count_nonzero(w1_mask == False)))
+        w1 = w1.where(w1_mask, other=w1[weightFeature].mean())
+        print("loading::   w1_threshold_pos = {}".format(w1_threshold_pos))
+        print("loading::   w1 mean = {}".format(w1[weightFeature].mean()))
+        print("loading::   w1_threshold_neg = {}".format(w1_threshold_neg))
+
         if correlation:
             cor0 = x0.corr()
             sns.heatmap(cor0, annot=True, cmap=plt.cm.Reds)
@@ -173,7 +194,12 @@ class Loader():
         x1 = x1[sorted(x1.columns)]
 
         # get metadata, i.e. max, min, mean, std of all the variables in the dataframes
-        metaData = {v : {x0[v].min(), x0[v].max() } for v in  x0.columns }
+        if scaling == "standard":
+            metaData = {v : {x0[v].mean(), x0[v].std() } for v in  x0.columns }
+            print("Performed Z0 Standard scaling: {}".format(metaData))
+        elif scaling == "minmax":
+            metaData = {v : {x0[v].min(), x0[v].max() } for v in  x0.columns }
+            print("Performed minmax scaling: {}".format(metaData))
         X0 = x0.to_numpy()
         X1 = x1.to_numpy()
 
@@ -265,6 +291,7 @@ class Loader():
         ext_binning = None,
         ext_plot_path=None,
         verbose=False,
+        scaling="minmax",
     ):
         """
         Parameters
@@ -304,7 +331,7 @@ class Loader():
             print("<loading.py::load_result>::   Calculating min/max range for plots & binning")
         binning = defaultdict()
         minmax = defaultdict()
-        divisions = 50
+        divisions = 100 # 50 default
 
         # external binning from yaml file.
         if ext_binning:
@@ -324,10 +351,28 @@ class Loader():
                     pass
 
             #max = x0df[column].max()
+            # Check for integer values in plotting data only, this indicates that no capping on data range needed
+            #  as integer values indicate well bounded data
+            intTest = [ (i % 1) == 0  for i in X0[:,idx] ]
+            #if key == "Njets":
+            #    print(X0[:,idx])
+            #    print(intTest)
+            intTest = all(intTest) #np.all(intTest == True)
+            print("key: {},   Integer Test:  {}".format(key, intTest))
+            #upperThreshold = 100 if (np.any(X0[:,idx] < 0 ) or intTest) else 50
+            upperThreshold = 100 if intTest else 98
+            print("key:  {},    Upper Threshold:   {}".format(key,upperThreshold))
+            max = np.percentile(X0[:,idx], upperThreshold)
             #min = x0df[column].min()
-            #minmax[column] = [min,max]
-            #binning[column] = np.linspace(min, max, divisions)
-            #print("<loading.py::load_result>::   Column {}:  min  =  {},  max  =  {}".format(column,min,max))
+            lowerThreshold = 0 if (np.any(X0[:,idx] < 0 ) or intTest) else 0
+            print("key:  {},    lower Threshold:   {}".format(key,lowerThreshold))
+            min = np.percentile(X0[:,idx], lowerThreshold)
+            minmax[idx] = [min,max]
+            binning[idx] = np.linspace(min, max, divisions)
+            if verbose:
+                print("<loading.py::load_result>::   Column {}:  min  =  {},  max  =  {}".format(column,min,max))
+                print(binning[idx])       
+
 
             #  Min/max
             #max = np.amax(X0[:,idx])
@@ -337,13 +382,13 @@ class Loader():
             #print("<loading.py::load_result>::   Column {}:  min  =  {},  max  =  {}".format(column,min,max))
 
             #  Mean/std
-            mean = np.mean(X0[:,idx])
-            std = np.std(X0[:,idx])
-            factor = 5
-            minmax[idx] = [mean-(5*std), mean+(5*std)]
-            binning[idx] = np.linspace(mean-(5*std), mean+(5*std), divisions)
+            #mean = np.mean(X0[:,idx])
+            #std = np.std(X0[:,idx])
+            #factor = 5
+            #minmax[idx] = [mean-(factor*std), mean+(factor*std)]
+            #binning[idx] = np.linspace(mean-(factor*std), mean+(factor*std), divisions)
             if verbose:
-                print("<loading.py::load_result>::   Column {}:  min  =  {},  max  =  {}".format(key,mean-5*std,mean+5*std))
+                print("<loading.py::load_result>::   Column {}:  min  =  {},  max  =  {}".format(key,mean-factor*std,mean+factor*std))
                 print(binning[idx])
 
         # no point in plotting distributions with too few events, they only look bad 

@@ -9,6 +9,7 @@ import pathlib
 import numpy as np
 from ml import RatioEstimator
 from ml import Loader
+from ml import Filter
 import numpy as np
 from itertools import repeat
 
@@ -29,12 +30,13 @@ parser.add_argument('-f', '--features',  action='store', type=str, dest='feature
 parser.add_argument('-w', '--weightFeature',  action='store', type=str, dest='weightFeature',  default='DummyEvtWeight', help='Name of event weights feature in TTree')
 parser.add_argument('-t', '--TreeName',  action='store', type=str, dest='treename',  default='Tree', help='Name of TTree name inside root files')
 parser.add_argument('-b', '--binning',  action='store', type=str, dest='binning',  default=None, help='path to binning yaml file.')
-parser.add_argument('-l', '--layers', action='store', type=int, dest='layers', nargs='*', default=None, help='number of nodes for each layer')
+parser.add_argument('-l', '--layers', action='store', type=int, dest='layers', nargs="*", default=None, help='number of nodes for each layer')
 parser.add_argument('--batch',  action='store', type=int, dest='batch_size',  default=4096, help='batch size')
 parser.add_argument('--per-epoch-plot', action='store_true', dest='per_epoch_plot', default=False, help='plotting train/validation result per epoch.')
 parser.add_argument('--per-epoch-save', action='store_true', dest='per_epoch_save', default=False, help='saving trained model per epoch.')
 parser.add_argument('--nepoch', action='store', dest='nepoch', type=int, default=500, help='Total number of epoch for training.')
 parser.add_argument('--scale-method', action='store', dest='scale_method', type=str, default=None, help='scaling method for input data. e.g minmax, standard.')
+parser.add_argument('--BoolFilter', action='store', dest='BoolFilter', type=str, default=None, help='Comma separated list of boolean logic. e.g. \'a | b\'.')
 opts = parser.parse_args()
 nominal  = opts.nominal
 variation = opts.variation
@@ -51,11 +53,15 @@ per_epoch_plot = opts.per_epoch_plot
 per_epoch_save = opts.per_epoch_save
 nepoch = opts.nepoch
 scale_method = opts.scale_method
+BoolFilter = opts.BoolFilter
 #################################################
 
 #################################################
 # Loading of data from root of numpy arrays
 loading = Loader()
+if BoolFilter != None:
+    InputFilter = Filter(FilterString = BoolFilter)
+    loading.Filter= InputFilter
 
 # Exception handling for input files - .root
 if os.path.exists(p+nominal+'.root') or os.path.exists('data/'+global_name+'/X_train_'+str(n)+'.npy'):
@@ -109,6 +115,7 @@ else:
         noTar=True,
         normalise=False,
         debug=False,
+        scaling=scale_method,
     )
     logger.info(" Loaded new datasets ")
 #######################################
@@ -116,7 +123,7 @@ else:
 #######################################
 # Estimate the likelihood ratio using a NN model
 #   -> Calculate number of input variables as rudimentary guess
-structure = ( (len(features)*3, ) * 5)
+structure = n_hidden 
 # Use the number of inputs as input to the hidden layer structure
 estimator = RatioEstimator(
     n_hidden=(structure),
@@ -179,6 +186,7 @@ train_loss, val_loss, accuracy_train, accuracy_val = estimator.train(
     batch_size=batch_size,
     n_epochs=nepoch,
     validation_split=0.25,
+    #optimizer="amsgrad",
     x=x,
     y=y,
     w=w,
