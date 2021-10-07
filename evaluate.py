@@ -18,6 +18,7 @@ parser.add_option('-w', '--weightFeature',  action='store', type=str, dest='weig
 parser.add_option('-t', '--TreeName',  action='store', type=str, dest='treename',  default='Tree', help='Name of TTree name inside root files')
 parser.add_option('--PlotROC',  action="store_true", dest='plot_ROC',  help='Flag to determine if one should plot ROC')
 parser.add_option('--PlotObsROC',  action="store_true", dest='plot_obs_ROC',  help='Flag to determine if one should plot observable ROCs')
+parser.add_option('--PlotResampleRatio',  action="store_true", dest='plot_resampledRatio',  help='Flag to determine if one should plot a ratio of resampled vs original distribution')
 parser.add_option('-m', '--model', action='store', type=str, dest='model', default=None, help='path to the model.')
 (opts, args) = parser.parse_args()
 nominal  = opts.nominal
@@ -72,6 +73,7 @@ for i in evaluate:
                         global_name=global_name,
                         plot_ROC=opts.plot_ROC,
                         plot_obs_ROC=opts.plot_obs_ROC,
+                        plot_resampledRatio=opts.plot_resampledRatio
                     )
 # Evaluate performance
 carl.evaluate_performance(x='data/'+global_name+'/X_val_'+str(n)+'.npy',
