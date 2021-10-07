@@ -58,7 +58,9 @@ def draw_weighted_distributions(x0, x1, w0, w1,
                                 binning, label,
                                 legend,
                                 n,
-                                save = False):
+                                save = False,
+                                ext_plot_path=None,
+                                normalise=True):
     plt.figure(figsize=(14, 10))
     #columns = range(len(variables))
 
@@ -68,32 +70,38 @@ def draw_weighted_distributions(x0, x1, w0, w1,
         if save: plt.figure(figsize=(14, 10))
         else: plt.subplot(3,4, id)
         #plt.yscale('log')
-        #plt.hist(x0[:,id], bins = binning[column], label = "nominal", **hist_settings0)
-        #plt.hist(x0[:,id], bins = binning[column], weights=weights, label = 'nominal*CARL', **hist_settings0)
-        #plt.hist(x1[:,id], bins = binning[column], label = legend, **hist_settings1)
         w0 = w0.flatten()
         w1 = w1.flatten()
         w_carl = w0*weights
+        if normalise:
+            w0 = w0/w0.sum()
+            w1 = w1/w1.sum()
+            w_carl = w_carl/w_carl.sum()
         plt.hist(x0[:,id], bins = binning[id], weights = w0, label = "nominal", **hist_settings_nom)
         plt.hist(x0[:,id], bins = binning[id], weights = w_carl, label = 'nominal*CARL', **hist_settings_CARL)
         plt.hist(x1[:,id], bins = binning[id], weights = w1, label = legend, **hist_settings_alt)
         plt.xlabel('%s'%(column), horizontalalignment='right',x=1)
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()
+        plt.xticks(fontsize=14)
+        plt.yticks(fontsize=14)
+
         # Calculate maximum and minimum of y-axis
         y_min, y_max = axes.get_ylim()
         axes.set_ylim([y_min*0.9, y_max*2])
-        #axes.set_ylim([len(x0)*0.001,len(x0)*2]) #sjiggins
-        #axes.set_ylim([w0.sum()*0.001,w0.sum()*2]) #sjiggins
         if save:
-            
-            # Create folder for storing plots
-            create_missing_folders([f"plots/{legend}"])
-            # Form output name and then save
-            output_name = f"plots/{legend}/w_{column}_nominalVs{legend}_{label}_{n}"
+            # Create folder for storing plots and Form output name and then save
+            if ext_plot_path:
+                create_missing_folders([f"plots/{legend}/{ext_plot_path}"])
+                output_name = f"plots/{legend}/{ext_plot_path}/w_{column}_nominalVs{legend}_{label}_{n}"
+            else:
+                create_missing_folders([f"plots/{legend}"])
+                output_name = f"plots/{legend}/w_{column}_nominalVs{legend}_{label}_{n}"
+
             plt.savefig(f"{output_name}.png")
             plt.clf()
             plt.close()
+            plt.figure(figsize=(10, 8)) # this line is needed to keep same canvas size
 
             # ratio plot
             x0_hist, edge0 = np.histogram(x0[:,id], bins = binning[id], weights = w0)
@@ -108,7 +116,7 @@ def draw_weighted_distributions(x0, x1, w0, w1,
             xref= [binning[id].min(), binning[id].max()]
             #   -> Now generate the x and y points of the reference line
             yref = [1.0,1.0]
-            
+
             ## Generate error bands for the reference histogram
             x0_error = []
             x1_error = []
@@ -126,19 +134,19 @@ def draw_weighted_distributions(x0, x1, w0, w1,
                     # Form relative error
                     binsqrsum_x0 = binsqrsum_x0/w0[mask0].sum()
                     binsqrsum_x1 = binsqrsum_x1/w1[mask1].sum()
-                    
+
                     x0_error.append(binsqrsum_x0 if binsqrsum_x0 > 0 else 0.0 )
                     x1_error.append(binsqrsum_x1 if binsqrsum_x1 > 0 else 0.0)
                     #print("binsqrsum_x0:  {}".format(binsqrsum_x0))
                     #print("binsqrsum_x1:  {}".format(binsqrsum_x1))
 
 
-            #else: 
+            #else:
             #    # Fill in errors with 0 as could not determine bin width
-            #    x0_hist_error = 
-            #    x1_hist_error = 
+            #    x0_hist_error =
+            #    x1_hist_error =
 
-            
+
             # Convert error lists to numpy arrays
             x0_error = np.array(x0_error)
             x1_error = np.array(x1_error)
@@ -155,21 +163,22 @@ def draw_weighted_distributions(x0, x1, w0, w1,
             #print("x0_error:    {}".format(x0_error))
             #print("x1_error:    {}".format(x1_error))
             #print("width:       {}".format(np.diff(edge1)))
+
             #plt.bar( x=edge1, height=yref_error+x1_error, bottom = yref_error-x1_error, width=np.diff(edge1), align='edge', linewidth=0, color='red', alpha=0.25, zorder=-1, label='uncertainty band')
-            plt.bar( x=edge1[:-1], 
+            plt.bar( x=edge1[:-1],
                      height=yref_error_up[:-1], bottom = yref_error_down[:-1],
                      color='red',
                      width=np.diff(edge1),
                      align='edge',
                      alpha=0.25,
                      label='uncertainty band')
-            #         #width=np.diff(edge1), 
-            #         #align='edge', 
-            #         #linewidth=0, 
-            #         #color='red', 
-            #         #alpha=0.25, 
+            #         #width=np.diff(edge1),
+            #         #align='edge',
+            #         #linewidth=0,
+            #         #color='red',
+            #         #alpha=0.25,
             #         #label='uncertainty band')
-                        
+
             plt.xlabel('%s'%(column), horizontalalignment='right',x=1)
             plt.legend(frameon=False,title = '%s sample'%(label) )
             axes = plt.gca()
@@ -179,7 +188,7 @@ def draw_weighted_distributions(x0, x1, w0, w1,
             plt.clf()
             plt.close()
 
-def weight_obs_data(x0, x1, w0, w1, max_weight=10000.): # Max weight redundant here because of large weight Sherpa!
+def weight_obs_data(x0, x1, w0, w1, max_evts=100000):
 
     # Remove negative probabilities - maintains proportionality still by abs()
     w0_abs = abs(w0)
@@ -189,6 +198,7 @@ def weight_obs_data(x0, x1, w0, w1, max_weight=10000.): # Max weight redundant h
     x0_len = x0.shape[0]
     x1_len = x1.shape[0]
     minEvts = x0_len if x0_len < x1_len else x1_len
+    minEvts = minEvts if minEvts < max_evts else max_evts
 
     w0 = w0[ 0:minEvts ]
     w1 = w1[ 0:minEvts ]
@@ -306,7 +316,7 @@ def draw_Obs_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True):
             plt.savefig('plots/roc_inputs_nominalVs%s_%s_%s_%s.png'%(legend,label,idx,n))
             plt.clf()
 
-def weight_data(x0, x1, w0, w1, max_weight=10000.):
+def weight_data(x0, x1, w0, w1, max_evts=100000):
 
     # Remove negative probabilities - maintains proportionality still by abs()
     w0 = abs(w0)
@@ -316,34 +326,40 @@ def weight_data(x0, x1, w0, w1, max_weight=10000.):
     x0_len = x0.shape[0]
     x1_len = x1.shape[0]
     minEvts = x0_len if x0_len < x1_len else x1_len
+    minEvts = minEvts if minEvts < max_evts else max_evts
 
     x0_len = x0.shape[0]
     w0 = w0 / w0.sum()
     weighted_data0 = np.random.choice(range(x0_len), x0_len, p = w0)
     w_x0 = x0.copy()[weighted_data0]
+    w0   = w0.copy()[weighted_data0]
     #w_x0 = np.random.choice(x0, size=minEvts, p = w0)
 
     x1_len = x1.shape[0]
     w1 = w1 / w1.sum()
     weighted_data1 = np.random.choice(range(x1_len), x1_len, p = w1)
     w_x1 = x1.copy()[weighted_data1]
+    w1   = w1.copy()[weighted_data1]
     #w_x1 = np.random.choice(x1, size=minEvts, p = w1)
 
     # Cap the two to equal size
     w_x0 = w_x0[ 0:minEvts, :]
     w_x1 = w_x1[ 0:minEvts, :]
+    w0   = w0[0:minEvts]
+    w1   = w1[0:minEvts]
 
     x_all = np.vstack((w_x0,w_x1))
     #y_all = np.zeros(x0_len+x1_len)
     y_all = np.zeros(minEvts*2)
     y_all[minEvts:] = 1
-    return (x_all,y_all)
+    w_all = np.append( w0, w1)
+    return (x_all,y_all,w_all)
 
 def resampled_discriminator_and_roc(original, target, w0, w1):
-    w0 = abs(w0)
-    w1 = abs(w1)
-    (data, labels) = weight_data(original, target, w0, w1)
-    W = np.concatenate([w0 / w0.sum(), w1 / w1.sum()])
+    #w0 = abs(w0) # Done in function below 'weight_data'
+    #w1 = abs(w1)
+    (data, labels, W) = weight_data(original, target, w0, w1)
+    #W = np.concatenate([w0 / w0.sum(), w1 / w1.sum()])
     Xtr, Xts, Ytr, Yts, Wtr, Wts = train_test_split(data, labels, W, random_state=42, train_size=0.51, test_size=0.49)
 
     discriminator = MLPRegressor(tol=1e-05, activation="logistic",
@@ -381,34 +397,50 @@ def draw_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True):
     logger.info("Unweighted %s AUC is %.3f"%(label,roc_auc_t))
     logger.info("Saving ROC plots to /plots")
 
-def plot_calibration_curve(y, probs_raw, probs_cal, do, var, save = False):
+def plot_calibration_curve(y, probs_raw, probs_cal, global_name, save = False):
     ax1 = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
     ax2 = plt.subplot2grid((3, 1), (2, 0))
     ax1.plot([0, 1], [0, 1], "k:", label="Perfectly calibrated")
 
+    # Masking -ve probabilities
+    mask = np.logical_and( (probs_raw > 0), (probs_cal > 0))
+    y = y[mask]
+    probs_raw = probs_raw[mask]
+    probs_cal = probs_cal[mask]
+    #for idx,(i,j) in enumerate(zip(probs_raw, probs_cal)):
+    #    if i < 0:
+    #        probs_raw[idx] = y[idx]
+    #    if j < 0:
+    #        probs_cal[idx] = y[idx]
+    #    #if j < 0 or i < 0:
+    #        #print("probs_raw:   {}".format(i))
+    #        #print("probs_cal:   {}".format(j))
+            
+
+
     frac_of_pos_raw, mean_pred_value_raw = calibration_curve(y, probs_raw, n_bins=50)
     frac_of_pos_cal, mean_pred_value_cal = calibration_curve(y, probs_cal, n_bins=50)
 
-    ax1.plot(mean_pred_value_raw, frac_of_pos_raw, "s-", label='uncalibrated', **hist_settings0)
-    ax1.plot(mean_pred_value_cal, frac_of_pos_cal, "s-", label='calibrated', **hist_settings0)
+    ax1.plot(mean_pred_value_raw, frac_of_pos_raw, "s-", label='uncalibrated', **hist_settings_nom)
+    ax1.plot(mean_pred_value_cal, frac_of_pos_cal, "s-", label='calibrated', **hist_settings_alt)
     ax1.set_ylabel("Fraction of positives")
     ax1.set_ylim([-0.05, 1.05])
     ax1.legend(loc="lower right")
     ax1.set_title(f'Calibration plot')
 
-    ax2.hist(probs_raw, range=(0, 1), bins=50, label='uncalibrated', lw=2, **hist_settings0)
-    ax2.hist(probs_cal, range=(0, 1), bins=50, label='calibrated', lw=2, **hist_settings0)
+    ax2.hist(probs_raw, range=(0, 1), bins=50, label='uncalibrated', lw=2, **hist_settings_nom)
+    ax2.hist(probs_cal, range=(0, 1), bins=50, label='calibrated', lw=2, **hist_settings_alt)
     ax2.set_xlabel("Mean predicted value")
     ax2.set_ylabel("Count")
     if save:
-        plt.savefig('plots/calibration_'+do+'_'+var+'.png')
+        plt.savefig('plots/calibration_'+global_name+'.png')
         plt.clf()
     logger.info("Saving calibration curves to /plots")
 
 def draw_weights(weightCT, weightCA, legend, do, n, save = False):
     plt.yscale('log')
-    plt.hist(weightCT, bins = np.exp(np.linspace(-0.5,1.1,50)), label = 'carl-torch', **hist_settings0)
-    plt.hist(weightCA, bins = np.exp(np.linspace(-0.5,1.1,50)), label = 'carlAthena', **hist_settings0)
+    plt.hist(weightCT, bins = np.exp(np.linspace(-0.5,1.1,50)), label = 'carl-torch', **hist_settings_nom)
+    plt.hist(weightCA, bins = np.exp(np.linspace(-0.5,1.1,50)), label = 'carlAthena', **hist_settings_nom)
     plt.xlabel('weights', horizontalalignment='right',x=1)
     plt.legend(frameon=False)
     plt.savefig("plots/weights_%s_%s_%s.png"%(do, legend, n))
