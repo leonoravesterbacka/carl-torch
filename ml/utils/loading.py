@@ -262,6 +262,7 @@ class Loader():
         global_name="Test",
         plot_ROC = True,
         plot_obs_ROC = True,
+        plot_resampledRatio=False,
         ext_binning = None,
         ext_plot_path=None,
         verbose=False,
@@ -346,15 +347,15 @@ class Loader():
                 print("<loading.py::load_result>::   Column {}:  min  =  {},  max  =  {}".format(key,mean-5*std,mean+5*std))
                 print(binning[idx])
 
-        # no point in plotting distributions with too few events, they only look bad 
-        #if int(nentries) > 5000: 
-        # plot ROC curves 
+        # no point in plotting distributions with too few events, they only look bad
+        #if int(nentries) > 5000:
+        # plot ROC curves
         print("<loading.py::load_result>::   Printing ROC")
         if plot_ROC:
             draw_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
         if plot_obs_ROC:
-            draw_Obs_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
-        
+            draw_Obs_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot, plot_resampledRatio)
+
         if verbose:
             print("<loading.py::load_result>::   Printing weighted distributions")
         # plot reweighted distributions
@@ -399,7 +400,7 @@ class Loader():
         #var = 'QSFUP',
         #plot = False
         self,
-        y_true, 
+        y_true,
         p1_raw,
         p1_cal,
         label = None,
