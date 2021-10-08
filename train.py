@@ -30,7 +30,7 @@ parser.add_argument('-f', '--features',  action='store', type=str, dest='feature
 parser.add_argument('-w', '--weightFeature',  action='store', type=str, dest='weightFeature',  default='DummyEvtWeight', help='Name of event weights feature in TTree')
 parser.add_argument('-t', '--TreeName',  action='store', type=str, dest='treename',  default='Tree', help='Name of TTree name inside root files')
 parser.add_argument('-b', '--binning',  action='store', type=str, dest='binning',  default=None, help='path to binning yaml file.')
-parser.add_argument('-l', '--layers', action='store', type=int, dest='layers', nargs="*", default=None, help='number of nodes for each layer')
+parser.add_argument('-l', '--layers', action='store', type=int, dest='layers', nargs='*', default=None, help='number of nodes for each layer')
 parser.add_argument('--batch',  action='store', type=int, dest='batch_size',  default=4096, help='batch size')
 parser.add_argument('--per-epoch-plot', action='store_true', dest='per_epoch_plot', default=False, help='plotting train/validation result per epoch.')
 parser.add_argument('--per-epoch-save', action='store_true', dest='per_epoch_save', default=False, help='saving trained model per epoch.')
