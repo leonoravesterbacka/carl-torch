@@ -134,33 +134,13 @@ def load(
         df_mask = df.eval( logExp )
         df = df[df_mask]
 
-        
-    
-    ## HACK!!!! Filter dRjj < 0.01
-    ##dRjj_mask = df[df["m_dRjj"] > 0.01]
-    ##dRjj_mask = (df["m_dRjj"] > 0.01) & (df["m_njets"] > 1)
-    ##Temp_mask = (df["m_dRjj"] > 0.01)
-    ##Temp_mask = (df["VpT"] > 1)
-    #Temp_mask = (df["Njets"] < 6)
-    ###print(dRjj_mask)
-    ##df = df[df["m_dRjj"] > 0.01].dropna()
-    ##df = df[df["m_dRjj"] > 0.01]
-    #df = df[Temp_mask]
-
     # Extract the weights from the Tree if specificed 
     if weightFeature == "DummyEvtWeight":
-        #weights = len(df.index)
         dweights = np.ones(len(df.index))
         weights = pd.DataFrame(data=dweights, index=range(len(df.index)), columns=[weightFeature])
     else:
-        #weights = X_tree[weightFeature]
-        #weights = X_tree.pandas.df(weightFeature)
         weights = pd.DataFrame(X_tree.arrays(weightFeature, library="np", entry_stop=n))
-        #print(weights)
-        ##weights = weights[Temp_mask]
         weights = weights[df_mask]
-        #print(weights)
-        #weights[weightFeature] = weights[weightFeature].abs() #sjiggins
 
     # For the moment one should siply use the features
     labels  = features
@@ -213,7 +193,7 @@ def load_and_check(filename, warning_threshold=1.0e9, memmap_files_larger_than_g
         smallest = np.nanmin(data)
         largest = np.nanmax(data)
         if np.abs(smallest) > warning_threshold or np.abs(largest) > warning_threshold:
-            logger.warning("File %s has some large numbers, ranging from %s to %s", filename, smallest, largest)
+            logger.warning("Warning: File %s has some large numbers, ranging from %s to %s", filename, smallest, largest)
 
     if len(data.shape) == 1:
         data = data.reshape(-1, 1)
