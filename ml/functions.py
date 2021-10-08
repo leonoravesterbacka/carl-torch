@@ -59,11 +59,6 @@ def ratio_xe(s_hat, y_true, w):
     if w is None:
         w = torch.ones(y_true.shape[0])
     loss = BCELoss(weight=w, reduction='sum')(s_hat, y_true)
-    #loss = BCELoss(weight=w)(s_hat, y_true)
-    #loss = -( (y_true * torch.log(s_hat))  +  ((1-y_true) * torch.log(1-s_hat)) )
-    #loss = np.where(loss < -10000, loss, -10000 )
-    #loss = w * loss
-    #loss = torch.sum(loss)
     return loss
 
 @contextmanager
