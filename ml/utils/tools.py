@@ -140,11 +140,12 @@ def load(
         weights = pd.DataFrame(X_tree.arrays(weightFeature, library="np", entry_stop=n))
 
     # Apply filtering if set by user
-    for logExp in Filter.FilterList:
-        #df_mask = pd.eval( logExp, target = df)
-        df_mask = df.eval( logExp )
-        df = df[df_mask]
-        weights = weights[df_mask]
+    if Filter != None:
+        for logExp in Filter.FilterList:
+            #df_mask = pd.eval( logExp, target = df)
+            df_mask = df.eval( logExp )
+            df = df[df_mask]
+            weights = weights[df_mask]
     
     # Reset all row numbers
     df = df.reset_index(drop=True)
