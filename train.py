@@ -194,6 +194,7 @@ train_loss, val_loss, accuracy_train, accuracy_val = estimator.train(
     x1=x1,
     scale_inputs=True,
     early_stopping=False,
+    #early_stopping_patience=20,
     intermediate_train_plot = intermediate_train_plot,
     intermediate_save = intermediate_save,
 )

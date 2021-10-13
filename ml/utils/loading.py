@@ -297,7 +297,11 @@ class Loader():
 
         # load samples
         X0 = load_and_check(x0, memmap_files_larger_than_gb=1.0)
+        X0 = np.nan_to_num(X0, nan=0.0, posinf = 0.0, neginf=0.0)
+        print(X0)
         X1 = load_and_check(x1, memmap_files_larger_than_gb=1.0)
+        X1 = np.nan_to_num(X1, nan=0.0, posinf = 0.0, neginf=0.0)
+        print(X1)
         W0 = load_and_check(w0, memmap_files_larger_than_gb=1.0)
         W1 = load_and_check(w1, memmap_files_larger_than_gb=1.0)
         if isinstance(metaData, str):
