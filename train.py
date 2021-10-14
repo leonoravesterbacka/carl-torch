@@ -2,7 +2,6 @@ import os
 import sys
 import logging
 import argparse
-import torch
 import tarfile
 import pickle
 import pathlib
@@ -34,8 +33,12 @@ parser.add_argument('-l', '--layers', action='store', type=int, dest='layers', n
 parser.add_argument('--batch',  action='store', type=int, dest='batch_size',  default=4096, help='batch size')
 parser.add_argument('--per-epoch-plot', action='store_true', dest='per_epoch_plot', default=False, help='plotting train/validation result per epoch.')
 parser.add_argument('--per-epoch-save', action='store_true', dest='per_epoch_save', default=False, help='saving trained model per epoch.')
-parser.add_argument('--nepoch', action='store', dest='nepoch', type=int, default=500, help='Total number of epoch for training.')
+parser.add_argument('--nepoch', action='store', dest='nepoch', type=int, default=300, help='Total number of epoch for training.')
 parser.add_argument('--scale-method', action='store', dest='scale_method', type=str, default=None, help='scaling method for input data. e.g minmax, standard.')
+parser.add_argument('--weight-clipping', action='store_true', dest='weight_clipping', default=False, help='clipping event weights')
+parser.add_argument('--weight-nsigma', action='store', type=int, dest='weight_nsigma', default=0, help='re-mapping weights')
+parser.add_argument('--polarity', action='store_true', dest="polarity", help='enable event weight polarity feature.')
+parser.add_argument('--loss-type', action='store', type=str, dest="loss_type", default="regular", help='a type on how to handle weight in loss function, options are "abs(w)" & "log(abs(w))" ')
 parser.add_argument('--BoolFilter', action='store', dest='BoolFilter', type=str, default=None, help='Comma separated list of boolean logic. e.g. \'a | b\'.')
 opts = parser.parse_args()
 nominal  = opts.nominal
@@ -53,6 +56,10 @@ per_epoch_plot = opts.per_epoch_plot
 per_epoch_save = opts.per_epoch_save
 nepoch = opts.nepoch
 scale_method = opts.scale_method
+weight_clipping = opts.weight_clipping
+weight_sigma = opts.weight_nsigma
+polarity = opts.polarity
+loss_type = opts.loss_type
 BoolFilter = opts.BoolFilter
 #################################################
 
@@ -79,7 +86,7 @@ else:
     sys.exit()
 
 if os.path.exists(f"data/{global_name}/data_out.tar.gz"):
-#    tar = tarfile.open("data_out.tar.gz", "r:gz")
+    # tar = tarfile.open("data_out.tar.gz", "r:gz")
     tar = tarfile.open(f"data/{global_name}/data_out.tar.gz")
     tar.extractall()
     tar.close()
@@ -115,6 +122,10 @@ else:
         noTar=True,
         normalise=False,
         debug=False,
+        weight_preprocess=weight_sigma > 0,
+        weight_preprocess_nsigma=weight_sigma,
+        large_weight_clipping=weight_clipping,
+        weight_polarity=polarity,
         scaling=scale_method,
     )
     logger.info(" Loaded new datasets ")
@@ -123,10 +134,10 @@ else:
 #######################################
 # Estimate the likelihood ratio using a NN model
 #   -> Calculate number of input variables as rudimentary guess
-structure = n_hidden 
+structure = n_hidden
 # Use the number of inputs as input to the hidden layer structure
 estimator = RatioEstimator(
-    n_hidden=(structure),
+    n_hidden=n_hidden,
     activation="relu"
 )
 estimator.scaling_method = scale_method
@@ -149,6 +160,9 @@ if per_epoch_plot:
         "global_name":global_name,
         "ext_binning":binning,
         "verbose" : False,
+        "plot_ROC" : False,
+        "plot_obs_ROC" : False,
+        "normalise" : True, # plotting
     }
     vali_args = {
         "x0":f'data/{global_name}/X0_val_{n}.npy',
@@ -157,12 +171,15 @@ if per_epoch_plot:
         "w1":f'data/{global_name}/w1_val_{n}.npy',
         "metaData":metaData,
         "features":features,
-        "label":"train",
+        "label":"val",
         "plot":True,
         "nentries":n,
         "global_name":global_name,
         "ext_binning":binning,
         "verbose" : False,
+        "plot_ROC" : False,
+        "plot_obs_ROC" : False,
+        "normalise" : True,  # plotting
     }
     intermediate_train_plot = (
         (estimator.evaluate, {"train":x0, "val":f'data/{global_name}/X0_val_{n}.npy'}),
@@ -196,6 +213,7 @@ train_loss, val_loss, accuracy_train, accuracy_val = estimator.train(
     early_stopping=False,
     intermediate_train_plot = intermediate_train_plot,
     intermediate_save = intermediate_save,
+    loss_type=loss_type,
 )
 
 # saving loss values and final trained models

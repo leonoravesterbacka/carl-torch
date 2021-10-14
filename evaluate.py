@@ -20,6 +20,9 @@ parser.add_option('--PlotROC',  action="store_true", dest='plot_ROC',  help='Fla
 parser.add_option('--PlotObsROC',  action="store_true", dest='plot_obs_ROC',  help='Flag to determine if one should plot observable ROCs')
 parser.add_option('--PlotResampleRatio',  action="store_true", dest='plot_resampledRatio',  help='Flag to determine if one should plot a ratio of resampled vs original distribution')
 parser.add_option('-m', '--model', action='store', type=str, dest='model', default=None, help='path to the model.')
+parser.add_option('-b', '--binning',  action='store', type=str, dest='binning',  default=None, help='path to binning yaml file.')
+parser.add_option('--normalise', action='store_true', dest='normalise', default=False, help='enforce normalization when plotting')
+parser.add_option('--rawWeight',  action="store_true", dest='raw_weight',  help='Flag to use raw event weight')
 parser.add_option('--scale-method', action='store', dest='scale_method', type=str, default=None, help='scaling method for input data. e.g minmax, standard.')
 (opts, args) = parser.parse_args()
 nominal  = opts.nominal
@@ -31,6 +34,9 @@ features = opts.features.split(",")
 weightFeature = opts.weightFeature
 treename = opts.treename
 model = opts.model
+binning = opts.binning
+normalise = opts.normalise
+raw_weight = opts.raw_weight
 scale_method = opts.scale_method
 #################################################
 
@@ -51,6 +57,7 @@ if model:
 else:
     carl.load('models/'+global_name+'_carl_'+str(n))
 evaluate = ['train','val']
+raw_w = "raw_" if raw_weight else ""
 for i in evaluate:
     print("<evaluate.py::__init__>::   Running evaluation for {}".format(i))
     r_hat, s_hat = carl.evaluate(x='data/'+global_name+'/X0_'+i+'_'+str(n)+'.npy')
@@ -59,26 +66,29 @@ for i in evaluate:
     w = 1./r_hat   # I thought r_hat = p_{1}(x) / p_{0}(x) ???
     print("w = {}".format(w))
     print("<evaluate.py::__init__>::   Loading Result for {}".format(i))
-    loading.load_result(x0='data/'+global_name+'/X0_'+i+'_'+str(n)+'.npy',
-                        x1='data/'+global_name+'/X1_'+i+'_'+str(n)+'.npy',
-                        w0='data/'+global_name+'/w0_'+i+'_'+str(n)+'.npy',
-                        w1='data/'+global_name+'/w1_'+i+'_'+str(n)+'.npy',
-                        metaData='data/'+global_name+'/metaData_'+str(n)+'.pkl',
-                        weights=w,
-                        features=features,
-                        #weightFeature=weightFeature,
-                        label=i,
-                        plot=True,
-                        nentries=n,
-                        #TreeName=treename,
-                        #pathA=p+nominal+".root",
-                        #pathB=p+variation+".root",
-                        global_name=global_name,
-                        plot_ROC=opts.plot_ROC,
-                        plot_obs_ROC=opts.plot_obs_ROC,
-                        scaling=scale_method,
-                        plot_resampledRatio=opts.plot_resampledRatio,
-                    )
+    loading.load_result(
+        x0=f'data/{global_name}/X0_{i}_{n}.npy',
+        x1=f'data/{global_name}/X1_{i}_{n}.npy',
+        w0=f'data/{global_name}/w0_{i}_{raw_w}{n}.npy',
+        w1=f'data/{global_name}/w1_{i}_{raw_w}{n}.npy',
+        metaData=f'data/{global_name}/metaData_{n}.pkl',
+        weights=w,
+        features=features,
+        #weightFeature=weightFeature,
+        label=i,
+        plot=True,
+        nentries=n,
+        #TreeName=treename,
+        #pathA=p+nominal+".root",
+        #pathB=p+variation+".root",
+        global_name=global_name,
+        plot_ROC=opts.plot_ROC,
+        plot_obs_ROC=opts.plot_obs_ROC,
+        ext_binning = binning,
+        normalise = normalise,
+        scaling=scale_method,
+        plot_resampledRatio=opts.plot_resampledRatio,
+    )
 # Evaluate performance
 print("<evaluate.py::__init__>::   Evaluate Performance of Model")
 carl.evaluate_performance(x='data/'+global_name+'/X_val_'+str(n)+'.npy',
