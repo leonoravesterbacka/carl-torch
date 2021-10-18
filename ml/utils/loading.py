@@ -98,11 +98,11 @@ class Loader():
 
         # Run if requested debugging by user
         if debug:
-            print("<loading.py::Loader()>::   Data sets for training (pandas dataframe)")
-            print("<loading.py::Loader()>::      X0:")
-            print(x0)
-            print("<loading.py::Loader()>::      X1:")
-            print(x1)
+            logger.info("Data sets for training (pandas dataframe)")
+            logger.info("   X0:")
+            logger.info(x0)
+            logger.info("   X1:")
+            logger.info(x1)
 
         # Pre-process for outliers
         logger.info(" Starting filtering")
@@ -124,13 +124,13 @@ class Loader():
                     continue
 
                 if debug:
-                    print("Column: {}:".format(column))
-                    print("Column: {},  mean0 = {}".format(column, x0[column].mean ()))
-                    print("Column: {},  mean1 = {}".format(column, x1[column].mean ()))
-                    print("Column: {},  std0 = {}".format(column, x0[column].std ()))
-                    print("Column: {},  std1 = {}".format(column, x1[column].std ()))
-                    print("Column: {},  lower limit = {}".format(column,lower_lim))
-                    print("Column: {},  upper limit = {}".format(column,upper_lim))
+                    logger.info("Column: {}:".format(column))
+                    logger.info("Column: {},  mean0 = {}".format(column, x0[column].mean ()))
+                    logger.info("Column: {},  mean1 = {}".format(column, x1[column].mean ()))
+                    logger.info("Column: {},  std0 = {}".format(column, x0[column].std ()))
+                    logger.info("Column: {},  std1 = {}".format(column, x1[column].std ()))
+                    logger.info("Column: {},  lower limit = {}".format(column,lower_lim))
+                    logger.info("Column: {},  upper limit = {}".format(column,upper_lim))
                 x0_mask = (x0[column] < upper_lim) & (x0[column] > lower_lim)
                 x1_mask = (x1[column] < upper_lim) & (x1[column] > lower_lim)
 
@@ -177,10 +177,10 @@ class Loader():
         # get metadata, i.e. max, min, mean, std of all the variables in the dataframes
         if scaling == "standard":
             metaData = {v : {x0[v].mean(), x0[v].std() } for v in  x0.columns }
-            print("Storing Z0 Standard scaling metadata: {}".format(metaData))
+            logger.info("Storing Z0 Standard scaling metadata: {}".format(metaData))
         elif scaling == "minmax":
             metaData = {v : {x0[v].min(), x0[v].max() } for v in  x0.columns }
-            print("Storing minmax scaling metadata: {}".format(metaData))
+            logger.info("Storing minmax scaling metadata: {}".format(metaData))
         X0 = x0.to_numpy()
         X1 = x1.to_numpy()
 
@@ -285,7 +285,7 @@ class Loader():
         """
 
         if verbose:
-            print("<loading.py::load_result>::   Extracting numpy data features")
+            logger.info("Extracting numpy data features")
 
         # Get data - only needed for column names which we can use features instead
         #x0df, weights0, labels0 = load(f = pathA,
@@ -314,7 +314,7 @@ class Loader():
 
         # Calculate the maximum of each column and minimum and then allocate bins
         if verbose:
-            print("<loading.py::load_result>::   Calculating min/max range for plots & binning")
+            logger.info("Calculating min/max range for plots & binning")
         binning = defaultdict()
         minmax = defaultdict()
         divisions = 100 # 50 default
@@ -348,20 +348,20 @@ class Loader():
             minmax[idx] = [min,max]
             binning[idx] = np.linspace(min, max, divisions)
             if verbose:
-                print("<loading.py::load_result>::   Column {}:  min  =  {},  max  =  {}".format(column,min,max))
+                logger.info("<loading.py::load_result>::   Column {}:  min  =  {},  max  =  {}".format(column,min,max))
                 print(binning[idx])       
 
         # no point in plotting distributions with too few events, they only look bad
         #if int(nentries) > 5000:
         # plot ROC curves
-        print("<loading.py::load_result>::   Printing ROC")
+        logger.info("<loading.py::load_result>::   Printing ROC")
         if plot_ROC:
             draw_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot)
         if plot_obs_ROC:
             draw_Obs_ROC(X0, X1, W0, W1, weights, label, global_name, nentries, plot, plot_resampledRatio)
 
         if verbose:
-            print("<loading.py::load_result>::   Printing weighted distributions")
+            logger.info("<loading.py::load_result>::   Printing weighted distributions")
         # plot reweighted distributions
         draw_weighted_distributions(X0, X1, W0, W1,
                                     weights,
