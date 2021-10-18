@@ -26,8 +26,10 @@ class RatioModel(nn.Module):
         n_last = n_observables
 
         # Hidden layers
+        print("<models.py>::   Hidden Layer building: {}".format(self.dropout_prob))
         for n_hidden_units in n_hidden:
             if self.dropout_prob > 1.0e-9:
+                print("<models.py>::   DROPOUT added: {}".format(self.dropout_prob))
                 self.layers.append(nn.Dropout(self.dropout_prob))
             self.layers.append(nn.Linear(n_last, n_hidden_units))
             n_last = n_hidden_units

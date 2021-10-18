@@ -177,10 +177,10 @@ class Loader():
         # get metadata, i.e. max, min, mean, std of all the variables in the dataframes
         if scaling == "standard":
             metaData = {v : {x0[v].mean(), x0[v].std() } for v in  x0.columns }
-            print("Performed Z0 Standard scaling: {}".format(metaData))
+            print("Storing Z0 Standard scaling metadata: {}".format(metaData))
         elif scaling == "minmax":
             metaData = {v : {x0[v].min(), x0[v].max() } for v in  x0.columns }
-            print("Performed minmax scaling: {}".format(metaData))
+            print("Storing minmax scaling metadata: {}".format(metaData))
         X0 = x0.to_numpy()
         X1 = x1.to_numpy()
 

@@ -41,6 +41,8 @@ class Estimator(object):
         self.x_scaling_stds = None
         self.scaling_method = None
 
+        self.divisions = 100 # binning for inputs if requested
+        
     def train(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -252,10 +254,10 @@ class Estimator(object):
             )
         elif transform:
             logger.info("Setting up input rescaling")
-            self.x_scaling_means = np.mean(x, axis=0)
-            self.x_scaling_stds = np.maximum(np.std(x, axis=0), 1.0e-6)
-            self.x_scaling_mins = np.min(x, axis=0)
-            self.x_scaling_maxs = np.max(x, axis=0)
+            self.x_scaling_means = np.nanmean(x, axis=0)
+            self.x_scaling_stds = np.maximum(np.nanstd(x, axis=0), 1.0e-6)
+            self.x_scaling_mins = np.nanmin(x, axis=0)
+            self.x_scaling_maxs = np.nanmax(x, axis=0)
         else:
             logger.info("Disabling input rescaling")
             n_parameters = x.shape[0]

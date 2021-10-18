@@ -127,9 +127,10 @@ structure = n_hidden
 # Use the number of inputs as input to the hidden layer structure
 estimator = RatioEstimator(
     n_hidden=(structure),
-    activation="relu"
+    activation="relu",
 )
 estimator.scaling_method = scale_method
+#estimator.dropout_prob = 0.5
 
 # per epoch plotting
 intermediate_train_plot = None
@@ -181,6 +182,7 @@ if per_epoch_save:
     )
 
 # perform training
+kwargs={"weight_decay": 1e-5}
 train_loss, val_loss, accuracy_train, accuracy_val = estimator.train(
     method='carl',
     batch_size=batch_size,
@@ -192,11 +194,17 @@ train_loss, val_loss, accuracy_train, accuracy_val = estimator.train(
     w=w,
     x0=x0,
     x1=x1,
+    w0=w0,
+    w1=w1,
     scale_inputs=True,
     early_stopping=False,
     #early_stopping_patience=20,
     intermediate_train_plot = intermediate_train_plot,
     intermediate_save = intermediate_save,
+    optimizer_kwargs=kwargs,
+    global_name=global_name,
+    plot_inputs=True,    
+    nentries=n,
 )
 
 # saving loss values and final trained models
