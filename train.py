@@ -188,6 +188,7 @@ if per_epoch_save:
 # additional options to pytorch training package
 kwargs = {}
 if opts.regularise is not None:
+    logger.info("L2 loss regularisation included.")
     kwargs={"weight_decay": 1e-5}
 
 # perform training
