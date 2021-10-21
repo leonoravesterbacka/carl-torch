@@ -25,6 +25,18 @@ hist_settings_CARL = {'histtype':'step', 'color':'black', 'linewidth':1, 'linest
 hist_settings_CARL_ratio = {'color':'black', 'linewidth':1, 'linestyle':'--'}
 #hist_settings1_step = {'color':'black', 'linewidth':1, 'linestyle':'--'}
 
+do_dbug_plot = False
+if do_dbug_plot:
+    try:
+        import pickle
+        with open("addInvSample.pkl", "rb") as f:
+            addInvSample = pickle.load(f)
+    except Exception as e:
+        print(e)
+        addInvSample = None
+else:
+    addInvSample = None
+
 
 def draw_unweighted_distributions(x0, x1,
                                   weights,
@@ -80,6 +92,21 @@ def draw_weighted_distributions(x0, x1, w0, w1,
         plt.hist(x0[:,id], bins = binning[id], weights = w0, label = "nominal", **hist_settings_nom)
         plt.hist(x0[:,id], bins = binning[id], weights = w_carl, label = 'nominal*CARL', **hist_settings_CARL)
         plt.hist(x1[:,id], bins = binning[id], weights = w1, label = legend, **hist_settings_alt)
+        if addInvSample:
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            _setting = {'histtype':'step', 'linewidth':2, 'color':'red'}
+            _x0 = addInvSample[0].to_numpy()
+            _w0 = addInvSample[1].to_numpy().flatten()
+            plt.hist(_x0[:,id], bins = binning[id], weights = _w0, label = "Non-splited nominal Inverted fraction", **_setting)
+
+            _inv_setting = {'histtype':'step', 'linewidth':3, 'color':'pink'}
+            if column == "polarity":
+                mul_scale = -1
+            else:
+                mul_scale = 1
+            _w0= (addInvSample[1]*-1).to_numpy().flatten()
+            plt.hist(_x0[:,id]*mul_scale, bins = binning[id], weights = _w0, label = "Non-splited nominal fraction", **_inv_setting)
+
         plt.xlabel('%s'%(column), horizontalalignment='right',x=1)
         plt.legend(frameon=False,title = '%s sample'%(label) )
         axes = plt.gca()

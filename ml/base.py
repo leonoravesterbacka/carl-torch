@@ -40,6 +40,11 @@ class Estimator(object):
         self.x_scaling_means = None
         self.x_scaling_stds = None
         self.scaling_method = None
+        self.scaling_clamp = False
+        self.clamp_min = None
+        self.clamp_max = None
+        self.x_scaling_quantile_up = None
+        self.x_scaling_quantile_down = None
 
         self.divisions = 100 # binning for inputs if requested
         
@@ -258,6 +263,13 @@ class Estimator(object):
             self.x_scaling_stds = np.maximum(np.nanstd(x, axis=0), 1.0e-6)
             self.x_scaling_mins = np.nanmin(x, axis=0)
             self.x_scaling_maxs = np.nanmax(x, axis=0)
+
+            self.x_scaling_quantile_down = np.quantile(x, 0, axis=0)
+            self.x_scaling_quantile_up = np.quantile(x, 0.80, axis=0)
+            if self.clamp_max is None:
+                self.clamp_max = self.x_scaling_quantile_up
+            if self.clamp_min is None:
+                self.clamp_min = self.x_scaling_quantile_down
         else:
             logger.info("Disabling input rescaling")
             n_parameters = x.shape[0]
@@ -266,6 +278,20 @@ class Estimator(object):
             self.x_scaling_stds = np.ones(n_parameters)
             self.x_scaling_mins = np.zeros(n_parameters)
             self.x_scaling_maxs = np.ones(n_parameters)
+            self.x_scaling_quantile_down = np.zeros(n_parameters)
+            self.x_scaling_quantile_up = np.ones(n_parameters)
+
+    def _clamp_inputs(self, x):
+        print("<base.py::_transform_inputs()>::   Doing Clamping for inputs")
+        # clamp value by 25% to 75% quntile
+        if isinstance(x, torch.Tensor):
+            clamp_max = torch.tesnor(self.clamp_max, dtype=x.dtype, device=x.device)
+            clamp_min = torch.tensor(self.clamp_min, dtype=x.dtype, device=x.device)
+            return torch.clamp(x, min=clamp_min, max=clamp_max)
+        else:
+            clamp_max = self.clamp_max
+            clamp_min = self.clamp_min
+            return np.clip(x, clamp_min, clamp_max)
 
     def _transform_inputs(self, x, scaling = "minmax"):
         # use the self.scaling method to overwritten the scaling arugmuent
@@ -293,6 +319,8 @@ class Estimator(object):
             # Check for none and 0 values
             if self.x_scaling_mins is not None and self.x_scaling_maxs is not None:
                 print("<base.py::_transform_inputs()>::   Doing min-max scaling")
+                if self.scaling_clamp:
+                    x = self._clamp_inputs(x)
                 if isinstance(x, torch.Tensor):
                     x_scaled = (x-torch.tensor(self.x_scaling_mins, dtype=x.dtype, device=x.device))
                     x_scaled = x_scaled/(torch.tensor(self.x_scaling_maxs, dtype=x.dtype, device=x.device) - torch.tensor(self.x_scaling_mins, dtype=x.dtype, device=x.device))
