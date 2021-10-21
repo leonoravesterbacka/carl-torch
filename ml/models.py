@@ -24,10 +24,12 @@ class RatioModel(nn.Module):
         # Build network
         self.layers = nn.ModuleList()
         n_last = n_observables
-
+        
         # Hidden layers
+        logger.info("Building {} hidden layers building".format(n_hidden))
         for n_hidden_units in n_hidden:
             if self.dropout_prob > 1.0e-9:
+                logger.info("Layer {} will contain dropout nodes with p={}".format(n_hidden_units,self.dropout_prob))
                 self.layers.append(nn.Dropout(self.dropout_prob))
             self.layers.append(nn.Linear(n_last, n_hidden_units))
             n_last = n_hidden_units

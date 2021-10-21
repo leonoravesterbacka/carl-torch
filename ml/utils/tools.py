@@ -190,10 +190,10 @@ def CoherentFlattening(df0, df1):
 
         # Now break up each column into elements of max size 'macObjectLen'
         df0_flattened = pd.DataFrame(df0[column].to_list(), columns=[column+str(idx) for idx in range(elemLen0)])
-        print(df0_flattened)
-        df0_flattened = df0_flattened.fillna(0)
-        print(df0_flattened)
-
+        #print(df0_flattened)
+        #df0_flattened = df0_flattened.fillna(0)
+        #print(df0_flattened)
+        
         # Delete extra dimensions if needed due to non-matching dimensionality of df0 & df1
         if elemLen0 > minObjectLen[column]:
             delColumns0 = [column+str(idx) for idx in range(minObjectLen[column], elemLen0)]
@@ -209,7 +209,7 @@ def CoherentFlattening(df0, df1):
 
         # Now break up each column into elements of max size 'macObjectLen'
         df1_flattened = pd.DataFrame(df1[column].to_list(), columns=[column+str(idx) for idx in range(elemLen1)])
-        df1_flattened = df1_flattened.fillna(0)
+        #df1_flattened = df1_flattened.fillna(0)
 
         # Delete extra dimensions if needed due to non-matching dimensionality of df0 & df1
         if elemLen1 > minObjectLen[column]:
@@ -222,6 +222,7 @@ def CoherentFlattening(df0, df1):
         #print(df_flattened)
         del df1[column]
         df1 = df1.join(df1_flattened)
+        print(df1)
 
     print("<loading.py::load()>::    Flattened Dataframe")
     #print(df)
@@ -292,12 +293,13 @@ def load(
         weights = pd.DataFrame(X_tree.arrays(weightFeature, library="np", entry_stop=n))
 
     # Apply filtering if set by user
-    for logExp in Filter.FilterList:
-        #df_mask = pd.eval( logExp, target = df)
-        df_mask = df.eval( logExp )
-        df = df[df_mask]
-        weights = weights[df_mask]
-
+    if Filter != None:
+        for logExp in Filter.FilterList:
+            #df_mask = pd.eval( logExp, target = df)
+            df_mask = df.eval( logExp )
+            df = df[df_mask]
+            weights = weights[df_mask]
+    
     # Reset all row numbers
     df = df.reset_index(drop=True)
 

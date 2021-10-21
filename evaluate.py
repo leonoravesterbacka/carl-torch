@@ -2,6 +2,7 @@ import os
 import sys
 import logging
 import optparse
+import numpy as np
 from ml import RatioEstimator
 from ml.utils.loading import Loader
 
@@ -64,6 +65,9 @@ for i in evaluate:
     print("s_hat = {}".format(s_hat))
     print("r_hat = {}".format(r_hat))
     w = 1./r_hat   # I thought r_hat = p_{1}(x) / p_{0}(x) ???
+    # Correct nan's and inf's to 1.0 corrective weights as they are useless in this instance. Warning
+    # to screen should already be printed
+    w = np.nan_to_num(w, nan=1.0, posinf=1.0, neginf=1.0)
     print("w = {}".format(w))
     print("<evaluate.py::__init__>::   Loading Result for {}".format(i))
     loading.load_result(

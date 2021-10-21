@@ -30,6 +30,8 @@ parser.add_argument('-w', '--weightFeature',  action='store', type=str, dest='we
 parser.add_argument('-t', '--TreeName',  action='store', type=str, dest='treename',  default='Tree', help='Name of TTree name inside root files')
 parser.add_argument('-b', '--binning',  action='store', type=str, dest='binning',  default=None, help='path to binning yaml file.')
 parser.add_argument('-l', '--layers', action='store', type=int, dest='layers', nargs='*', default=None, help='number of nodes for each layer')
+parser.add_argument('-d', '--dropout-prob', action='store', type=float, dest='dropout_prob', default=None, help='Dropout probability for internal hidden layers')
+parser.add_argument('-r', '--regularise', action='store', type=str, dest='regularise', default=None, help='Regularisation technique for the loss function [L0, L1, L2]')
 parser.add_argument('--batch',  action='store', type=int, dest='batch_size',  default=4096, help='batch size')
 parser.add_argument('--per-epoch-plot', action='store_true', dest='per_epoch_plot', default=False, help='plotting train/validation result per epoch.')
 parser.add_argument('--per-epoch-save', action='store_true', dest='per_epoch_save', default=False, help='saving trained model per epoch.')
@@ -137,10 +139,17 @@ else:
 structure = n_hidden
 # Use the number of inputs as input to the hidden layer structure
 estimator = RatioEstimator(
+<<<<<<< HEAD
+    n_hidden=(structure),
+    activation="relu",
+=======
     n_hidden=n_hidden,
     activation="relu"
+>>>>>>> 0ee116faa365e5fb30b3fc8d28c159e0742840fa
 )
 estimator.scaling_method = scale_method
+if opts.dropout_prob is not None:
+    estimator.dropout_prob = opts.dropout_prob
 
 # per epoch plotting
 intermediate_train_plot = None
@@ -197,6 +206,13 @@ if per_epoch_save:
         estimator.save, intermediate_save_args
     )
 
+
+# additional options to pytorch training package
+kwargs = {}
+if opts.regularise is not None:
+    logger.info("L2 loss regularisation included.")
+    kwargs={"weight_decay": 1e-5}
+
 # perform training
 train_loss, val_loss, accuracy_train, accuracy_val = estimator.train(
     method='carl',
@@ -209,10 +225,17 @@ train_loss, val_loss, accuracy_train, accuracy_val = estimator.train(
     w=w,
     x0=x0,
     x1=x1,
+    w0=w0,
+    w1=w1,
     scale_inputs=True,
     early_stopping=False,
+    #early_stopping_patience=20,
     intermediate_train_plot = intermediate_train_plot,
     intermediate_save = intermediate_save,
+    optimizer_kwargs=kwargs,
+    global_name=global_name,
+    plot_inputs=True,    
+    nentries=n,
     loss_type=loss_type,
 )
 

@@ -46,6 +46,8 @@ class Estimator(object):
         self.x_scaling_quantile_up = None
         self.x_scaling_quantile_down = None
 
+        self.divisions = 100 # binning for inputs if requested
+        
     def train(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -257,10 +259,11 @@ class Estimator(object):
             )
         elif transform:
             logger.info("Setting up input rescaling")
-            self.x_scaling_means = np.mean(x, axis=0)
-            self.x_scaling_stds = np.maximum(np.std(x, axis=0), 1.0e-6)
-            self.x_scaling_mins = np.min(x, axis=0)
-            self.x_scaling_maxs = np.max(x, axis=0)
+            self.x_scaling_means = np.nanmean(x, axis=0)
+            self.x_scaling_stds = np.maximum(np.nanstd(x, axis=0), 1.0e-6)
+            self.x_scaling_mins = np.nanmin(x, axis=0)
+            self.x_scaling_maxs = np.nanmax(x, axis=0)
+
             self.x_scaling_quantile_down = np.quantile(x, 0, axis=0)
             self.x_scaling_quantile_up = np.quantile(x, 0.80, axis=0)
             if self.clamp_max is None:
@@ -304,6 +307,11 @@ class Estimator(object):
                 else:
                     x_scaled = x - self.x_scaling_means
                     x_scaled /= self.x_scaling_stds
+                
+                # Check for nans/nums
+                #x_scaled = torch.tensor(np.nan_to_num(x_scaled, nan=0.0, posinf=0.0, neginf=0.0), dtype=x.dtype, device=x.device )
+                x_scaled = np.nan_to_num(x_scaled, nan=0.0, posinf=0.0, neginf=0.0)
+                #x_scaled = torch.tensor(x_scaled, dtype=x_scaled.dtype, device=x.device)
             else:
                 print("<base.py::_transform_inputs()>::   unable to do standard scaling")
                 x_scaled = x
@@ -324,6 +332,9 @@ class Estimator(object):
             else:
                 print("<base.py::_transform_inputs()>::   unable to do min-max scaling")
                 x_scaled = x
+            # Check for nans/nums
+            x_scaled = np.nan_to_num(x_scaled, nan=0.0, posinf=0.0, neginf=0.0) 
+
         return x_scaled
 
     def _wrap_settings(self):
