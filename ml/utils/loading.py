@@ -107,7 +107,8 @@ class Loader():
             x1, w1, vlabels1
         )  = HarmonisedLoading(fA = pathA, fB = pathB,
                                features=features, weightFeature=weightFeature,
-                               nentries = int(nentries), TreeName = TreeName, weight_polarity=weight_polarity, Filter=self.Filter)
+                               nentries = int(nentries), TreeName = TreeName, 
+                               weight_polarity=weight_polarity, Filter=self.Filter)
 
 
         # Run if requested debugging by user
