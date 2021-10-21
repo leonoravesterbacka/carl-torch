@@ -84,6 +84,7 @@ def HarmonisedLoading(
     weightFeature="DummyEvtWeight",
     nentries=0,
     TreeName="Tree",
+    Filter=None,
     do_self_dope=False,
     do_mix_dope=False,
     weight_polarity=False,
@@ -134,6 +135,7 @@ def HarmonisedLoading(
         weightFeature=weightFeature,
         n=int(nentries),
         t=TreeName,
+        Filter=Filter,
         weight_polarity=weight_polarity,
     )
 
@@ -143,6 +145,7 @@ def HarmonisedLoading(
         weightFeature=weightFeature,
         n=int(nentries),
         t=TreeName,
+        Filter=Filter,
         weight_polarity=weight_polarity,
     )
 
