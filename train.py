@@ -139,13 +139,8 @@ else:
 structure = n_hidden
 # Use the number of inputs as input to the hidden layer structure
 estimator = RatioEstimator(
-<<<<<<< HEAD
     n_hidden=(structure),
     activation="relu",
-=======
-    n_hidden=n_hidden,
-    activation="relu"
->>>>>>> 0ee116faa365e5fb30b3fc8d28c159e0742840fa
 )
 estimator.scaling_method = scale_method
 if opts.dropout_prob is not None:
