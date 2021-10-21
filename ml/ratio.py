@@ -147,21 +147,13 @@ class RatioEstimator(Estimator):
         # Load training data
         logger.info("Loading training data")
         memmap_threshold = 1.0 if memmap else None
-<<<<<<< HEAD
-        x  = load_and_check(x, memmap_files_larger_than_gb=memmap_threshold)
-        y  = load_and_check(y, memmap_files_larger_than_gb=memmap_threshold)
-        x0 = load_and_check(x0, memmap_files_larger_than_gb=memmap_threshold)
-        x1 = load_and_check(x1, memmap_files_larger_than_gb=memmap_threshold)
-        w = load_and_check(w, memmap_files_larger_than_gb=memmap_threshold)
-        w0 = load_and_check(w0, memmap_files_larger_than_gb=memmap_threshold)
-        w1 = load_and_check(w1, memmap_files_larger_than_gb=memmap_threshold)
-=======
         x  = load_and_check(x, memmap_files_larger_than_gb=memmap_threshold, name="features")
         y  = load_and_check(y, memmap_files_larger_than_gb=memmap_threshold, name="target")
         x0 = load_and_check(x0, memmap_files_larger_than_gb=memmap_threshold, name="nominal features")
         x1 = load_and_check(x1, memmap_files_larger_than_gb=memmap_threshold, name="variation features")
         w = load_and_check(w, memmap_files_larger_than_gb=memmap_threshold, name="weights")
->>>>>>> 0ee116faa365e5fb30b3fc8d28c159e0742840fa
+        w0 = load_and_check(w0, memmap_files_larger_than_gb=memmap_threshold, name="weight1")
+        w1 = load_and_check(w1, memmap_files_larger_than_gb=memmap_threshold, name="weights2")
 
         # Infer dimensions of problem
         n_samples = x.shape[0]
