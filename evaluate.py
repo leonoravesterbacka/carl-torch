@@ -46,6 +46,7 @@ logger = logging.getLogger(__name__)
 if os.path.exists('data/'+global_name+'/X_train_'+str(n)+'.npy') and os.path.exists('data/'+global_name+'/metaData_'+str(n)+'.pkl'):
     logger.info(" Doing evaluation of model trained with datasets: [{}, {}], with {} events.".format(nominal, variation, n))
 else:
+    logger.info(" No data set directory of the form {}.".format('data/'+global_name+'/X_train_'+str(n)+'.npy'))
     logger.info(" No datasets available for evaluation of model trained with datasets: [{},{}] with {} events.".format(nominal, variation, n))
     logger.info("ABORTING")
     sys.exit()
@@ -68,6 +69,11 @@ for i in evaluate:
     # Correct nan's and inf's to 1.0 corrective weights as they are useless in this instance. Warning
     # to screen should already be printed
     w = np.nan_to_num(w, nan=1.0, posinf=1.0, neginf=1.0)
+    
+    # Temporary weight clipping
+    OneinOneThousand = np.percentile(w, 99.9)
+    w[w > OneinOneThousand] = 1.0
+
     print("w = {}".format(w))
     print("<evaluate.py::__init__>::   Loading Result for {}".format(i))
     loading.load_result(
