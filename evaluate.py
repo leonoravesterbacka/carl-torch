@@ -8,7 +8,7 @@ from ml import RatioEstimator
 from ml.utils.loading import Loader
 
 #################################################
-opts, args = arg_handler_eval()
+opts = arg_handler_eval()
 nominal  = opts.nominal
 variation = opts.variation
 n = opts.nentries
@@ -51,12 +51,12 @@ for i in evaluate:
     w = 1./r_hat   # I thought r_hat = p_{1}(x) / p_{0}(x) ???
     # Correct nan's and inf's to 1.0 corrective weights as they are useless in this instance. Warning
     # to screen should already be printed
-    if carl_weight_protection:
+    if opts.weight_protection:
         w = np.nan_to_num(w, nan=1.0, posinf=1.0, neginf=1.0)
     
     # Weight clipping if requested by user
-    if carl_weight_clipping:
-        carl_w_clipping = np.percentile(w, w_threshold)
+    if opts.weight_threshold < 100:
+        carl_w_clipping = np.percentile(w, opts.weight_threshold)
         w[w > carl_w_clipping] = carl_w_clipping
 
     print("w = {}".format(w))
