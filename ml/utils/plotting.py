@@ -486,7 +486,7 @@ def draw_Obs_ROC(X0, X1, W0, W1, weights, label, legend, n, plot = True, plot_re
     W0 = W0.flatten()
     W1 = W1.flatten()
     for idx in range(X0.shape[1]): ## Loop through the observables and calculate ROC
-        print("Observable {}".format(idx))
+        print("<draw_Obs_ROC()>::   Observable {}".format(idx))
         # Extract the observables - 1D array
         x0 = X0[:,idx]
         x1 = X1[:,idx]
@@ -543,16 +543,17 @@ def weight_data(x0, x1, w0, w1):
     
     x0_len = x0.shape[0]
     w0_sum = int(w0.sum())
-    print("w0_sum: {}".format(w0_sum))
-    print("Available virtual memory = {}".format(mem.free))
-    print("Size of single data point = {}".format(x0[0].nbytes))
-    print("x0[0] = {}".format(x0[0]))
+    print("<weight_data>::   Initial resample length (w0_sum): {}".format(w0_sum))
+    print("<weight_data>::   Available virtual memory  = {}".format(mem.free))
+    print("<weight_data>::   Size of single data point = {}".format(x0[0].nbytes))
+    print("<weight_data>::      ->  x0[0] = {}".format(x0[0]))
+    print("<weight_data>::      ->  x1[0] = {}".format(x1[0]))
     resample_num_0 = round(mem.free/(10*x0[0].nbytes))
     resample_num_0 = resample_num_0 if resample_num_0 < max_resample else max_resample
     w0 = w0 / w0.sum()
     #weighted_data0 = np.random.choice(range(x0_len), w0_sum, p = w0)
     weighted_data0 = np.random.choice(range(x0_len), resample_num_0, p = w0)
-    print("Weighted Sample Length = {}".format(len(weighted_data0)))
+    print("<weight_data>::    Weighted Sample Length (x0) = {}".format(len(weighted_data0)))
     w_x0 = x0.copy()[weighted_data0]
 
     x1_len = x1.shape[0]
@@ -564,6 +565,7 @@ def weight_data(x0, x1, w0, w1):
     w1 = w1 / w1.sum()
     #weighted_data1 = np.random.choice(range(x1_len), w1_sum, p = w1)
     weighted_data1 = np.random.choice(range(x1_len), resample_num_1, p = w1)
+    print("<weight_data>::    Weighted Sample Length (x1) = {}".format(len(weighted_data1)))
     w_x1 = x1.copy()[weighted_data1]
 
     # Calculate the minimum size so as to ensure we have equal number of events in each class
