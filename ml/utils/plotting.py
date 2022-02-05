@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import time
 import logging
+import psutil
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -146,7 +147,8 @@ def draw_weighted_distributions(x0, x1, w0, w1,
         ############################
         ########### Custom #########
         nom_alt_KL = compute_kl_divergence(x0[:,id], w0, x1[:,id], w1, len(binning[id]))
-        carl_alt_KL = compute_kl_divergence(x0[:,id], w0, x0[:,id], w_carl, len(binning[id]))
+        #carl_alt_KL = compute_kl_divergence(x0[:,id], w0, x0[:,id], w_carl, len(binning[id]))
+        carl_alt_KL = compute_kl_divergence(x0[:,id], w_carl, x1[:,id], w1, len(binning[id]))
         ## Result string
         nom_alt_KL_res = "KL(nom,alt) = {}".format(nom_alt_KL)
         carl_alt_KL_res = "KL(carl,alt) = {}".format(carl_alt_KL)
@@ -534,16 +536,34 @@ def weight_data(x0, x1, w0, w1):
     w0 = abs(w0)
     w1 = abs(w1)
 
+    # Test the amount of available memory on device
+    mem = psutil.virtual_memory()
+    # Assign a max resample number
+    max_resample = 200000
+    
     x0_len = x0.shape[0]
     w0_sum = int(w0.sum())
+    print("w0_sum: {}".format(w0_sum))
+    print("Available virtual memory = {}".format(mem.free))
+    print("Size of single data point = {}".format(x0[0].nbytes))
+    print("x0[0] = {}".format(x0[0]))
+    resample_num_0 = round(mem.free/(10*x0[0].nbytes))
+    resample_num_0 = resample_num_0 if resample_num_0 < max_resample else max_resample
     w0 = w0 / w0.sum()
-    weighted_data0 = np.random.choice(range(x0_len), w0_sum, p = w0)
+    #weighted_data0 = np.random.choice(range(x0_len), w0_sum, p = w0)
+    weighted_data0 = np.random.choice(range(x0_len), resample_num_0, p = w0)
+    print("Weighted Sample Length = {}".format(len(weighted_data0)))
     w_x0 = x0.copy()[weighted_data0]
 
     x1_len = x1.shape[0]
     w1_sum = int(w1.sum())
+    resample_num_1 = round(mem.free/(10*x1[0].nbytes))
+    resample_num_1 = resample_num_1 if resample_num_1 < max_resample else max_resample
+    resample_num_1 *= (w1_sum/w0_sum)
+    resample_num_1 = round(resample_num_1)
     w1 = w1 / w1.sum()
-    weighted_data1 = np.random.choice(range(x1_len), w1_sum, p = w1)
+    #weighted_data1 = np.random.choice(range(x1_len), w1_sum, p = w1)
+    weighted_data1 = np.random.choice(range(x1_len), resample_num_1, p = w1)
     w_x1 = x1.copy()[weighted_data1]
 
     # Calculate the minimum size so as to ensure we have equal number of events in each class
