@@ -58,7 +58,7 @@ def _ratio_xe(s_hat, y_true, w):
     # New weighted loss functions - sjiggins
     if w is None:
         w = torch.ones(y_true.shape[0])
-    loss = BCELoss(weight=w, reduction='sum')(s_hat, y_true)
+    loss = BCELoss(weight=w, reduction='mean')(s_hat, y_true)
     return loss
 
 def _ratio_xe_abs_w(s_hat, y_true, w):
