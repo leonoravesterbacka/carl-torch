@@ -4,6 +4,7 @@ import argparse
 #################################################
 # Argument parsing helper functions
 def percentile_range(value):
+    value = float(value)
     # Restrict percentile to a range of 0-100
     if value > 100. or value < 0.:
         raise argparse.ArgumentTypeError("%s should be between 0-100, with float precision allowed." % value)
