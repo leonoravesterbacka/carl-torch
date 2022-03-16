@@ -92,21 +92,21 @@ def _ratio_xe(s_hat, y_true, w):
 
 
     #### Automatic fraction adaptor per batch ###    
-    frac = 0.5
+    #frac = 0.5
     s_hat_temp = torch.sub(s_hat, 0.5)  #works 3
     s_hat_temp = torch.where(s_hat_temp > 0, s_hat_temp, torch.zeros(s_hat_temp.size()).to("cuda", torch.float, non_blocking=True))
     s_hat_temp = torch.mul(s_hat_temp, 2)       ## works 3
     s_hat_temp = torch.pow(s_hat_temp, 4)            ## Works 3
     inverse_sub = torch.reciprocal(1-s_hat_temp)      ## Works 3
     # Calculate the temporary batch loss from the 
-    tempTotal = torch.sum(loss)           ## work 3b
-    print("tempTotal: {}".format(tempTotal))
-    hatTempTotal = torch.sum(inverse_sub)  ## work 3b
-    print("hatTempTotal: {}".format(hatTempTotal))
+    #tempTotal = torch.sum(loss)           ## work 3b
+    #print("tempTotal: {}".format(tempTotal))
+    #hatTempTotal = torch.sum(inverse_sub)  ## work 3b
+    #print("hatTempTotal: {}".format(hatTempTotal))
     #coefficient = 0.1 - (tempTotal/hatTempTotal)
-    coefficient = tempTotal/( torch.div(hatTempTotal,frac) - hatTempTotal )
+    #coefficient = tempTotal/( torch.div(hatTempTotal,frac) - hatTempTotal )
     coefficient=0.1
-    print("coefficient: {}".format(coefficient))
+    #print("coefficient: {}".format(coefficient))
     #inverse_sub = torch.mul(inverse_sub, 0.1)      ## Works 3
     inverse_sub = torch.mul(inverse_sub, coefficient)      ## Works 3b
 
