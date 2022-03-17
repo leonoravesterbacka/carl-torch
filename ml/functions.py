@@ -60,93 +60,34 @@ def _ratio_xe(s_hat, y_true, w):
     epsilon_2 = 0.9
     if w is None:
         w = torch.ones(y_true.shape[0])
-    #loss = BCELoss(weight=w, reduction='mean')(s_hat, y_true)
-    
+    loss = BCELoss(weight=w, reduction='mean')(s_hat, y_true)
 
-    ### Version 2
-    ##inverse = torch.reciprocal(s_hat)
-    ##inverse_sub = torch.reciprocal(1-s_hat)
-    ##addTerm = torch.max(inverse, inverse_sub)
-    #loss = BCELoss(weight=w, reduction='mean')(s_hat, y_true)
-    #prob = torch.pow(s_hat, 2)
-    #prob = torch.sub( torch.ones(prob.size()).to("cuda", torch.float, non_blocking=True), prob )
-    #prob = torch.reciprocal(prob)
-    #prob = torch.exp(prob)
-    #loss = torch.add(loss, prob)
-    #loss = torch.sum(loss)
+    return loss
 
-    #### Version 1
-    #print(loss)
-    ##  Test of output addition to loss
+def _ratio_xe_prob_reg(s_hat, y_true, w):
+    if w is None:
+        w = torch.ones(y_true.shape[0])
+    # Calculate BCE loss
     bceloss = BCELoss(weight=w, reduction='none')
     loss = bceloss(s_hat, y_true)
-    #print(loss)
-    
-    #s_hat_temp = torch.mul(s_hat, epsilon_1)#.to("cuda", torch.float, non_blocking=True)
-    #s_hat_temp = torch.mul(s_hat, 1.0)#.to("cuda", torch.float, non_blocking=True)
-    #s_hat_temp = torch.where(s_hat > 0.9, s_hat, torch.zeros(torch.size(s_hat)))
-    #s_hat_temp = 1-s_hat
-    #inverse = torch.reciprocal(s_hat_temp)
-    #inverse = torch.reciprocal(s_hat)
-    #inverse_sub = torch.reciprocal(1-s_hat_temp)
 
-
-    #### Automatic fraction adaptor per batch ###    
-    #frac = 0.5
-    s_hat_temp = torch.sub(s_hat, 0.5)  #works 3
+    # Calculate the suppresion term
+    s_hat_temp = torch.sub(s_hat, 0.5)
     s_hat_temp = torch.where(s_hat_temp > 0, s_hat_temp, torch.zeros(s_hat_temp.size()).to("cuda", torch.float, non_blocking=True))
-    s_hat_temp = torch.mul(s_hat_temp, 2)       ## works 3
-    s_hat_temp = torch.pow(s_hat_temp, 4)            ## Works 3
-    inverse_sub = torch.reciprocal(1-s_hat_temp)      ## Works 3
-    # Calculate the temporary batch loss from the 
-    #tempTotal = torch.sum(loss)           ## work 3b
-    #print("tempTotal: {}".format(tempTotal))
-    #hatTempTotal = torch.sum(inverse_sub)  ## work 3b
-    #print("hatTempTotal: {}".format(hatTempTotal))
-    #coefficient = 0.1 - (tempTotal/hatTempTotal)
-    #coefficient = tempTotal/( torch.div(hatTempTotal,frac) - hatTempTotal )
+    s_hat_temp = torch.mul(s_hat_temp, 2)
+    s_hat_temp = torch.pow(s_hat_temp, 4)
+    inverse_sub = torch.reciprocal(1-s_hat_temp)
+
+    # Calculate the final suppression term per event weighted but the coefficient
     coefficient=0.1
-    #print("coefficient: {}".format(coefficient))
-    #inverse_sub = torch.mul(inverse_sub, 0.1)      ## Works 3
-    inverse_sub = torch.mul(inverse_sub, coefficient)      ## Works 3b
-
-    #s_hat_temp = torch.pow(s_hat, 10)            ## Works 2
-    #inverse_sub = torch.reciprocal(1-s_hat)      ## Works 2
-    #inverse_sub = torch.mul(inverse_sub, 0.1)      ## Works 2
-
-    #inverse_sub = torch.reciprocal(1-s_hat)      ## Works 1
-    #inverse_sub = torch.where(inverse_sub > 10, inverse_sub, torch.zeros(inverse_sub.size()).to("cuda", torch.float, non_blocking=True) ) ### Works 1
-
-    #inverse_sub = torch.reciprocal(1-s_hat)
-    #print("s_hat: {}".format(s_hat))
-    #print("1/1-s_hat: {}".format(inverse_sub))
-    #print("1-s_hat: {}".format(s_hat_temp))
-    #addTerm = torch.max(inverse, inverse_sub)
-    
-    #print("loss shape: {}".format(loss.size()))
-    #print("inverse shape: {}".format(inverse.size()))
-    #print("inverse_sub shape: {}".format(inverse_sub.size()))
-    
-    #inverse_sub = torch.mul(inverse_sub, epsilon_2)
-    #inverse = torch.mul(inverse, epsilon_1)
-    loss = torch.add(loss, inverse_sub) # OutputSuppresion      # Works 1
-    #loss = torch.add(loss, inverse)   # OutputSuppresion
-    #loss = torch.add(loss, s_hat)   # OutputSuppresion
-    #loss = torch.add(loss, s_hat_temp)   # OutputSuppresion
-    
-    ## Best is s_hat + inverse with epsilon = 0.01
-
-    #loss = torch.add(loss, inverse)   # OutputSuppresion-v2
-    #loss = torch.add(loss, s_hat_temp) # OutputSuppresion-v2
-    #loss = torch.add(loss, addTerm)
-    
-    #print(inverse)
-    #print(inverse_sub)
-    #print(loss)
-    
+    inverse_sub = torch.mul(inverse_sub, coefficient)
+    # Add the suppression term
+    loss = torch.add(loss, inverse_sub)
+    # Need to return scalar
     loss = torch.sum(loss)
 
     return loss
+
 
 def _ratio_xe_abs_w(s_hat, y_true, w):
     if w is None:
@@ -166,6 +107,7 @@ def ratio_xe(type):
     """
     preserved_type = {
         "regular": _ratio_xe,
+        "score_suppressed": _ratio_xe_prob_reg,
         "abs(w)": _ratio_xe_abs_w,
         "log(abs(w))": _ratio_xe_log_abs_w,
     }
