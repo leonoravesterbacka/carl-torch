@@ -183,6 +183,7 @@ if opts.regularise is not None:
     logger.info("L2 loss regularisation included.")
     kwargs={"weight_decay": 1e-5}
 
+
 # perform training
 train_loss, val_loss, accuracy_train, accuracy_val = estimator.train(
     method='carl',
@@ -198,15 +199,18 @@ train_loss, val_loss, accuracy_train, accuracy_val = estimator.train(
     w0=w0,
     w1=w1,
     scale_inputs=True,
+    scaling=scale_method,
     early_stopping=False,
     #early_stopping_patience=20,
     intermediate_train_plot = intermediate_train_plot,
     intermediate_save = intermediate_save,
     optimizer_kwargs=kwargs,
     global_name=global_name,
-    plot_inputs=True,    
+    plot_inputs=False,    
     nentries=n,
     loss_type=loss_type,
+    #initial_lr=0.0001,
+    #final_lr=0.00001,
 )
 
 # saving loss values and final trained models

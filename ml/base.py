@@ -4,6 +4,7 @@ import logging
 import os
 import json
 import numpy as np
+import pickle
 import torch
 import tarfile
 import onnxruntime as ort
@@ -210,7 +211,7 @@ class Estimator(object):
         logger.info("acc %.2f",accuracy_score(y_pred,y))
         logger.info(confusion_matrix(y, y_pred))
 
-    def load(self, filename):
+    def load(self, filename, global_name=None, nentries=-1):
 
         """
         Loads a trained model from files.
@@ -234,10 +235,27 @@ class Estimator(object):
 
         # Load scaling
         try:
-            self.x_scaling_means = np.load(filename + "_x_means.npy")
-            self.x_scaling_stds =  np.load(filename + "_x_stds.npy")
-            self.x_scaling_mins =  np.load(filename + "_x_mins.npy")
-            self.x_scaling_maxs =  np.load(filename + "_x_maxs.npy")
+
+            # Scale observables
+            # Check if meta data has been saved, if so then scale using saved meta data from
+            # initial total dataset loading stage
+            metaData='data/'+global_name+'/metaData_'+str(nentries)+'.pkl'
+            metaDataDict = None
+            if os.path.exists(metaData):
+                # Get the meta data containing the keys (input feature names)
+                logger.info("Obtaining input features from metaData_{}.pkl".format(global_name))
+                metaDataFile = open(metaData, 'rb')
+                metaDataDict = pickle.load(metaDataFile)
+                metaDataFile.close()
+                
+                # Initialise input scaling transformation
+                self.initialize_input_transform(x=None, overwrite=False, 
+                                                metaData=metaDataDict, scaling=self.scaling_method)
+            else:
+                self.x_scaling_means = np.load(filename + "_x_means.npy")
+                self.x_scaling_stds =  np.load(filename + "_x_stds.npy")
+                self.x_scaling_mins =  np.load(filename + "_x_mins.npy")
+                self.x_scaling_maxs =  np.load(filename + "_x_maxs.npy")
             logger.debug(
                 "  Found input scaling information: means %s, stds %s, mins %s, maxs %s  ", self.x_scaling_means, self.x_scaling_stds, self.x_scaling_mins, self.x_scaling_maxs
             )
@@ -252,12 +270,52 @@ class Estimator(object):
         logger.debug("Loading state dictionary from %s_state_dict.pt", filename)
         self.model.load_state_dict(torch.load(filename + "_state_dict.pt", map_location="cpu"))
 
-    def initialize_input_transform(self, x, transform=True, overwrite=True):
-        if self.x_scaling_stds is not None and self.x_scaling_means is not None and self.x_scaling_mins is not None and self.x_scaling_maxs is not None and not overwrite:
+    def initialize_input_transform(self, x, 
+                                   transform=True, overwrite=True, 
+                                   metaData = None, scaling="minmax"):
+        
+        # Initially tell the user if values already set
+        if (self.x_scaling_stds is not None  and
+           self.x_scaling_means is not None and 
+           self.x_scaling_mins is not None  and 
+           self.x_scaling_maxs is not None 
+           and not overwrite):
             logger.info(
                 "Input rescaling already defined. To overwrite, call initialize_input_transform(x, overwrite=True)."
             )
-        elif transform:
+        elif transform and metaData is not None:
+            # Now if the user passes metadata already use said metadata
+            logger.info(
+                "Input rescaling will run using metaData. To overwrite, call initialize_input_transform(x, overwrite=True, metaData=None).")
+
+            np_pair_first = []
+            np_pair_second = []
+            for idx,(key,pair) in enumerate(metaData.items()):
+                logger.info("   Passing for variable {}:".format(key))
+                logger.info("        Pair = {}".format(pair))
+                logger.info("        first = {}".format(pair[0]))
+                logger.info("        second = {}".format(pair[-1]))
+                np_pair_first.append(pair[0])
+                np_pair_second.append(pair[-1])
+
+            logger.info("Using scale method '{}'".format(scaling))
+            if scaling == "minmax":
+                self.x_scaling_mins = np.array(np_pair_first)
+                self.x_scaling_maxs = np.array(np_pair_second)
+            elif scaling == "standard":
+                self.x_scaling_means = np.array(np_pair_first)
+                self.x_scaling_stds = np.array(np_pair_second)
+
+            # Add the quantiles as it does not hurt at this stage
+            if x is not None:
+                self.x_scaling_quantile_down = np.quantile(x, 0, axis=0)
+                self.x_scaling_quantile_up = np.quantile(x, 0.80, axis=0)
+                if self.clamp_max is None:
+                    self.clamp_max = self.x_scaling_quantile_up
+                    if self.clamp_min is None:
+                        self.clamp_min = self.x_scaling_quantile_down
+                        
+        elif transform and metaData is None:
             logger.info("Setting up input rescaling")
             self.x_scaling_means = np.nanmean(x, axis=0)
             self.x_scaling_stds = np.maximum(np.nanstd(x, axis=0), 1.0e-6)
@@ -310,7 +368,7 @@ class Estimator(object):
                 
                 # Check for nans/nums
                 #x_scaled = torch.tensor(np.nan_to_num(x_scaled, nan=0.0, posinf=0.0, neginf=0.0), dtype=x.dtype, device=x.device )
-                x_scaled = np.nan_to_num(x_scaled, nan=0.0, posinf=0.0, neginf=0.0)
+                x_scaled = np.nan_to_num(x_scaled, nan=-1, posinf=0.0, neginf=0.0)
                 #x_scaled = torch.tensor(x_scaled, dtype=x_scaled.dtype, device=x.device)
             else:
                 print("<base.py::_transform_inputs()>::   unable to do standard scaling")
@@ -319,6 +377,8 @@ class Estimator(object):
             # Check for none and 0 values
             if self.x_scaling_mins is not None and self.x_scaling_maxs is not None:
                 print("<base.py::_transform_inputs()>::   Doing min-max scaling")
+                print("self.x_scaling_mins = {}".format(self.x_scaling_mins))
+                print("self.x_scaling_maxs = {}".format(self.x_scaling_maxs))
                 if self.scaling_clamp:
                     x = self._clamp_inputs(x)
                 if isinstance(x, torch.Tensor):
@@ -333,7 +393,7 @@ class Estimator(object):
                 print("<base.py::_transform_inputs()>::   unable to do min-max scaling")
                 x_scaled = x
             # Check for nans/nums
-            x_scaled = np.nan_to_num(x_scaled, nan=0.0, posinf=0.0, neginf=0.0) 
+            x_scaled = np.nan_to_num(x_scaled, nan=-1.0, posinf=0.0, neginf=0.0) 
 
         return x_scaled
 
