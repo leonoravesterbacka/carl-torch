@@ -78,7 +78,6 @@ if opts.clip_weight:
 calib = CalibratedClassifier(carl, global_name=global_name)
 calib.fit(X=X,y=y,w=w)
 p0, p1, r_cal = calib.predict(X=X)
-#w_cal = 1/r_cal
 loading.load_calibration(y_true = y,
                          p1_raw = s_hat, 
                          p1_cal = p1, 
