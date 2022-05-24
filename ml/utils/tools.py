@@ -287,6 +287,10 @@ def load(
         logger.info("Attempting extract features however user did not define values. Using all keys inside TTree as features.")
         features = X_tree.keys()
 
+    # Ensure that we don't try to load 0 events. Convert 0 to None, meaning load the entire dataset
+    if n == 0:
+        n = None
+
     # Extract the pandas dataframe - warning about jagged arrays
     #df = X_tree.pandas.df(features, flatten=False)
     logger.info("<{}> Converting uproot array to panda's dataframe".format(process_time()))
