@@ -40,6 +40,8 @@ class Estimator(object):
         self.n_parameters = None
         self.x_scaling_means = None
         self.x_scaling_stds = None
+        self.x_scaling_mins = None
+        self.x_scaling_maxs = None
         self.scaling_method = None
         self.scaling_clamp = False
         self.clamp_min = None
