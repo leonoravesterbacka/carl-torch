@@ -193,7 +193,7 @@ class Loader():
         #metaData = defaultdict()
         metaData = OrderedDict()
         if scaling == "standard":
-            metaData = {v : {x0[v].mean() , x0[v].std() } for v in  x0.columns }
+            metaData = {v : (x0[v].mean() , x0[v].std() ) for v in  x0.columns }
             logger.info("Storing Z0 Standard scaling metadata: {}".format(metaData))
         elif scaling == "minmax":
             #metaData = {v : OrderedDict({x0[v].min() if x0[v].min() < x1[v].min() else x1[v].min(), x0[v].max() if x0[v].max() > x1[v].max() else x1[v].max() } for v in  x0.columns) }
