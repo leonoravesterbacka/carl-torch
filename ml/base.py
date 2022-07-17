@@ -40,6 +40,8 @@ class Estimator(object):
         self.n_parameters = None
         self.x_scaling_means = None
         self.x_scaling_stds = None
+        self.x_scaling_mins = None
+        self.x_scaling_maxs = None
         self.scaling_method = None
         self.scaling_clamp = False
         self.clamp_min = None
@@ -102,6 +104,9 @@ class Estimator(object):
             logger.debug("Saving input scaling information to %s_x_means.npy and %s_x_stds.npy", filename, filename)
             np.save(filename + "_x_means.npy", self.x_scaling_means)
             np.save(filename + "_x_stds.npy", self.x_scaling_stds)
+
+        if self.x_scaling_mins is not None and self.x_scaling_maxs is not None:
+            logger.debug("Saving input scaling information to %s_x_mins.npy and %s_x_maxs.npy", filename, filename)
             np.save(filename + "_x_mins.npy", self.x_scaling_mins)
             np.save(filename + "_x_maxs.npy", self.x_scaling_maxs)
 
