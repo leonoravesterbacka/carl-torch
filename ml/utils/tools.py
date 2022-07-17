@@ -288,8 +288,8 @@ def load(
         features = X_tree.keys()
 
     # Ensure that we don't try to load 0 events. Convert 0 to None, meaning load the entire dataset
-    #if n == 0:
-    #    n = None
+    if n == 0:
+        n = None
 
     # Extract the pandas dataframe - warning about jagged arrays
     #df = X_tree.pandas.df(features, flatten=False)
