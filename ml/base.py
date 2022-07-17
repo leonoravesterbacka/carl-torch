@@ -105,6 +105,11 @@ class Estimator(object):
             np.save(filename + "_x_means.npy", self.x_scaling_means)
             np.save(filename + "_x_stds.npy", self.x_scaling_stds)
 
+        if self.x_scaling_mins is not None and self.x_scaling_maxs is not None:
+            logger.debug("Saving input scaling information to %s_x_mins.npy and %s_x_maxs.npy", filename, filename)
+            np.save(filename + "_x_mins.npy", self.x_scaling_mins)
+            np.save(filename + "_x_maxs.npy", self.x_scaling_maxs)
+
         # Save state dict
         logger.debug("Saving state dictionary to %s_state_dict.pt", filename)
         torch.save(self.model.state_dict(), filename + "_state_dict.pt")
