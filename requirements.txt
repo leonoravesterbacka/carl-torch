@@ -6,7 +6,7 @@ joblib==0.16.0
 kiwisolver==1.2.0
 matplotlib==3.3.1
 numpy==1.19.1
-onnx==1.7.0
+onnx==1.13.0
 onnxruntime==1.5.2
 pandas==1.1.1
 Pillow==7.2.0
